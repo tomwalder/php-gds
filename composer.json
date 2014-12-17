@@ -1,0 +1,16 @@
+{
+  "name": "tomwalder/php-gds",
+  "type": "library",
+  "description": "Google Datastore Library",
+  "keywords": ["google", "datastore"],
+  "homepage": "https://github.com/tomwalder/php-gds",
+  "require": {
+    "google/apiclient": "dev-master"
+  },
+  "autoload": {
+    "classmap": [
+      "src/"
+    ]
+  },
+  "include-path": ["src/"]
+}
