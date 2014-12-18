@@ -1,6 +1,6 @@
 <?php
 /**
- * Fetch a single record from GDS and update it
+ * Update a single record from GDS and update it
  *
  * @author Tom Walder <tom@docnet.nu>
  */
