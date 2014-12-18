@@ -40,6 +40,18 @@ abstract class Repository
     }
 
     /**
+     * Delete a single Model entity from the Datastore
+     *
+     * @param Model $obj_model
+     * @return bool
+     */
+    public function delete(Model $obj_model)
+    {
+        $obj_entity_key = (new Mapper($this->getSchema()))->createKey($obj_model);
+        return $this->obj_gateway->delete($obj_entity_key);
+    }
+
+    /**
      * Fetch a single Model from the Datastore, by it's Key ID
      *
      * @param $str_id

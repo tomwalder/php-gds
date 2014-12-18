@@ -79,13 +79,22 @@ class Gateway
         } else {
             $obj_mutation->setUpsert([$obj_entity]);
         }
+        $obj_response = $this->commitMutation($obj_mutation);
+        return(1 == $obj_response->getMutationResult()['indexUpdates']);
+    }
+
+    /**
+     * Apply a mutation to the Datastore (commit)
+     *
+     * @param \Google_Service_Datastore_Mutation $obj_mutation
+     * @return \Google_Service_Datastore_CommitResponse
+     */
+    private function commitMutation(\Google_Service_Datastore_Mutation $obj_mutation)
+    {
         $obj_request = new \Google_Service_Datastore_CommitRequest();
         $obj_request->setMode('NON_TRANSACTIONAL');
         $obj_request->setMutation($obj_mutation);
-
-        /** @var \Google_Service_Datastore_CommitResponse $obj_response */
-        $obj_response = $this->obj_datasets->commit($this->str_dataset_id, $obj_request);
-        return(1 == $obj_response->getMutationResult()['indexUpdates']);
+        return $this->obj_datasets->commit($this->str_dataset_id, $obj_request);
     }
 
     /**
@@ -169,6 +178,20 @@ class Gateway
             return $obj_response['batch']['entityResults'];
         }
         return [];
+    }
+
+    /**
+     * Delete an Entity
+     *
+     * @param \Google_Service_Datastore_Key $obj_key
+     * @return bool
+     */
+    public function delete(\Google_Service_Datastore_Key $obj_key)
+    {
+        $obj_mutation = new \Google_Service_Datastore_Mutation();
+        $obj_mutation->setDelete([$obj_key]);
+        $obj_response = $this->commitMutation($obj_mutation);
+        return(1 == $obj_response->getMutationResult()['indexUpdates']);
     }
 
 }
