@@ -1,6 +1,6 @@
 <?php
 /**
- * GDS Model
+ * GDS Mapper
  *
  * @author Tom Walder <tom@docnet.nu>
  */
@@ -14,6 +14,11 @@ class EntityMapper
      */
     private $obj_schema = NULL;
 
+    /**
+     * Schema required on construction
+     *
+     * @param Schema $obj_schema
+     */
     public function __construct(Schema $obj_schema)
     {
         $this->obj_schema = $obj_schema;
@@ -132,7 +137,6 @@ class EntityMapper
         }
         return $obj_property;
     }
-
 
     /**
      * Map a single result out of the Raw response data array into a supplied Model object
