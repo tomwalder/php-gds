@@ -6,7 +6,12 @@
  */
 namespace GDS;
 
-class EntityMapper
+/**
+ * Map between Entity and Model data/objects
+ *
+ * @package GDS
+ */
+class Mapper
 {
 
     /**
@@ -141,6 +146,8 @@ class EntityMapper
     /**
      * Map a single result out of the Raw response data array into a supplied Model object
      *
+     * @todo Parent Keys
+     *
      * @param $arr_result
      * @param Model $obj_model
      * @return Model
@@ -160,7 +167,6 @@ class EntityMapper
                 $obj_model->setKeyName($arr_path_end['name']);
             }
 
-            // @todo DO WE HAVE A Parent KEY?
             // if(count($arr_path) > 1) {
             //     $arr_parent = [$arr_path[0]['kind'], $arr_path[0]['name']];
             //     $obj_model->setParent($arr_parent);

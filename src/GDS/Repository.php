@@ -4,6 +4,11 @@
  */
 namespace GDS;
 
+/**
+ * Google Datastore Repository
+ *
+ * @package GDS
+ */
 abstract class Repository
 {
 
@@ -30,19 +35,54 @@ abstract class Repository
      */
     public function put(Model $obj_model)
     {
-        $obj_entity = (new EntityMapper($this->getSchema()))->createFromModel($obj_model);
+        $obj_entity = (new Mapper($this->getSchema()))->createFromModel($obj_model);
         return $this->obj_gateway->put($obj_entity, $obj_model->isNew());
     }
 
     /**
-     * Fetch a single Model from the Datastore, by it's ID
+     * Fetch a single Model from the Datastore, by it's Key ID
      *
      * @param $str_id
      * @return Model|null
      */
     public function fetchById($str_id)
     {
-        $arr_results = $this->obj_gateway->fetchById($this->getSchema()->getKind(), $str_id);
+        return $this->mapOneFromResults(
+            $this->obj_gateway->fetchById($this->getSchema()->getKind(), $str_id)
+        );
+    }
+
+    /**
+     * Fetch a single Model from the Datastore, by it's Key Name
+     *
+     * @param $str_name
+     * @return Model|null
+     */
+    public function fetchByName($str_name)
+    {
+        return $this->mapOneFromResults(
+            $this->obj_gateway->fetchByName($this->getSchema()->getKind(), $str_name)
+        );
+    }
+
+    /**
+     * Fetch Models based on a GQL query
+     *
+     * @param $str_query
+     * @return Model[]
+     */
+    public function query($str_query)
+    {
+        $arr_results = $this->obj_gateway->gql($str_query);
+        return $this->mapFromResults($arr_results);
+    }
+
+    /**
+     * @param $arr_results
+     * @return Model|null
+     */
+    private function mapOneFromResults($arr_results)
+    {
         $arr_models = $this->mapFromResults($arr_results);
         if(count($arr_models) > 0) {
             return $arr_models[0];
@@ -59,7 +99,7 @@ abstract class Repository
     private function mapFromResults(array $arr_results)
     {
         $arr_models = [];
-        $obj_mapper = new EntityMapper($this->getSchema());
+        $obj_mapper = new Mapper($this->getSchema());
         foreach ($arr_results as $arr_result) {
             $arr_models[] = $obj_mapper->mapFromRawData($arr_result, $this->createEntity());
         }
