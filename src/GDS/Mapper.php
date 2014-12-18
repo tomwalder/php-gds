@@ -51,7 +51,7 @@ class Mapper
      * @param Model $obj_model
      * @return \Google_Service_Datastore_Key
      */
-    private function createKey(Model $obj_model)
+    public function createKey(Model $obj_model)
     {
         $obj_path = new \Google_Service_Datastore_KeyPathElement();
         $obj_path->setKind($this->obj_schema->getKind());
