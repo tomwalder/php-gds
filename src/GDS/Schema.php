@@ -6,6 +6,11 @@
  */
 namespace GDS;
 
+/**
+ * Google Datastore Model Schema
+ *
+ * @package GDS
+ */
 class Schema
 {
 
