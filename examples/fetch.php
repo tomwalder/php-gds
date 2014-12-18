@@ -18,10 +18,11 @@ $obj_gateway = new GDS\Gateway($obj_client, GDS_DATASET_ID);
 // Repository requires a Gateway
 $obj_book_repo = new BookRepository($obj_gateway);
 
-// Retrieve
+// Retrieve one
 $obj_book = $obj_book_repo->fetchById('5066549580791808');
 print_r($obj_book);
 
-// Update & save
-$obj_book->author = 'Tom ' . date('Y-m-d H:i:s');
-print_r($obj_book_repo->put($obj_book));
+// Fatch all
+$arr_models = $obj_book_repo->query("SELECT * FROM Book");
+print_r($arr_models);
+echo "Found ", count($arr_models), " records", PHP_EOL;
