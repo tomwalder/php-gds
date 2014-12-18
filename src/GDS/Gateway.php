@@ -8,6 +8,11 @@
  */
 namespace GDS;
 
+/**
+ * Google Datastore Gateway
+ *
+ * @package GDS
+ */
 class Gateway
 {
 
@@ -83,19 +88,13 @@ class Gateway
         return(1 == $obj_response->getMutationResult()['indexUpdates']);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+    /**
+     * Fetch entity data by Key ID
+     *
+     * @param $str_kind
+     * @param $str_key_id
+     * @return array
+     */
     public function fetchById($str_kind, $str_key_id)
     {
         $obj_path = new \Google_Service_Datastore_KeyPathElement();
@@ -106,6 +105,13 @@ class Gateway
         return $this->fetchByKeys([$obj_key]);
     }
 
+    /**
+     * Fetch entity data by Key Name
+     *
+     * @param $str_kind
+     * @param $str_key_name
+     * @return mixed
+     */
     public function fetchByName($str_kind, $str_key_name)
     {
         $obj_path = new \Google_Service_Datastore_KeyPathElement();
@@ -116,6 +122,12 @@ class Gateway
         return $this->fetchByKeys([$obj_key]);
     }
 
+    /**
+     * Fetch entity data for an array of Keys
+     *
+     * @param $arr_keys
+     * @return mixed
+     */
     private function fetchByKeys($arr_keys)
     {
         $obj_request = new \Google_Service_Datastore_LookupRequest();
@@ -124,11 +136,39 @@ class Gateway
         return $obj_response->getFound();
     }
 
-    public function fetchByQuery($str_gql)
+    /**
+     * Fetch entity data based on GQL
+     *
+     * @param $str_gql
+     * @return Model[]
+     */
+    public function gql($str_gql)
     {
-        // @todo
+        $obj_query = new \Google_Service_Datastore_GqlQuery();
+        $obj_query->setAllowLiteral(TRUE);
+        $obj_query->setQueryString($str_gql);
+        return $this->executeQuery($obj_query);
     }
 
-
+    /**
+     * Execute the given query and return the results.
+     *
+     * @param \Google_Collection $obj_query
+     * @return array
+     */
+    private function executeQuery(\Google_Collection $obj_query)
+    {
+        $obj_request = new \Google_Service_Datastore_RunQueryRequest();
+        if ($obj_query instanceof \Google_Service_Datastore_GqlQuery) {
+            $obj_request->setGqlQuery($obj_query);
+        } else {
+            $obj_request->setQuery($obj_query);
+        }
+        $obj_response = $this->obj_datasets->runQuery($this->str_dataset_id, $obj_request);
+        if (isset($obj_response['batch']['entityResults'])) {
+            return $obj_response['batch']['entityResults'];
+        }
+        return [];
+    }
 
 }
