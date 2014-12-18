@@ -6,6 +6,11 @@
  */
 namespace GDS;
 
+/**
+ * Google Datastore Model
+ *
+ * @package GDS
+ */
 abstract class Model
 {
 
