@@ -1,6 +1,6 @@
 <?php
 /**
- * Represents a Book repository
+ * Represents a GDS Book repository
  *
  * @author Tom Walder <tom@docnet.nu>
  */
