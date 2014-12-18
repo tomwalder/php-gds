@@ -1,6 +1,6 @@
 <?php
 /**
- * Configuration file
+ * Template Configuration file for php-gds examples
  *
  * @author Tom Walder <tom@docnet.nu>
  */

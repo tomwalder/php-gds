@@ -12,10 +12,14 @@ abstract class Repository
      */
     private $obj_gateway = NULL;
 
+    /**
+     * Gateway required on construction
+     *
+     * @param Gateway $obj_gateway
+     */
     public function __construct(Gateway $obj_gateway)
     {
         $this->obj_gateway = $obj_gateway;
-
     }
 
     /**
@@ -29,7 +33,6 @@ abstract class Repository
         $obj_entity = (new EntityMapper($this->getSchema()))->createFromModel($obj_model);
         return $this->obj_gateway->put($obj_entity, $obj_model->isNew());
     }
-
 
     /**
      * Fetch a single Model from the Datastore, by it's ID
@@ -62,7 +65,6 @@ abstract class Repository
         }
         return $arr_models;
     }
-
 
     /**
      * Get the schema for this GDS Model
