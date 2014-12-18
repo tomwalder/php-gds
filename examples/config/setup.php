@@ -12,3 +12,4 @@ if(!file_exists($str_path . '/config.php')) {
     throw new Exception('No config.php file - see README');
 }
 require_once('config.php');
+date_default_timezone_set('Europe/London');
