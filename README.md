@@ -21,9 +21,10 @@ $obj_book->isbn = '1840224339';
 $obj_book_repo->insert($obj_book);
 ```
 
-Now let's pull some data out of Datastore
+Now let's pull some data out of Datastore ([Go here for more information on GQL](https://cloud.google.com/datastore/docs/concepts/gql))
 
 ```php
+// Fetch all the books, using a GQL query, and show their titles and ISBN
 $arr_books = $obj_book_repo->query("SELECT * FROM Book");
 foreach($arr_books as $obj_book) {
     echo "Title: {$obj_book->title}, ISBN: {$obj_book->isbn}", PHP_EOL;
@@ -38,8 +39,8 @@ https://cloud.google.com/datastore/
 
 You'll need 
 - a Google Account (doh)
-- a Project to work on with the "Google Cloud Datastore API" turned ON in your project (https://console.developers.google.com/)
-- a "Service account" and a P12 key file for that service account (https://developers.google.com/accounts/docs/OAuth2#serviceaccount)
+- a Project to work on with the "Google Cloud Datastore API" turned ON in your project [Google Developer Console](https://console.developers.google.com/)
+- a "Service account" and a P12 key file for that service account [Service Accounts](https://developers.google.com/accounts/docs/OAuth2#serviceaccount)
 
 ## Running the examples ##
 
@@ -52,7 +53,7 @@ Or, you can pass in your own `Google_Client` object, configured with whatever au
 
 ## Footnote ##
 
-Not that it matters too much, I've been trying to decide what sort of Patterns this library contains. See PEAA here: http://martinfowler.com/eaaCatalog/index.html 
+Not that it matters too much, I've been trying to decide what sort of Patterns this library contains. [PEAA](http://martinfowler.com/eaaCatalog/index.html).
 
 What I decided is that I'm not really following DataMapper or Repository to the letter of how they were envisaged.
 
