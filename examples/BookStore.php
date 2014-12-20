@@ -15,7 +15,7 @@ class BookStore extends GDS\Store
     protected function getSchema()
     {
         return (new GDS\Schema('Book'))
-            ->addField('name')
+            ->addField('title')
             ->addField('author')
             ->addField('isbn');
     }
