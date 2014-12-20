@@ -44,7 +44,22 @@ class Mapper
     }
 
     /**
-     * Create an Entity Key from a Model
+     * Create an array of Datastore Entity from an array of Models
+     *
+     * @param array $arr_models
+     * @return array
+     */
+    public function createFromModels(array $arr_models)
+    {
+        $arr_entities = [];
+        foreach($arr_models as $obj_model) {
+            $arr_entities[] = $this->createFromModel($obj_model);
+        }
+        return $arr_entities;
+    }
+
+    /**
+     * Create an Entity Key from a Model, with a Kind any any existing key data
      *
      * @todo handle Ancestor keys
      *
@@ -55,31 +70,76 @@ class Mapper
     {
         $obj_path = new \Google_Service_Datastore_KeyPathElement();
         $obj_path->setKind($this->obj_schema->getKind());
-
-        // Existing Key Data?
         if (NULL !== $obj_model->getKeyId()) {
             $obj_path->setId($obj_model->getKeyId());
         } else if (NULL !== $obj_model->getKeyName()) {
             $obj_path->setName($obj_model->getKeyName());
         }
-
         $obj_key = new \Google_Service_Datastore_Key();
         $obj_key->setPath([$obj_path]);
         return $obj_key;
     }
 
     /**
+     * Create an array of Entity Key from an array of Models
+     *
+     * @param array $arr_models
+     * @return array
+     */
+    public function createKeys(array $arr_models)
+    {
+        $arr_keys = [];
+        foreach($arr_models as $obj_model) {
+            $arr_keys[] = $this->createKey($obj_model);
+        }
+        return $arr_keys;
+    }
+
+    /**
      * Build & return the properties for the Model
+     *
+     * @todo handle undefined properties.. let's call them Dynamic
      *
      * @param Model $obj_model
      * @return array
+     * @throws \Exception
      */
     private function createProperties(Model $obj_model)
     {
         $arr_property_map = [];
-        foreach ($this->obj_schema->getFields() as $str_field => $arr_field_def) {
-            if ($obj_model->hasData($str_field)) {
-                $arr_property_map[$str_field] = $this->createProperty($arr_field_def, $obj_model->{$str_field});
+        $arr_field_defs = $this->obj_schema->getFields();
+        foreach($obj_model->getData() as $str_field_name => $mix_value) {
+            if(isset($arr_field_defs[$str_field_name])) {
+                $arr_property_map[$str_field_name] = $this->createProperty($arr_field_defs[$str_field_name], $mix_value);
+            } else {
+                switch(gettype($mix_value)) {
+                    case 'boolean':
+                        $int_dynamic_type = Schema::FIELD_BOOLEAN;
+                        break;
+
+                    case 'integer':
+                        $int_dynamic_type = Schema::FIELD_INTEGER;
+                        break;
+
+                    case 'double':
+                        $int_dynamic_type = Schema::FIELD_DOUBLE;
+                        break;
+
+                    case 'string':
+                        $int_dynamic_type = Schema::FIELD_STRING;
+                        break;
+
+                    case 'array':
+                    case 'object':
+                    case 'resource':
+                    case 'NULL':
+                    case 'unknown type':
+                    default:
+                        trigger_error('Unsupported dynamic type, casting to string: ' . gettype($mix_value), E_USER_WARNING);
+                        $int_dynamic_type = Schema::FIELD_STRING;
+                        $mix_value = (string)$mix_value;
+                }
+                $arr_property_map[$str_field_name] = $this->createProperty(['type' => $int_dynamic_type, 'index' => FALSE], $mix_value);
             }
         }
         return $arr_property_map;
@@ -138,7 +198,6 @@ class Mapper
 
             default:
                 throw new \RuntimeException('Unable to process field type: ' . $arr_field_def['type']);
-
         }
         return $obj_property;
     }
@@ -181,7 +240,7 @@ class Mapper
             if (isset($arr_field_defs[$str_field])) {
                 $obj_model->__set($str_field, $this->extractPropertyValue($arr_field_defs[$str_field]['type'], $obj_property));
             } else {
-                throw new \RuntimeException('Undefined field data: ' . $str_field);
+                $obj_model->__set($str_field, $this->extractPropertyValue(Schema::FIELD_DETECT, $obj_property));
             }
         }
         return $obj_model;
@@ -215,11 +274,25 @@ class Mapper
                 return $obj_property->getBooleanValue();
 
             case Schema::FIELD_STRING_LIST:
-                $arr = [];
-                foreach($obj_property->getListValue() as $obj_val) {
-                    $arr[] = $obj_val->getStringValue();
+                $arr_values = $obj_property->getListValue();
+                if(NULL !== $arr_values) {
+                    $arr = [];
+                    foreach ($arr_values as $obj_val) {
+                        /** @var $obj_val \Google_Service_Datastore_Property */
+                        $arr[] = $obj_val->getStringValue();
+                    }
+                    return $arr;
                 }
-                return $arr;
+                return NULL;
+
+            case Schema::FIELD_DETECT:
+                foreach([Schema::FIELD_STRING, Schema::FIELD_INTEGER, Schema::FIELD_DATETIME, Schema::FIELD_DOUBLE, Schema::FIELD_BOOLEAN] as $int_field_type) {
+                    $mix_val = $this->extractPropertyValue($int_field_type, $obj_property);
+                    if(NULL !== $mix_val) {
+                        return $mix_val;
+                    }
+                }
+                return NULL;
         }
         throw new \Exception('Unsupported field type: ' . $int_type);
     }
