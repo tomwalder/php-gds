@@ -101,24 +101,29 @@ abstract class Model
     }
 
     /**
-     * Does this Model instance contain data for the field?
+     * Does this Model instance contain data for the supplied field? Or any data if no field specified?
      *
      * @param $str_key
      * @return bool
      */
-    public function hasData($str_key)
+    public function hasData($str_key = NULL)
     {
+        if(NULL === $str_key) {
+            return !empty($this->arr_data);
+        }
         return isset($this->arr_data[$str_key]);
     }
 
     /**
-     * Is this Model instance a new record?
+     * Get the entire data array
      *
-     * @return bool
+     * @return array
      */
-    public function isNew()
+    public function getData()
     {
-        return (NULL === $this->str_key_name && NULL === $this->str_key_id);
+        return $this->arr_data;
     }
+
+
 
 }
