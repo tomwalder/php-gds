@@ -9,7 +9,7 @@ namespace GDS;
  *
  * @package GDS
  */
-abstract class Repository
+abstract class Store
 {
 
     /**
@@ -28,27 +28,33 @@ abstract class Repository
     }
 
     /**
-     * Write a single Model object to the Datastore
+     * Write one or more Model objects to the Datastore
      *
-     * @param Model $obj_model
+     * @param mixed
      * @return bool
      */
-    public function put(Model $obj_model)
+    public function save($arr_models)
     {
-        $obj_entity = (new Mapper($this->getSchema()))->createFromModel($obj_model);
-        return $this->obj_gateway->put($obj_entity, $obj_model->isNew());
+        if($arr_models instanceof Model) {
+            $arr_models = [$arr_models];
+        }
+        $arr_entities = (new Mapper($this->getSchema()))->createFromModels($arr_models);
+        return $this->obj_gateway->putMulti($arr_entities);
     }
 
     /**
-     * Delete a single Model entity from the Datastore
+     * Delete one or more Model objects from the Datastore
      *
-     * @param Model $obj_model
+     * @param mixed
      * @return bool
      */
-    public function delete(Model $obj_model)
+    public function delete($arr_models)
     {
-        $obj_entity_key = (new Mapper($this->getSchema()))->createKey($obj_model);
-        return $this->obj_gateway->delete($obj_entity_key);
+        if($arr_models instanceof Model) {
+            $arr_models = [$arr_models];
+        }
+        $arr_keys = (new Mapper($this->getSchema()))->createKeys($arr_models);
+        return $this->obj_gateway->deleteMulti($arr_keys);
     }
 
     /**
@@ -113,7 +119,7 @@ abstract class Repository
         $arr_models = [];
         $obj_mapper = new Mapper($this->getSchema());
         foreach ($arr_results as $arr_result) {
-            $arr_models[] = $obj_mapper->mapFromRawData($arr_result, $this->createEntity());
+            $arr_models[] = $obj_mapper->mapFromRawData($arr_result, $this->createModel());
         }
         return $arr_models;
     }
@@ -130,6 +136,6 @@ abstract class Repository
      *
      * @return Model
      */
-    abstract public function createEntity();
+    abstract public function createModel();
 
 }

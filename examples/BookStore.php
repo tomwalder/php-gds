@@ -4,7 +4,7 @@
  *
  * @author Tom Walder <tom@docnet.nu>
  */
-class BookRepository extends GDS\Repository
+class BookStore extends GDS\Store
 {
 
     /**
@@ -25,7 +25,7 @@ class BookRepository extends GDS\Repository
      *
      * @return \GDS\Model
      */
-    public function createEntity()
+    public function createModel()
     {
         return new Book();
     }
