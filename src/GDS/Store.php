@@ -28,12 +28,12 @@ abstract class Store
     }
 
     /**
-     * Write one or more Model objects to the Datastore
+     * Write one or more changed Model objects to the Datastore
      *
      * @param mixed
      * @return bool
      */
-    public function save($arr_models)
+    public function upsert($arr_models)
     {
         if($arr_models instanceof Model) {
             $arr_models = [$arr_models];
@@ -93,6 +93,19 @@ abstract class Store
     {
         $arr_results = $this->obj_gateway->gql($str_query);
         return $this->mapFromResults($arr_results);
+    }
+
+    /**
+     * @param array $arr_data
+     * @return Model
+     */
+    public function createFromArray(array $arr_data)
+    {
+        $obj_model = $this->createModel();
+        foreach($arr_data as $str_property => $mix_value) {
+            $obj_model->__set($str_property, $mix_value);
+        }
+        return $obj_model;
     }
 
     /**
