@@ -1,6 +1,6 @@
 # Google Datastore Library for PHP #
 
-[Google Cloud Datastore](https://cloud.google.com/datastore/) is a great NoSQL solution, but it can be tricky (i.e. there's lots of glue) to get the "Hello World" of data persistence up and running in PHP.
+[Google Cloud Datastore](https://cloud.google.com/datastore/) is a great NoSQL solution, but it can be tricky (i.e. there's lots of code glue needed) to get the "Hello World" of data persistence up and running in PHP.
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
@@ -29,17 +29,11 @@ foreach($arr_books as $obj_book) {
 }
 ```
 
-## What is Google Cloud Datastore? ##
-
-https://cloud.google.com/datastore/
-
-https://cloud.google.com/datastore/docs/concepts/entities#Datastore_Properties_and_value_types
-
 ## Getting Started ##
 
 You'll need 
 - a Google Account (doh)
-- a Project to work on with the "Google Cloud Datastore API" turned ON in your project [Google Developer Console](https://console.developers.google.com/)
+- a Project to work on with the "Google Cloud Datastore API" turned ON [Google Developer Console](https://console.developers.google.com/)
 - a "Service account" and a P12 key file for that service account [Service Accounts](https://developers.google.com/accounts/docs/OAuth2#serviceaccount)
 
 ## Running the examples ##
@@ -50,6 +44,11 @@ You will need to create 2 files in the `examples/config` folder as follows
 
 Or, you can pass in your own `Google_Client` object, configured with whatever auth you like.
 
+## More About Google Cloud Datastore ##
+
+"Use a managed, NoSQL, schemaless database for storing non-relational data. Cloud Datastore automatically scales as you need it and supports transactions as well as robust, SQL-like queries."
+
+https://cloud.google.com/datastore/
 
 ## Footnotes ##
 
