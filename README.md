@@ -19,7 +19,7 @@ $obj_book->isbn = '1840224339';
 $obj_book_store->upsert($obj_book);
 ```
 
-Now let's pull some data out of Datastore ([more information on GQL](https://cloud.google.com/datastore/docs/concepts/gql))
+Now let's pull some data out of Datastore
 
 ```php
 // Fetch all the books, using a GQL query, and show their titles and ISBN
@@ -49,6 +49,12 @@ Or, you can pass in your own `Google_Client` object, configured with whatever au
 "Use a managed, NoSQL, schemaless database for storing non-relational data. Cloud Datastore automatically scales as you need it and supports transactions as well as robust, SQL-like queries."
 
 https://cloud.google.com/datastore/
+
+### Specific Topics ###
+
+[Entities, Data Types etc.](https://cloud.google.com/datastore/docs/concepts/entities)
+
+[More information on GQL](https://cloud.google.com/datastore/docs/concepts/gql)
 
 ## Footnotes ##
 
