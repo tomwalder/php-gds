@@ -27,6 +27,13 @@ class Gateway
     private $str_dataset_id = NULL;
 
     /**
+     * The last response - sually a Commit or Query response
+     *
+     * @var \Google_Model
+     */
+    private $obj_last_response = NULL;
+
+    /**
      * Create a new GDS service
      *
      * @param \Google_Client $obj_client
@@ -63,24 +70,46 @@ class Gateway
     }
 
     /**
-     * Put an Entity into the Datastore
+     * Put a single Entity into the Datastore
+     *
+     * @param \Google_Service_Datastore_Entity $obj_entity
+     * @return bool
+     */
+    public function put(\Google_Service_Datastore_Entity $obj_entity)
+    {
+        return $this->putMulti([$obj_entity]);
+    }
+
+    /**
+     * Put an array of Entities into the Datastore
      *
      * @todo Transactions
      *
-     * @param \Google_Service_Datastore_Entity $obj_entity
-     * @param $bol_auto_id
+     * @param \Google_Service_Datastore_Entity[] $arr_entities
      * @return bool
      */
-    public function put(\Google_Service_Datastore_Entity $obj_entity, $bol_auto_id)
+    public function putMulti(array $arr_entities)
     {
         $obj_mutation = new \Google_Service_Datastore_Mutation();
-        if ($bol_auto_id) {
-            $obj_mutation->setInsertAutoId([$obj_entity]);
-        } else {
-            $obj_mutation->setUpsert([$obj_entity]);
+        $arr_auto_id = [];
+        $arr_has_key = [];
+        foreach($arr_entities as $obj_entity) {
+            /** @var \Google_Service_Datastore_KeyPathElement $obj_path */
+            $obj_path = $obj_entity->getKey()->getPath()[0];
+            if($obj_path->getId() || $obj_path->getName()) {
+                $arr_has_key[] = $obj_entity;
+            } else {
+                $arr_auto_id[] = $obj_entity;
+            }
         }
-        $obj_response = $this->commitMutation($obj_mutation);
-        return(1 == $obj_response->getMutationResult()['indexUpdates']);
+        if (!empty($arr_auto_id)) {
+            $obj_mutation->setInsertAutoId($arr_auto_id);
+        }
+        if (!empty($arr_has_key)) {
+            $obj_mutation->setUpsert($arr_has_key);
+        }
+        $this->commitMutation($obj_mutation);
+        return TRUE;
     }
 
     /**
@@ -94,7 +123,8 @@ class Gateway
         $obj_request = new \Google_Service_Datastore_CommitRequest();
         $obj_request->setMode('NON_TRANSACTIONAL');
         $obj_request->setMutation($obj_mutation);
-        return $this->obj_datasets->commit($this->str_dataset_id, $obj_request);
+        $this->obj_last_response = $this->obj_datasets->commit($this->str_dataset_id, $obj_request);
+        return $this->obj_last_response;
     }
 
     /**
@@ -141,8 +171,8 @@ class Gateway
     {
         $obj_request = new \Google_Service_Datastore_LookupRequest();
         $obj_request->setKeys($arr_keys);
-        $obj_response = $this->obj_datasets->lookup($this->str_dataset_id, $obj_request);
-        return $obj_response->getFound();
+        $this->obj_last_response = $this->obj_datasets->lookup($this->str_dataset_id, $obj_request);
+        return $this->obj_last_response->getFound();
     }
 
     /**
@@ -173,9 +203,9 @@ class Gateway
         } else {
             $obj_request->setQuery($obj_query);
         }
-        $obj_response = $this->obj_datasets->runQuery($this->str_dataset_id, $obj_request);
-        if (isset($obj_response['batch']['entityResults'])) {
-            return $obj_response['batch']['entityResults'];
+        $this->obj_last_response = $this->obj_datasets->runQuery($this->str_dataset_id, $obj_request);
+        if (isset($this->obj_last_response['batch']['entityResults'])) {
+            return $this->obj_last_response['batch']['entityResults'];
         }
         return [];
     }
@@ -190,8 +220,32 @@ class Gateway
     {
         $obj_mutation = new \Google_Service_Datastore_Mutation();
         $obj_mutation->setDelete([$obj_key]);
-        $obj_response = $this->commitMutation($obj_mutation);
-        return(1 == $obj_response->getMutationResult()['indexUpdates']);
+        $this->obj_last_response = $this->commitMutation($obj_mutation);
+        return(1 == $this->obj_last_response->getMutationResult()['indexUpdates']);
+    }
+
+    /**
+     * Delete one or more entities based on their Key
+     *
+     * @param array $arr_keys
+     * @return bool
+     */
+    public function deleteMulti(array $arr_keys)
+    {
+        $obj_mutation = new \Google_Service_Datastore_Mutation();
+        $obj_mutation->setDelete($arr_keys);
+        $this->obj_last_response = $this->commitMutation($obj_mutation);
+        return(count($arr_keys) == $this->obj_last_response->getMutationResult()['indexUpdates']);
+    }
+
+    /**
+     * Retrieve the last response object
+     *
+     * @return \Google_Model
+     */
+    public function getLastResponse()
+    {
+        return $this->obj_last_response;
     }
 
 }
