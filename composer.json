@@ -1,7 +1,7 @@
 {
   "name": "tomwalder/php-gds",
   "type": "library",
-  "description": "Google Datastore Library",
+  "description": "Google Cloud Datastore Library for PHP",
   "keywords": ["google", "datastore"],
   "homepage": "https://github.com/tomwalder/php-gds",
   "require": {
