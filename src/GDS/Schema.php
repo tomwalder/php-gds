@@ -24,6 +24,7 @@ class Schema
     const FIELD_FLOAT = 4; // FLOAT === DOUBLE
     const FIELD_BOOLEAN = 10; // 10 types of people...
     const FIELD_STRING_LIST = 20;
+    const FIELD_DETECT = 99; // used for auto-detection
 
     /**
      * Kind (like database 'Table')
