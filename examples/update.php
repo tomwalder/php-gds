@@ -1,26 +1,18 @@
 <?php
 /**
- * Update a single record from GDS and update it
+ * Delete a single record from GDS
  *
  * @author Tom Walder <tom@docnet.nu>
  */
-require_once('../vendor/autoload.php');
-require_once('config/setup.php');
-require_once('Book.php');
-require_once('BookRepository.php');
+require_once('boilerplate.php');
 
-// We'll need a Google_Client, use our convenience method
-$obj_client = GDS\Gateway::createGoogleClient(GDS_APP_NAME, GDS_SERVICE_ACCOUNT_NAME, GDS_KEY_FILE_PATH);
+// Fetch one record
+$arr_books = $obj_book_store->query("SELECT * FROM Book LIMIT 1");
+echo "Found ", count($arr_books), " records", PHP_EOL;
+foreach($arr_books as $obj_book) {
+    echo "   Title: {$obj_book->title}, ISBN: {$obj_book->isbn}", PHP_EOL;
 
-// Gateway requires a Google_Client and Dataset ID
-$obj_gateway = new GDS\Gateway($obj_client, GDS_DATASET_ID);
-
-// Repository requires a Gateway
-$obj_book_repo = new BookRepository($obj_gateway);
-
-// Retrieve one
-$obj_book = $obj_book_repo->fetchById('5066549580791808');
-
-// Update & save
-$obj_book->author = 'Tom ' . date('Y-m-d H:i:s');
-print_r($obj_book_repo->put($obj_book));
+    // Update the author
+    $obj_book->author = 'Tom ' . date('Y-m-d H:i:s');
+    $obj_book_store->upsert($obj_book);
+}
