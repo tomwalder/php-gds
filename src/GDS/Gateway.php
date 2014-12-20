@@ -1,16 +1,27 @@
 <?php
 /**
- * GDS Gateway
+ * Copyright 2014 Tom Walder
  *
- * Persists and retrieves Entities to/from GDS
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * @author Tom Walder <tom@docnet.nu>
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 namespace GDS;
 
 /**
  * Google Datastore Gateway
  *
+ * Persists and retrieves Entities to/from GDS
+ *
+ * @author Tom Walder <tom@docnet.nu>
  * @package GDS
  */
 class Gateway
@@ -93,10 +104,10 @@ class Gateway
         $obj_mutation = new \Google_Service_Datastore_Mutation();
         $arr_auto_id = [];
         $arr_has_key = [];
-        foreach($arr_entities as $obj_entity) {
+        foreach ($arr_entities as $obj_entity) {
             /** @var \Google_Service_Datastore_KeyPathElement $obj_path */
             $obj_path = $obj_entity->getKey()->getPath()[0];
-            if($obj_path->getId() || $obj_path->getName()) {
+            if ($obj_path->getId() || $obj_path->getName()) {
                 $arr_has_key[] = $obj_entity;
             } else {
                 $arr_auto_id[] = $obj_entity;
@@ -221,7 +232,7 @@ class Gateway
         $obj_mutation = new \Google_Service_Datastore_Mutation();
         $obj_mutation->setDelete([$obj_key]);
         $this->obj_last_response = $this->commitMutation($obj_mutation);
-        return(1 == $this->obj_last_response->getMutationResult()['indexUpdates']);
+        return (1 == $this->obj_last_response->getMutationResult()['indexUpdates']);
     }
 
     /**
@@ -235,7 +246,7 @@ class Gateway
         $obj_mutation = new \Google_Service_Datastore_Mutation();
         $obj_mutation->setDelete($arr_keys);
         $this->obj_last_response = $this->commitMutation($obj_mutation);
-        return(count($arr_keys) == $this->obj_last_response->getMutationResult()['indexUpdates']);
+        return (count($arr_keys) == $this->obj_last_response->getMutationResult()['indexUpdates']);
     }
 
     /**
