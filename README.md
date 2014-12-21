@@ -4,7 +4,7 @@
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
-## Quick Examples ##
+## Basic Examples ##
 
 I find examples a great way to decide if I want to even try out a library, so here's a couple for you (without the boilerplate)...
 
@@ -51,10 +51,10 @@ Or, you can pass in your own `Google_Client` object, configured with whatever au
 https://cloud.google.com/datastore/
 
 ### Specific Topics ###
-
-[Entities, Data Types etc.](https://cloud.google.com/datastore/docs/concepts/entities)
-
-[More information on GQL](https://cloud.google.com/datastore/docs/concepts/gql)
+Some highlighted topics you might want to read up on
+- [Entities, Data Types etc.](https://cloud.google.com/datastore/docs/concepts/entities)
+- [More information on GQL](https://cloud.google.com/datastore/docs/concepts/gql)
+- [Indexes](https://cloud.google.com/datastore/docs/concepts/indexes)
 
 ## Footnotes ##
 
