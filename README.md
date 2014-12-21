@@ -31,12 +31,19 @@ foreach($arr_books as $obj_book) {
 
 ## Getting Started ##
 
-You'll need 
+Are you sitting comfortable? before we begin, you will need: 
 - a Google Account (doh)
 - a Project to work on with the "Google Cloud Datastore API" turned ON [Google Developer Console](https://console.developers.google.com/)
 - a "Service account" and a P12 key file for that service account [Service Accounts](https://developers.google.com/accounts/docs/OAuth2#serviceaccount)
 
-## Running the examples ##
+### Composer, Dependencies ###
+
+To install using composer, use this require line
+`"tomwalder/php-gds": "dev-master"`
+
+I use the Google php api client for low-level access to Datastore services, so that will get pulled in to your project too.
+
+### Running the examples ###
 
 You will need to create 2 files in the `examples/config` folder as follows
 - `config.php` (you can use `_config.php` as a template)
