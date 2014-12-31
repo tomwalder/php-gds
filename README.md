@@ -39,6 +39,7 @@ Are you sitting comfortable? before we begin, you will need:
 ### Composer, Dependencies ###
 
 To install using composer, use this require line
+
 `"tomwalder/php-gds": "dev-master"`
 
 I use the Google php api client for low-level access to Datastore services, so that will get pulled in to your project too.
@@ -50,6 +51,23 @@ You will need to create 2 files in the `examples/config` folder as follows
 - `key.p12`
 
 Or, you can pass in your own `Google_Client` object, configured with whatever auth you like.
+
+## Multi-tenant Applications & Data Namespaces ##
+
+Google Datastore supports segregating data within a single "Dataset" using something called Namespaces.
+
+Generally, this is intended for multi-tenant applications where each customer would have separate data, even within the same "Kind".
+
+This library supports namespaces, and they can be configured per `Gateway` instance ny passing in the optional namespace parameter.
+
+```php
+// Create a store for a particular customer or 'application namespace'
+$obj_google_client = GDS\Gateway::createGoogleClient(GDS_APP_NAME, GDS_SERVICE_ACCOUNT_NAME, GDS_KEY_FILE_PATH);
+$obj_customer_gateway = new GDS\Gateway($obj_google_client, GDS_DATASET_ID, 'customer-namespace');
+$obj_customer_book_store = new BookStore($obj_customer_gateway);
+```
+
+Further examples are included in the examples folder.
 
 ## More About Google Cloud Datastore ##
 
