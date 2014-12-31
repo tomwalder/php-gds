@@ -2,8 +2,15 @@
   "name": "tomwalder/php-gds",
   "type": "library",
   "description": "Google Cloud Datastore Library for PHP",
-  "keywords": ["google", "datastore"],
+  "keywords": ["google", "datastore", "appengine", "gae", "cloud datastore"],
   "homepage": "https://github.com/tomwalder/php-gds",
+  "license": "Apache-2.0",
+  "authors": [
+    {
+      "name": "Tom Walder",
+      "email": "tom@docnet.nu"
+    }
+  ],
   "require": {
     "google/apiclient": "dev-master"
   },
