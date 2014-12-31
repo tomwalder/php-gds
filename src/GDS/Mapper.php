@@ -109,8 +109,6 @@ class Mapper
     /**
      * Build & return the properties for the Model
      *
-     * @todo handle undefined properties.. let's call them Dynamic
-     *
      * @param Model $obj_model
      * @return array
      * @throws \Exception
