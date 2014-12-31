@@ -31,4 +31,12 @@ $obj_book3->isbn = '1853260096';
 $bol_multi_result = $obj_book_store->upsert([$obj_book2, $obj_book3]);
 var_dump($bol_multi_result);
 
-// @todo Type 3
+// Create using our factory method
+$obj_book4 = $obj_book_store->createFromArray([
+    'title' => 'The Merchant of Venice',
+    'author' => 'William Shakespeare',
+    'isbn' => '1840224312'
+]);
+$bol_factory_result = $obj_book_store->upsert($obj_book4);
+var_dump($bol_factory_result);
+
