@@ -33,28 +33,41 @@ class Gateway
     private $obj_datasets = NULL;
 
     /**
+     * The dataset ID
+     *
      * @var string
      */
     private $str_dataset_id = NULL;
 
     /**
-     * The last response - sually a Commit or Query response
+     * The last response - usually a Commit or Query response
      *
      * @var \Google_Model
      */
     private $obj_last_response = NULL;
 
     /**
+     * Optional namespace (for multi-tenant applications)
+     *
+     * @var string|null
+     */
+    private $str_namespace = NULL;
+
+    /**
      * Create a new GDS service
+     *
+     * Optional namespace (for multi-tenant applications)
      *
      * @param \Google_Client $obj_client
      * @param $str_dataset_id
+     * @param null $str_namespace
      */
-    public function __construct(\Google_Client $obj_client, $str_dataset_id)
+    public function __construct(\Google_Client $obj_client, $str_dataset_id, $str_namespace = NULL)
     {
         $obj_service = new \Google_Service_Datastore($obj_client);
         $this->obj_datasets = $obj_service->datasets;
         $this->str_dataset_id = $str_dataset_id;
+        $this->str_namespace = $str_namespace;
     }
 
     /**
@@ -105,8 +118,9 @@ class Gateway
         $arr_auto_id = [];
         $arr_has_key = [];
         foreach ($arr_entities as $obj_entity) {
+            $obj_key = $this->applyNamespace($obj_entity->getKey());
             /** @var \Google_Service_Datastore_KeyPathElement $obj_path */
-            $obj_path = $obj_entity->getKey()->getPath()[0];
+            $obj_path = $obj_key->getPath()[0];
             if ($obj_path->getId() || $obj_path->getName()) {
                 $arr_has_key[] = $obj_entity;
             } else {
@@ -121,6 +135,30 @@ class Gateway
         }
         $this->commitMutation($obj_mutation);
         return TRUE;
+    }
+
+    /**
+     * Apply the current namespace to an object or array of objects
+     *
+     * @todo Validate it's OK to set one partition instance on multiple entities
+     *
+     * @param $mix_target
+     * @return mixed
+     */
+    private function applyNamespace($mix_target)
+    {
+        if(NULL !== $this->str_namespace) {
+            $obj_partition = new \Google_Service_Datastore_PartitionId();
+            $obj_partition->setNamespace($this->str_namespace);
+            if(is_array($mix_target)) {
+                foreach($mix_target as $obj_target) {
+                    $obj_target->setPartitionId($obj_partition);
+                }
+            } else {
+                $mix_target->setPartitionId($obj_partition);
+            }
+        }
+        return $mix_target;
     }
 
     /**
@@ -178,10 +216,10 @@ class Gateway
      * @param $arr_keys
      * @return mixed
      */
-    private function fetchByKeys($arr_keys)
+    private function fetchByKeys(array $arr_keys)
     {
         $obj_request = new \Google_Service_Datastore_LookupRequest();
-        $obj_request->setKeys($arr_keys);
+        $obj_request->setKeys($this->applyNamespace($arr_keys));
         $this->obj_last_response = $this->obj_datasets->lookup($this->str_dataset_id, $obj_request);
         return $this->obj_last_response->getFound();
     }
@@ -203,12 +241,14 @@ class Gateway
     /**
      * Execute the given query and return the results.
      *
+     * @todo Partition/Namespace on \Google_Service_Datastore_RunQueryRequest
+     *
      * @param \Google_Collection $obj_query
      * @return array
      */
     private function executeQuery(\Google_Collection $obj_query)
     {
-        $obj_request = new \Google_Service_Datastore_RunQueryRequest();
+        $obj_request = $this->applyNamespace(new \Google_Service_Datastore_RunQueryRequest());
         if ($obj_query instanceof \Google_Service_Datastore_GqlQuery) {
             $obj_request->setGqlQuery($obj_query);
         } else {
@@ -229,10 +269,7 @@ class Gateway
      */
     public function delete(\Google_Service_Datastore_Key $obj_key)
     {
-        $obj_mutation = new \Google_Service_Datastore_Mutation();
-        $obj_mutation->setDelete([$obj_key]);
-        $this->obj_last_response = $this->commitMutation($obj_mutation);
-        return (1 == $this->obj_last_response->getMutationResult()['indexUpdates']);
+        return $this->deleteMulti([$obj_key]);
     }
 
     /**
