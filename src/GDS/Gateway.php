@@ -241,8 +241,6 @@ class Gateway
     /**
      * Execute the given query and return the results.
      *
-     * @todo Partition/Namespace on \Google_Service_Datastore_RunQueryRequest
-     *
      * @param \Google_Collection $obj_query
      * @return array
      */
