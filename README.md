@@ -52,18 +52,34 @@ You will need to create 2 files in the `examples/config` folder as follows
 
 Or, you can pass in your own `Google_Client` object, configured with whatever auth you like.
 
+## Defining Your Model ##
+
+It often makes a lot of sense to define your Model Schema up front.  Because Datastore is schemaless the library also supports fields/properties that are not explicitly defined in your schema.  
+
+Here is how we build the Schema (in the BookStore class) for our examples:
+
+```php
+$obj_schema = (new GDS\Schema('Book'))
+   ->addField('title')
+   ->addField('author')
+   ->addField('isbn', GDS\Schema::FIELD_STRING, TRUE);
+```
+
+In this example, the ISBN field has been specifically set as an indexed field. By default, fields are of type `FIELD_STRING` and are NOT indexed. 
+
+See the `Schema` class for a list of supported types.
+
+Take a look at the `examples` folder for a fully operational set of code.
+
 ## Pagination ##
 
 When working with larger data sets, it can be useful to page through results in smaller batches. Here's an example.
 
 ```php
-// Fetch paginated results
+// Set the GQL query, then fetch results in pages of 50 until we run out
 $obj_book_store->query('SELECT * FROM Book');
 while($arr_page = $obj_book_store->fetchPage(50)) {
     echo "Page contains ", count($arr_page), " records", PHP_EOL;
-    foreach ($arr_page as $obj_book) {
-        echo "   Title: {$obj_book->title}, ISBN: {$obj_book->isbn}", PHP_EOL;
-    }
 }
 ```
 
