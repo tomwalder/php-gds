@@ -6,8 +6,8 @@
  */
 require_once('boilerplate.php');
 
-// Fetch and delete
-$arr_books = $obj_book_store->query("SELECT * FROM Book");
+// Fetch and delete ALL records
+$arr_books = $obj_book_store->fetchAll("SELECT * FROM Book");
 echo "Found ", count($arr_books), " records", PHP_EOL;
 $obj_book_store->delete($arr_books);
 
