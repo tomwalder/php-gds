@@ -59,13 +59,14 @@ It often makes a lot of sense to define your Model Schema up front.  Because Dat
 Here is how we build the Schema (in the BookStore class) for our examples:
 
 ```php
+// Define a schema with a Datastore Entity Kind of "Book" and 3 fields
 $obj_schema = (new GDS\Schema('Book'))
    ->addField('title')
    ->addField('author')
    ->addField('isbn', GDS\Schema::FIELD_STRING, TRUE);
 ```
 
-In this example, the ISBN field has been specifically set as an indexed field. By default, fields are of type `FIELD_STRING` and are NOT indexed. 
+In this example, the ISBN field has been specifically set as an indexed string field. By default, fields are string fields and are NOT indexed. 
 
 See the `Schema` class for a list of supported types.
 
