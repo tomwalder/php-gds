@@ -40,6 +40,13 @@ class Gateway
     private $str_dataset_id = NULL;
 
     /**
+     * Optional namespace (for multi-tenant applications)
+     *
+     * @var string|null
+     */
+    private $str_namespace = NULL;
+
+    /**
      * The last response - usually a Commit or Query response
      *
      * @var \Google_Model
@@ -47,11 +54,11 @@ class Gateway
     private $obj_last_response = NULL;
 
     /**
-     * Optional namespace (for multi-tenant applications)
+     * End Cursor from the last response
      *
      * @var string|null
      */
-    private $str_namespace = NULL;
+    private $str_end_cursor = NULL;
 
     /**
      * Create a new GDS service
@@ -225,17 +232,51 @@ class Gateway
     }
 
     /**
-     * Fetch entity data based on GQL
+     * Fetch entity data based on GQL (and optional parameters)
      *
      * @param $str_gql
+     * @param array $arr_params
      * @return Model[]
      */
-    public function gql($str_gql)
+    public function gql($str_gql, $arr_params = NULL)
     {
         $obj_query = new \Google_Service_Datastore_GqlQuery();
         $obj_query->setAllowLiteral(TRUE);
         $obj_query->setQueryString($str_gql);
+        if(NULL !== $arr_params) {
+            $this->addParamsToQuery($obj_query, $arr_params);
+        }
         return $this->executeQuery($obj_query);
+    }
+
+    /**
+     * Add Parameters to a GQL Query object
+     *
+     * @param \Google_Service_Datastore_GqlQuery $obj_query
+     * @param array $arr_params
+     */
+    private function addParamsToQuery(\Google_Service_Datastore_GqlQuery $obj_query, array $arr_params)
+    {
+        if(count($arr_params) > 0) {
+            $arr_args = [];
+            foreach ($arr_params as $str_name => $mix_value) {
+                $obj_arg = new \Google_Service_Datastore_GqlQueryArg();
+                $obj_arg->setName($str_name);
+                if ('startCursor' == $str_name) {
+                    $obj_arg->setCursor($mix_value);
+                } else {
+                    $obj_val = new \Google_Service_Datastore_Value();
+                    if(is_int($mix_value)) {
+                        $obj_val->setIntegerValue($mix_value);
+                    } else {
+                        $obj_val->setStringValue($mix_value);
+                    }
+                    $obj_arg->setValue($obj_val);
+                }
+                $arr_args[] = $obj_arg;
+            }
+            $obj_query->setNameArgs($arr_args);
+        }
     }
 
     /**
@@ -292,6 +333,16 @@ class Gateway
     public function getLastResponse()
     {
         return $this->obj_last_response;
+    }
+
+    /**
+     * Get the end Cursor for the last response
+     *
+     * @return mixed
+     */
+    public function getEndCursor()
+    {
+        return $this->obj_last_response['batch']['endCursor'];
     }
 
 }
