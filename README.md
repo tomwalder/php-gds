@@ -88,19 +88,20 @@ while($arr_page = $obj_book_store->fetchPage(50)) {
 
 In a standard SQL environment, the above pagination would look something like this:
 
-`SELECT * FROM Book LIMIT 0, 50` for the first page 
-`SELECT * FROM Book LIMIT 50, 50` for the second, and so on.
+- `SELECT * FROM Book LIMIT 0, 50` for the first page 
+- `SELECT * FROM Book LIMIT 50, 50` for the second, and so on.
 
 Although you can use a very similar syntax with Datastore GQL, it can be unnecessarily costly. This is because each row scanned when running a query is charged for. So, doing the equivalent of `LIMIT 5000, 50` will count as 5,050 reads - not just the 50 we actually get back.
 
 This is all fixed by using Cursors. The implementation is all encapsulated within the `Gateway` class so you don't need to worry about it.
 
-A couple of tips when running queries:
+#### Tips for LIMIT-ed fetch operations ####
 
-- Don't supply a `LIMIT` clause when calling `fetchOne()` - it's done for you.
-- Don't supply a `LIMIT` or `OFFSET` clause when calling `fetchPage()` - again, it's done for you and it will cause a conflict. 
+Do not supply a `LIMIT` clause when calling 
+- `fetchOne()` - it's done for you (we add `LIMIT 1`)
+- `fetchPage()` - again, it's done for you and it will cause a conflict. 
 
-A few pricing and cursor references:
+#### Pricing & Cursor References ####
 
 - [Query Cursors](https://cloud.google.com/datastore/docs/concepts/queries#Datastore_Query_cursors)
 - [Costs for Datastore Calls](https://cloud.google.com/appengine/pricing)
