@@ -1,6 +1,6 @@
 # Google Datastore Library for PHP #
 
-[Google Cloud Datastore](https://cloud.google.com/datastore/) is a great NoSQL solution, but it can be tricky (i.e. there's lots of code glue needed) to get the "Hello World" of data persistence up and running in PHP.
+[Google Cloud Datastore](https://cloud.google.com/datastore/) is a great NoSQL solution (hosted, scalable, free up to a point), but it can be tricky (i.e. there's lots of code glue needed) to get the "Hello World" of data persistence up and running in PHP.
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
@@ -67,13 +67,14 @@ while($arr_page = $obj_book_store->fetchPage(50)) {
 }
 ```
 
-### Limits, Offsets & Cursors ### 
+### Limits, Offsets & Cursors ###
 
 In a standard SQL environment, the above pagination would look something like this:
 
-`SELECT * FROM Book LIMIT 0, 50` for the first page, then for the second page `SELECT * FROM Book LIMIT 50, 50` and so on.
+`SELECT * FROM Book LIMIT 0, 50` for the first page 
+`SELECT * FROM Book LIMIT 50, 50` for the second, and so on.
 
-Although you can use a very similar syntax with Datastore GQL, it can be unnecessarily costly. This is because each row scanned when running a query is charged for. So, doing the equivalent of `LIMIT 5000, 50` will count as 5,050 reads - not the 50 we actually get back.
+Although you can use a very similar syntax with Datastore GQL, it can be unnecessarily costly. This is because each row scanned when running a query is charged for. So, doing the equivalent of `LIMIT 5000, 50` will count as 5,050 reads - not just the 50 we actually get back.
 
 This is all fixed by using Cursors. The implementation is all encapsulated within the `Gateway` class so you don't need to worry about it.
 
@@ -107,13 +108,15 @@ Further examples are included in the examples folder.
 
 ## More About Google Cloud Datastore ##
 
+What Google say:
+
 > "Use a managed, NoSQL, schemaless database for storing non-relational data. Cloud Datastore automatically scales as you need it and supports transactions as well as robust, SQL-like queries."
 
 https://cloud.google.com/datastore/
 
 ### Specific Topics ###
 
-Some highlighted topics you might want to read up on
+A few highlighted topics you might want to read up on
 - [Entities, Data Types etc.](https://cloud.google.com/datastore/docs/concepts/entities)
 - [More information on GQL](https://cloud.google.com/datastore/docs/concepts/gql)
 - [Indexes](https://cloud.google.com/datastore/docs/concepts/indexes)
