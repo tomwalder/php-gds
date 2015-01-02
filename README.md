@@ -23,7 +23,7 @@ Now let's pull some data out of Datastore
 
 ```php
 // Fetch all the books, using a GQL query, and show their titles and ISBN
-$arr_books = $obj_book_store->query("SELECT * FROM Book");
+$arr_books = $obj_book_store->fetchAll("SELECT * FROM Book");
 foreach($arr_books as $obj_book) {
     echo "Title: {$obj_book->title}, ISBN: {$obj_book->isbn}", PHP_EOL;
 }
@@ -31,7 +31,7 @@ foreach($arr_books as $obj_book) {
 
 ## Getting Started ##
 
-Are you sitting comfortable? before we begin, you will need: 
+Are you sitting comfortably? before we begin, you will need: 
 - a Google Account (doh)
 - a Project to work on with the "Google Cloud Datastore API" turned ON [Google Developer Console](https://console.developers.google.com/)
 - a "Service account" and a P12 key file for that service account [Service Accounts](https://developers.google.com/accounts/docs/OAuth2#serviceaccount)
@@ -52,6 +52,42 @@ You will need to create 2 files in the `examples/config` folder as follows
 
 Or, you can pass in your own `Google_Client` object, configured with whatever auth you like.
 
+## Pagination ##
+
+When working with larger data sets, it can be useful to page through results in smaller batches. Here's an example.
+
+```php
+// Fetch paginated results
+$obj_book_store->query('SELECT * FROM Book');
+while($arr_page = $obj_book_store->fetchPage(50)) {
+    echo "Page contains ", count($arr_page), " records", PHP_EOL;
+    foreach ($arr_page as $obj_book) {
+        echo "   Title: {$obj_book->title}, ISBN: {$obj_book->isbn}", PHP_EOL;
+    }
+}
+```
+
+### Limits, Offsets & Cursors ### 
+
+In a standard SQL environment, the above pagination would look something like this:
+
+`SELECT * FROM Book LIMIT 0, 50` for the first page, then for the second page `SELECT * FROM Book LIMIT 50, 50` and so on.
+
+Although you can use a very similar syntax with Datastore GQL, it can be unnecessarily costly. This is because each row scanned when running a query is charged for. So, doing the equivalent of `LIMIT 5000, 50` will count as 5,050 reads - not the 50 we actually get back.
+
+This is all fixed by using Cursors. The implementation is all encapsulated within the `Gateway` class so you don't need to worry about it.
+
+A couple of tips when running queries:
+
+- Don't supply a `LIMIT` clause when calling `fetchOne()` - it's done for you.
+- Don't supply a `LIMIT` or `OFFSET` clause when calling `fetchPage()` - again, it's done for you and it will cause a conflict. 
+
+A few pricing and cursor references:
+
+- [Query Cursors](https://cloud.google.com/datastore/docs/concepts/queries#Datastore_Query_cursors)
+- [Costs for Datastore Calls](https://cloud.google.com/appengine/pricing)
+- [Datastore Quotas](https://cloud.google.com/appengine/docs/quotas#Datastore)
+
 ## Multi-tenant Applications & Data Namespaces ##
 
 Google Datastore supports segregating data within a single "Dataset" using something called Namespaces.
@@ -71,11 +107,12 @@ Further examples are included in the examples folder.
 
 ## More About Google Cloud Datastore ##
 
-"Use a managed, NoSQL, schemaless database for storing non-relational data. Cloud Datastore automatically scales as you need it and supports transactions as well as robust, SQL-like queries."
+> "Use a managed, NoSQL, schemaless database for storing non-relational data. Cloud Datastore automatically scales as you need it and supports transactions as well as robust, SQL-like queries."
 
 https://cloud.google.com/datastore/
 
 ### Specific Topics ###
+
 Some highlighted topics you might want to read up on
 - [Entities, Data Types etc.](https://cloud.google.com/datastore/docs/concepts/entities)
 - [More information on GQL](https://cloud.google.com/datastore/docs/concepts/gql)
@@ -85,8 +122,5 @@ Some highlighted topics you might want to read up on
 
 I am certainly more familiar with SQL and relational data models so I think that may end up coming across in the code - rightly so or not!
 
-Not that it matters too much, I've been trying to decide what sort of Patterns this library contains. [PEAA](http://martinfowler.com/eaaCatalog/index.html).
+I've been trying to decide if & what sort of Patterns this library contains. [PEAA](http://martinfowler.com/eaaCatalog/index.html). What I decided is that I'm not really following DataMapper or Repository to the letter of how they were envisaged. Probably it's closest to DataMapper. 
 
-What I decided is that I'm not really following DataMapper or Repository to the letter of how they were envisaged.
-
-Probably it's closest to DataMapper. 
