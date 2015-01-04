@@ -27,6 +27,8 @@ abstract class Store
 {
 
     /**
+     * The GDS Gateway we're going to use
+     *
      * @var Gateway
      */
     private $obj_gateway = NULL;
@@ -180,6 +182,28 @@ abstract class Store
         $arr_results = $this->obj_gateway->gql($this->str_last_query . " LIMIT {$int_page_size} {$str_offset}", $arr_params);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
         return $this->mapFromResults($arr_results);
+    }
+
+    /**
+     * Get the last result cursor
+     *
+     * @return null|string
+     */
+    public function getCursor()
+    {
+        return $this->str_last_cursor;
+    }
+
+    /**
+     * Set the query cursor
+     *
+     * Usually before continuing through a paged result set
+     *
+     * @param $str_cursor
+     */
+    public function setCursor($str_cursor)
+    {
+        $this->str_last_cursor = $str_cursor;
     }
 
     /**
