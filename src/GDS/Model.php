@@ -112,6 +112,17 @@ abstract class Model
     }
 
     /**
+     * Is a data value set?
+     *
+     * @param $str_key
+     * @return bool
+     */
+    public function __isset($str_key)
+    {
+        return isset($this->arr_data[$str_key]);
+    }
+
+    /**
      * Does this Model instance contain data for the supplied field? Or any data if no field specified?
      *
      * @param $str_key
