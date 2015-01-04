@@ -54,13 +54,6 @@ class Gateway
     private $obj_last_response = NULL;
 
     /**
-     * End Cursor from the last response
-     *
-     * @var string|null
-     */
-    private $str_end_cursor = NULL;
-
-    /**
      * Create a new GDS service
      *
      * Optional namespace (for multi-tenant applications)
