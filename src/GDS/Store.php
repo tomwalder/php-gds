@@ -55,6 +55,7 @@ abstract class Store
     public function __construct(Gateway $obj_gateway)
     {
         $this->obj_gateway = $obj_gateway;
+        $this->str_last_query = 'SELECT * FROM ' . $this->getSchema()->getKind() . ' ORDER BY __key__ ASC';
     }
 
     /**
