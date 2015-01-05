@@ -61,9 +61,9 @@ Here is how we build the Schema (in the BookStore class) for our examples:
 ```php
 // Define a schema with a Datastore Entity Kind of "Book" and 3 fields
 $obj_schema = (new GDS\Schema('Book'))
-   ->addField('title')
-   ->addField('author')
-   ->addField('isbn', GDS\Schema::FIELD_STRING, TRUE);
+   ->addString('title')
+   ->addString('author')
+   ->addString('isbn', TRUE);
 ```
 
 In this example, the ISBN field has been specifically set as an indexed string field. By default, fields are string fields and are NOT indexed. 
@@ -71,6 +71,12 @@ In this example, the ISBN field has been specifically set as an indexed string f
 See the `Schema` class for a list of supported types.
 
 Take a look at the `examples` folder for a fully operational set of code.
+
+### Re-indexing ###
+
+When you change a field from non-indexed to indexed you will need to "re-index" all your existing entities before they will be returned in queries run against that index by Datastore. This is due to the way Google update their BigTable indexes.
+
+I've included a simple example (paginated) re-index script in the examples folder, `reindex.php`.
 
 ## Pagination ##
 
