@@ -6,26 +6,41 @@
  */
 require_once('boilerplate.php');
 
+// Fetch the first record (using the default "SELECT * FROM Kind" query)
+$obj_book = $obj_book_store->fetchOne();
+describeResult($obj_book);
+
 // Retrieve one by it's Datastore ID
 $obj_book = $obj_book_store->fetchById('5066549580791808');
-if($obj_book) {
-    echo "Found, ISBN: ", $obj_book->isbn, PHP_EOL;
-} else {
-    echo "Single Book not found", PHP_EOL;
-}
+describeResult($obj_book);
+
+// Fetch a book by GQL
+$obj_book = $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = '1853260304'");
+describeResult($obj_book);
 
 // Fetch all
 $arr_books = $obj_book_store->fetchAll("SELECT * FROM Book");
-echo "Query found ", count($arr_books), " records", PHP_EOL;
-foreach($arr_books as $obj_book) {
-    echo "   Title: {$obj_book->title}, ISBN: {$obj_book->isbn}", PHP_EOL;
-}
+describeResult($arr_books);
 
 // Fetch paginated
 $obj_book_store->query('SELECT * FROM Book');
 while($arr_page = $obj_book_store->fetchPage(5)) {
-    echo PHP_EOL, "Page contains ", count($arr_page), " records", PHP_EOL;
-    foreach ($arr_page as $obj_book) {
-        echo "   Title: {$obj_book->title}, ISBN: {$obj_book->isbn}", PHP_EOL;
+    describeResult($arr_page);
+}
+
+
+/**
+ * Helper function to simplify results display
+ *
+ * @param $mix_result
+ */
+function describeResult($mix_result)
+{
+    if($mix_result instanceof Book) {
+        echo "Found single result: {$mix_result->title}, {$mix_result->isbn}", PHP_EOL;
+    } elseif (is_array($mix_result)) {
+        echo "Found ", count($mix_result), " results", PHP_EOL;
+    } else {
+        echo "No result(s) found", PHP_EOL;
     }
 }
