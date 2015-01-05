@@ -6,25 +6,34 @@ This library is intended to make it easier for you to get started with and to us
 
 ## Basic Examples ##
 
-I find examples a great way to decide if I want to even try out a library, so here's a couple for you (without the boilerplate)...
+I find examples a great way to decide if I want to even try out a library, so here's a couple for you.
+
+I am skipping boilerplate code - these initial examples are just to show what working code might look like. I encourage you to check out the examples folder for full details.
+
+Firstly, we'll need a concrete `GDS\Model` and `GDS\Store` class. See [Defining Your Model](#defining-your-model) below.
 
 ```php
-// Let's create a new Book object with some data
+class Book extends GDS\Model { /* No custom code needed */ }
+class BookStore extends GDS\Store { /* Schema configuration */ }
+```
+
+Create a record and insert into the Datastore
+
+```php
 $obj_book = new Book();
 $obj_book->title = 'Romeo and Juliet';
 $obj_book->author = 'William Shakespeare';
 $obj_book->isbn = '1840224339';
 
-// And write it to Datastore
+// Write it to Datastore
 $obj_book_store->upsert($obj_book);
 ```
 
-Now let's pull some data out of Datastore
+Now let's pull some data out of the Datastore
 
 ```php
-// Fetch all the books, using a GQL query, and show their titles and ISBN
-$arr_books = $obj_book_store->fetchAll("SELECT * FROM Book");
-foreach($arr_books as $obj_book) {
+// Fetch all the books and show their titles and ISBN
+foreach($obj_book_store->fetchAll() as $obj_book) {
     echo "Title: {$obj_book->title}, ISBN: {$obj_book->isbn}", PHP_EOL;
 }
 ```
@@ -77,6 +86,29 @@ Take a look at the `examples` folder for a fully operational set of code.
 When you change a field from non-indexed to indexed you will need to "re-index" all your existing entities before they will be returned in queries run against that index by Datastore. This is due to the way Google update their BigTable indexes.
 
 I've included a simple example (paginated) re-index script in the examples folder, `reindex.php`.
+
+## Queries, GQL & The Default Query ##
+
+At the time of writing, the `GDS\Store` object uses Datastore GQL as it's query language and provides a few helper methods for some more common queries, like `fetchById()` and `fetchByName()`.
+
+When you instanciate a store object, like `BookStore` in our example, it comes pre-loaded with a default GQL query of the following form
+
+```sql
+SELECT * FROM <Kind> ORDER BY __key__ ASC
+```
+
+Which means you can quickly and easily get one or all records without needing to write any GQL, like this:
+
+```php
+// Get the first record
+$obj_book_store->fetchOne();
+
+// Get all records
+$obj_book_store->fetchAll();
+
+// Get the first 10
+$obj_book_store->fetchPage(10);
+```
 
 ## Pagination ##
 
