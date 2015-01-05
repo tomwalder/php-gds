@@ -79,6 +79,78 @@ class Schema
     }
 
     /**
+     * Add a string field to the schema
+     *
+     * @param $str_name
+     * @param bool $bol_index
+     * @return Schema
+     */
+    public function addString($str_name, $bol_index = FALSE)
+    {
+        return $this->addField($str_name, self::FIELD_STRING, $bol_index);
+    }
+
+    /**
+     * Add an integer field to the schema
+     *
+     * @param $str_name
+     * @param bool $bol_index
+     * @return Schema
+     */
+    public function addInteger($str_name, $bol_index = FALSE)
+    {
+        return $this->addField($str_name, self::FIELD_INTEGER, $bol_index);
+    }
+
+    /**
+     * Add a datetime field to the schema
+     *
+     * @param $str_name
+     * @param bool $bol_index
+     * @return Schema
+     */
+    public function addDatetime($str_name, $bol_index = FALSE)
+    {
+        return $this->addField($str_name, self::FIELD_DATETIME, $bol_index);
+    }
+
+    /**
+     * Add a float|double field to the schema
+     *
+     * @param $str_name
+     * @param bool $bol_index
+     * @return Schema
+     */
+    public function addFloat($str_name, $bol_index = FALSE)
+    {
+        return $this->addField($str_name, self::FIELD_FLOAT, $bol_index);
+    }
+
+    /**
+     * Add a boolean field to the schema
+     *
+     * @param $str_name
+     * @param bool $bol_index
+     * @return Schema
+     */
+    public function addBoolean($str_name, $bol_index = FALSE)
+    {
+        return $this->addField($str_name, self::FIELD_BOOLEAN, $bol_index);
+    }
+
+    /**
+     * Add a string-list (array of strings) field to the schema
+     *
+     * @param $str_name
+     * @param bool $bol_index
+     * @return Schema
+     */
+    public function addStringList($str_name, $bol_index = FALSE)
+    {
+        return $this->addField($str_name, self::FIELD_STRING_LIST, $bol_index);
+    }
+
+    /**
      * Get the Kind
      *
      * @return string
