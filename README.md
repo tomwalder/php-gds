@@ -136,12 +136,15 @@ $obj_book = $obj_book_store->createFromArray([
 At the time of writing, the `GDS\Store` object uses Datastore GQL as it's query language. Here is an example:
 
 ```php
-$obj_book = $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = '1853260304'");
+$obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = '1853260304'");
 ```
  
-We provide a few helper methods for some more common queries, like `fetchById()` and `fetchByName()`.
+We provide a couple of helper methods for some common queries:
 
-When you instantiate a store object, like `BookStore` in our example, it comes pre-loaded with a default GQL query of the following form
+- `GDS\Store::fetchById`
+- `GDS\Store::fetchByName`
+
+When you instantiate a store object, like `BookStore` in our example, it comes pre-loaded with a default GQL query of the following form (this is "The Default Query")
 
 ```sql
 SELECT * FROM <Kind> ORDER BY __key__ ASC
@@ -150,19 +153,9 @@ SELECT * FROM <Kind> ORDER BY __key__ ASC
 Which means you can quickly and easily get one or many records without needing to write any GQL, like this:
 
 ```php
-$obj_store->fetchOne();
-```
-
-Get all books
-
-```php
-$obj_store->fetchAll();
-```
-
-Get the first 10 books
-
-```php
-$obj_store->fetchPage(10);
+$obj_store->fetchOne();     // Gets the first book
+$obj_store->fetchAll();     // Gets all books
+$obj_store->fetchPage(10);  // Gets the first 10 books
 ```
 
 ### Pagination ###
