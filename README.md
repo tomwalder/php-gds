@@ -68,10 +68,9 @@ Or, you can pass in your own `Google_Client` object, configured with whatever au
 
 Because Datastore is schemaless, the library also supports fields/properties that are not explicitly defined. But it often makes a lot of sense to define your Model Schema up front.
 
-Here is how we might build the Schema for our examples:
+Here is how we might build the Schema for our examples, with a Datastore Entity Kind of "Book" and 3 fields.
 
 ```php
-// Define a schema with a Datastore Entity Kind of "Book" and 3 fields
 $obj_schema = (new GDS\Schema('Book'))
    ->addString('title')
    ->addString('author')
@@ -81,9 +80,15 @@ $obj_schema = (new GDS\Schema('Book'))
 $obj_book_store = new GDS\Store($obj_gateway, $obj_schema);
 ```
 
-In this example, the ISBN field has been specifically set as an indexed string field. By default, fields are string fields and are NOT indexed. 
+In this example, the ISBN field has been specifically set as an indexed string field. By default, fields are string fields and are NOT indexed. An indexed field can be used in a WHERE clause.
 
-See the `Schema` class for a list of supported types.
+Avaialable Schema configuration methods:
+- `GDS\Schema::addString`
+- `GDS\Schema::addInteger`
+- `GDS\Schema::addDatetime`
+- `GDS\Schema::addFloat`
+- `GDS\Schema::addBoolean`
+- `GDS\Schema::addStringList`
 
 Take a look at the `examples` folder for a fully operational set of code.
 
@@ -101,7 +106,7 @@ class BookStore extends GDS\Store { /* ... */ }
 This way, when you pull objects out of Datastore, they are objects of your defined Model class.
 
 ```php
-$obj_store = new BookStore();
+$obj_store = new BookStore($obj_gateway);
 $obj_book = $obj_store->fetchOne(); // $obj_book will be a "Book" object
 ```
 
