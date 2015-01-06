@@ -75,7 +75,7 @@ $obj_schema = (new GDS\Schema('Book'))
    ->addString('author')
    ->addString('isbn', TRUE);
    
-// The Store class accepts either a Schema object or Kind name as it's second parameter
+// The Store accepts a Schema object or Kind name as it's second parameter
 $obj_book_store = new GDS\Store($obj_gateway, $obj_schema);
 ```
 
