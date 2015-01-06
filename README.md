@@ -39,7 +39,7 @@ foreach($obj_book_store->fetchAll() as $obj_book) {
 }
 ```
 
-These examples use the generic GDS\Model class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on Schema and indexed fields.
+These examples use the generic `GDS\Model` class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on customer Models, Schemas and indexed fields.
 
 ## Getting Started ##
 
@@ -117,7 +117,7 @@ I've included a simple example (paginated) re-index script in the examples folde
 
 At the time of writing, the `GDS\Store` object uses Datastore GQL as it's query language and provides a few helper methods for some more common queries, like `fetchById()` and `fetchByName()`.
 
-When you instanciate a store object, like `BookStore` in our example, it comes pre-loaded with a default GQL query of the following form
+When you instantiate a store object, like `BookStore` in our example, it comes pre-loaded with a default GQL query of the following form
 
 ```sql
 SELECT * FROM <Kind> ORDER BY __key__ ASC
@@ -127,13 +127,13 @@ Which means you can quickly and easily get one or all records without needing to
 
 ```php
 // Get the first record
-$obj_book_store->fetchOne();
+$obj_store->fetchOne();
 
 // Get all records
-$obj_book_store->fetchAll();
+$obj_store->fetchAll();
 
 // Get the first 10
-$obj_book_store->fetchPage(10);
+$obj_store->fetchPage(10);
 ```
 
 ## Pagination ##
@@ -181,8 +181,8 @@ This library supports namespaces, and they can be configured per `Gateway` insta
 
 ```php
 // Create a store for a particular customer or 'application namespace'
-$obj_google_client = GDS\Gateway::createGoogleClient(GDS_APP_NAME, GDS_SERVICE_ACCOUNT_NAME, GDS_KEY_FILE_PATH);
-$obj_customer_gateway = new GDS\Gateway($obj_google_client, GDS_DATASET_ID, 'customer-namespace');
+$obj_google_client = GDS\Gateway::createGoogleClient(APP_NAME, ACCOUNT_NAME, KEY_FILE);
+$obj_customer_gateway = new GDS\Gateway($obj_google_client, DATASET_ID, 'customer-namespace');
 $obj_customer_book_store = new BookStore($obj_customer_gateway);
 ```
 
