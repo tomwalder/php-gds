@@ -18,7 +18,7 @@ $obj_gateway = new GDS\Gateway($obj_client, DATASET_ID);
 $obj_book_store = new GDS\Store($obj_gateway, 'Book');
 ```
 
-Create a record and insert into the Datastore
+Create a record and insert into the Datastore (see below for [Alternative Array Syntax](#alternative-array-syntax)) 
 
 ```php
 $obj_book = new GDS\Model();
@@ -116,6 +116,20 @@ Check out the examples folder for `Book.php` and `BookStore.php` code samples.
 When you change a field from non-indexed to indexed you will need to "re-index" all your existing entities before they will be returned in queries run against that index by Datastore. This is due to the way Google update their BigTable indexes.
 
 I've included a simple example (paginated) re-index script in the examples folder, `reindex.php`.
+
+## Creating Records ##
+
+### Alternative Array Syntax ###
+
+There is an alternative to directly constructing a new `GDS\Model` and setting it's member data, which is to use the `GDS\Store::createFromArray` factory method as follows.
+
+```php
+$obj_book = $obj_book_store->createFromArray([
+    'title' => 'The Merchant of Venice',
+    'author' => 'William Shakespeare',
+    'isbn' => '1840224312'
+]);
+```
 
 ## Queries, GQL & The Default Query ##
 
