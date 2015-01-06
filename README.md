@@ -185,9 +185,9 @@ This library supports namespaces, and they can be configured per `Gateway` insta
 
 ```php
 // Create a store for a particular customer or 'application namespace'
-$obj_google_client = GDS\Gateway::createGoogleClient(APP_NAME, ACCOUNT_NAME, KEY_FILE);
-$obj_customer_gateway = new GDS\Gateway($obj_google_client, DATASET_ID, 'customer-namespace');
-$obj_customer_book_store = new BookStore($obj_customer_gateway);
+$obj_client = GDS\Gateway::createGoogleClient(APP_NAME, ACCOUNT_NAME, KEY_FILE);
+$obj_namespaced_gateway = new GDS\Gateway($obj_client, DATASET_ID, 'customer-namespace');
+$obj_namespaced_book_store = new BookStore($obj_namespaced_gateway);
 ```
 
 Further examples are included in the examples folder.
