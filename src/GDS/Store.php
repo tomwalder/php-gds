@@ -21,9 +21,8 @@ namespace GDS;
  *
  * @author Tom Walder <tom@docnet.nu>
  * @package GDS
- * @abstract
  */
-abstract class Store
+class Store
 {
 
     /**
@@ -32,6 +31,13 @@ abstract class Store
      * @var Gateway
      */
     private $obj_gateway = NULL;
+
+    /**
+     * The GDS Schema defining the Model we're operating with
+     *
+     * @var Schema
+     */
+    private $obj_schema = NULL;
 
     /**
      * The last GQL query
@@ -48,14 +54,38 @@ abstract class Store
     private $str_last_cursor = NULL;
 
     /**
-     * Gateway required on construction
+     * Gateway and Schema/Kind required on construction
      *
      * @param Gateway $obj_gateway
+     * @param Schema|string|null $mix_schema
+     * @throws \Exception
      */
-    public function __construct(Gateway $obj_gateway)
+    public function __construct(Gateway $obj_gateway, $mix_schema = NULL)
     {
         $this->obj_gateway = $obj_gateway;
-        $this->str_last_query = 'SELECT * FROM ' . $this->getSchema()->getKind() . ' ORDER BY __key__ ASC';
+        $this->obj_schema = $this->determineSchema($mix_schema);
+        $this->str_last_query = 'SELECT * FROM ' . $this->obj_schema->getKind() . ' ORDER BY __key__ ASC';
+    }
+
+    /**
+     * Set up the Schema for the current data model, based on the provided Kind/Schema/buildSchema
+     *
+     * @param $mix_schema
+     * @return Schema
+     * @throws \Exception
+     */
+    private function determineSchema($mix_schema)
+    {
+        if(NULL === $mix_schema) {
+            $mix_schema = $this->buildSchema();
+        }
+        if ($mix_schema instanceof Schema) {
+            return $mix_schema;
+        }
+        if (is_string($mix_schema)) {
+            return new Schema($mix_schema);
+        }
+        throw new \Exception('You must provide a Schema or Kind. Alternatively, you can extend GDS\Store and implement the buildSchema() method.');
     }
 
     /**
@@ -258,13 +288,31 @@ abstract class Store
      *
      * @return Schema
      */
-    abstract protected function getSchema();
+    private function getSchema()
+    {
+        return $this->obj_schema;
+    }
 
     /**
      * Create a new instance of this GDS Model class
      *
      * @return Model
      */
-    abstract public function createModel();
+    public function createModel()
+    {
+        return new Model();
+    }
+
+    /**
+     * Build and return a Schema object describing the data model
+     *
+     * This method is intended to be overridden in any extended Store classes
+     *
+     * @return Schema|null
+     */
+    protected function buildSchema()
+    {
+        return NULL;
+    }
 
 }

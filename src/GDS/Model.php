@@ -22,7 +22,7 @@ namespace GDS;
  * @author Tom Walder <tom@docnet.nu>
  * @package GDS
  */
-abstract class Model
+class Model
 {
 
     /**
@@ -145,7 +145,5 @@ abstract class Model
     {
         return $this->arr_data;
     }
-
-
 
 }
