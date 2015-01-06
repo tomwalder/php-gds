@@ -30,10 +30,9 @@ $obj_book->isbn = '1840224339';
 $obj_book_store->upsert($obj_book);
 ```
 
-Now let's pull some data out of the Datastore
+Fetch all the Books from the Datastore and display their titles and ISBN numbers
 
 ```php
-// Fetch all the books and show their titles and ISBN
 foreach($obj_book_store->fetchAll() as $obj_book) {
     echo "Title: {$obj_book->title}, ISBN: {$obj_book->isbn}", PHP_EOL;
 }
