@@ -170,7 +170,7 @@ class Mapper
         if(isset($arr_field_def['index']) && TRUE === $arr_field_def['index']) {
             $bol_index = TRUE;
         }
-        $obj_property->setIndexed($bol_index); // @todo validate this works OK for indexed STRING_LIST
+        $obj_property->setIndexed($bol_index);
 
         switch ($arr_field_def['type']) {
             case Schema::FIELD_STRING:
@@ -195,6 +195,7 @@ class Mapper
                 break;
 
             case Schema::FIELD_STRING_LIST:
+                $obj_property->setIndexed(NULL); // Ensure we only index the values, not the list
                 $arr_values = [];
                 foreach ((array)$mix_value as $str) {
                     $obj_value = new \Google_Service_Datastore_Value();
