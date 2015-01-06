@@ -133,7 +133,13 @@ $obj_book = $obj_book_store->createFromArray([
 
 ## Queries, GQL & The Default Query ##
 
-At the time of writing, the `GDS\Store` object uses Datastore GQL as it's query language and provides a few helper methods for some more common queries, like `fetchById()` and `fetchByName()`.
+At the time of writing, the `GDS\Store` object uses Datastore GQL as it's query language. Here is an example:
+
+```php
+$obj_book = $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = '1853260304'");
+```
+ 
+We provide a few helper methods for some more common queries, like `fetchById()` and `fetchByName()`.
 
 When you instantiate a store object, like `BookStore` in our example, it comes pre-loaded with a default GQL query of the following form
 
@@ -141,32 +147,36 @@ When you instantiate a store object, like `BookStore` in our example, it comes p
 SELECT * FROM <Kind> ORDER BY __key__ ASC
 ```
 
-Which means you can quickly and easily get one or all records without needing to write any GQL, like this:
+Which means you can quickly and easily get one or many records without needing to write any GQL, like this:
 
 ```php
-// Get the first record
 $obj_store->fetchOne();
+```
 
-// Get all records
+Get all books
+
+```php
 $obj_store->fetchAll();
+```
 
-// Get the first 10
+Get the first 10 books
+
+```php
 $obj_store->fetchPage(10);
 ```
 
-## Pagination ##
+### Pagination ###
 
-When working with larger data sets, it can be useful to page through results in smaller batches. Here's an example.
+When working with larger data sets, it can be useful to page through results in smaller batches. Here's an example paging through all Books in 50's.
 
 ```php
-// Set the GQL query, then fetch results in pages of 50 until we run out
 $obj_book_store->query('SELECT * FROM Book');
 while($arr_page = $obj_book_store->fetchPage(50)) {
     echo "Page contains ", count($arr_page), " records", PHP_EOL;
 }
 ```
 
-### Limits, Offsets & Cursors ###
+#### Limits, Offsets & Cursors ####
 
 In a standard SQL environment, the above pagination would look something like this:
 
