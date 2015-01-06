@@ -6,11 +6,11 @@ This library is intended to make it easier for you to get started with and to us
 
 ## Basic Examples ##
 
-I find examples a great way to decide if I want to even try out a library, so here's a couple for you.
+I find examples a great way to decide if I want to even try out a library, so here's a couple for you. Check out the examples folder for full code samples.
 
-These initial examples are just to show what working code might look like. I encourage you to check out the examples folder for full details.
+Firstly, we'll need a `GDS\Store` through which we will read and write `GDS\Model` objects to and from Datastore. 
 
-Firstly, we'll need a `GDS\Store` through which we will read and write `GDS\Model` objects to and from Datastore. The Store needs a `GDS\Gateway` to talk to Google. The gateway needs a `Google_Client` for authentication.
+The Store needs a `GDS\Gateway` to talk to Google. The gateway needs a `Google_Client` for authentication.
 
 ```php
 $obj_client = GDS\Gateway::createGoogleClient(APP_NAME, ACCOUNT_NAME, KEY_FILE);
