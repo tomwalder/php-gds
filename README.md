@@ -178,13 +178,15 @@ In a standard SQL environment, the above pagination would look something like th
 
 Although you can use a very similar syntax with Datastore GQL, it can be unnecessarily costly. This is because each row scanned when running a query is charged for. So, doing the equivalent of `LIMIT 5000, 50` will count as 5,050 reads - not just the 50 we actually get back.
 
-This is all fixed by using Cursors. The implementation is all encapsulated within the `Gateway` class so you don't need to worry about it.
+This is all fixed by using Cursors. The implementation is all encapsulated within the `GDS\Gateway` class so you don't need to worry about it.
+
+Bototm line: the bult-in pagination uses Cursors whenever possible for fastest & cheapest results.
 
 #### Tips for LIMIT-ed fetch operations ####
 
 Do not supply a `LIMIT` clause when calling 
-- `fetchOne()` - it's done for you (we add `LIMIT 1`)
-- `fetchPage()` - again, it's done for you and it will cause a conflict. 
+- `GDS\Store::fetchOne` - it's done for you (we add `LIMIT 1`)
+- `GDS\Store::fetchPage` - again, it's done for you and it will cause a conflict. 
 
 #### Pricing & Cursor References ####
 
@@ -222,6 +224,7 @@ https://cloud.google.com/datastore/
 A few highlighted topics you might want to read up on
 - [Entities, Data Types etc.](https://cloud.google.com/datastore/docs/concepts/entities)
 - [More information on GQL](https://cloud.google.com/datastore/docs/concepts/gql)
+- [GQL Reference](https://cloud.google.com/datastore/docs/apis/gql/gql_reference)
 - [Indexes](https://cloud.google.com/datastore/docs/concepts/indexes)
 
 ## Footnotes ##
