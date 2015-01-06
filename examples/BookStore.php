@@ -8,11 +8,11 @@ class BookStore extends GDS\Store
 {
 
     /**
-     * Get the configuration for this GDS Model
+     * Build and return a Schema object describing the data model
      *
      * @return \GDS\Schema
      */
-    protected function getSchema()
+    protected function buildSchema()
     {
         return (new GDS\Schema('Book'))
             ->addString('title')
@@ -21,7 +21,7 @@ class BookStore extends GDS\Store
     }
 
     /**
-     * Create a new instance of the Model class
+     * Create a new instance of the Book Model class
      *
      * @return \GDS\Model
      */

@@ -36,7 +36,7 @@ while($arr_page = $obj_book_store->fetchPage(5)) {
  */
 function describeResult($mix_result)
 {
-    if($mix_result instanceof Book) {
+    if($mix_result instanceof GDS\Model) {
         echo "Found single result: {$mix_result->title}, {$mix_result->isbn}", PHP_EOL;
     } elseif (is_array($mix_result)) {
         echo "Found ", count($mix_result), " results", PHP_EOL;
