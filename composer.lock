@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "24c1bcefc5981d3af121c9f9eb4667c6",
+    "hash": "41b52af54d409f1bd29e622bc91a37cd",
     "packages": [
         {
             "name": "google/apiclient",
@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/google/google-api-php-client.git",
-                "reference": "0d4a67029c159e784f7cc62a066beb31095e533f"
+                "reference": "f07769e15dc0fdc30056e488e84bc042bd6a1c2d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/google/google-api-php-client/zipball/0d4a67029c159e784f7cc62a066beb31095e533f",
-                "reference": "0d4a67029c159e784f7cc62a066beb31095e533f",
+                "url": "https://api.github.com/repos/google/google-api-php-client/zipball/f07769e15dc0fdc30056e488e84bc042bd6a1c2d",
+                "reference": "f07769e15dc0fdc30056e488e84bc042bd6a1c2d",
                 "shasum": ""
             },
             "require": {
@@ -46,7 +46,7 @@
             "keywords": [
                 "google"
             ],
-            "time": "2014-12-19 10:44:43"
+            "time": "2015-01-07 11:03:15"
         }
     ],
     "packages-dev": [],
@@ -57,6 +57,8 @@
     },
     "prefer-stable": false,
     "prefer-lowest": false,
-    "platform": [],
+    "platform": {
+        "php": ">=5.4.0"
+    },
     "platform-dev": []
 }

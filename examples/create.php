@@ -7,7 +7,7 @@
 require_once('boilerplate.php');
 
 // So now create a simple Model object
-$obj_book = new Book();
+$obj_book = new GDS\Entity();
 $obj_book->title = 'Romeo and Juliet';
 $obj_book->author = 'William Shakespeare';
 $obj_book->isbn = '1840224339';
@@ -32,7 +32,7 @@ $bol_multi_result = $obj_book_store->upsert([$obj_book2, $obj_book3]);
 var_dump($bol_multi_result);
 
 // Create using our factory method
-$obj_book4 = $obj_book_store->createFromArray([
+$obj_book4 = $obj_book_store->createEntity([
     'title' => 'The Merchant of Venice',
     'author' => 'William Shakespeare',
     'isbn' => '1840224312'

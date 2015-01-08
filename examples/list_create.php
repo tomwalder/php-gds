@@ -21,7 +21,7 @@ $obj_contact_schema = (new GDS\Schema('Contact'))
 $obj_store = new GDS\Store($obj_gateway, $obj_contact_schema);
 
 // Create 1
-$obj_contact1 = $obj_store->createFromArray([
+$obj_contact1 = $obj_store->createEntity([
     'first_name' => 'Tom',
     'last_name' => 'Walder',
     'tags' => ["customer", "newsletter"]
@@ -29,7 +29,7 @@ $obj_contact1 = $obj_store->createFromArray([
 $obj_contact1->setKeyName('tom@docnet.nu');
 
 // Create 2
-$obj_contact2 = $obj_store->createFromArray([
+$obj_contact2 = $obj_store->createEntity([
     'first_name' => 'Thomas',
     'last_name' => 'Walder',
     'tags' => ["newsletter", "api"]

@@ -96,12 +96,12 @@ class Gateway
     /**
      * Put a single Entity into the Datastore
      *
-     * @param \Google_Service_Datastore_Entity $obj_entity
+     * @param \Google_Service_Datastore_Entity $obj_google_entity
      * @return bool
      */
-    public function put(\Google_Service_Datastore_Entity $obj_entity)
+    public function put(\Google_Service_Datastore_Entity $obj_google_entity)
     {
-        return $this->putMulti([$obj_entity]);
+        return $this->putMulti([$obj_google_entity]);
     }
 
     /**
@@ -109,22 +109,22 @@ class Gateway
      *
      * @todo Transactions
      *
-     * @param \Google_Service_Datastore_Entity[] $arr_entities
+     * @param \Google_Service_Datastore_Entity[] $arr_google_entities
      * @return bool
      */
-    public function putMulti(array $arr_entities)
+    public function putMulti(array $arr_google_entities)
     {
         $obj_mutation = new \Google_Service_Datastore_Mutation();
         $arr_auto_id = [];
         $arr_has_key = [];
-        foreach ($arr_entities as $obj_entity) {
-            $obj_key = $this->applyNamespace($obj_entity->getKey());
-            /** @var \Google_Service_Datastore_KeyPathElement $obj_path */
-            $obj_path = $obj_key->getPath()[0];
-            if ($obj_path->getId() || $obj_path->getName()) {
-                $arr_has_key[] = $obj_entity;
+        foreach ($arr_google_entities as $obj_google_entity) {
+            $obj_key = $this->applyNamespace($obj_google_entity->getKey());
+            /** @var \Google_Service_Datastore_KeyPathElement $obj_path_end */
+            $obj_path_end = end($obj_key->getPath());
+            if ($obj_path_end->getId() || $obj_path_end->getName()) {
+                $arr_has_key[] = $obj_google_entity;
             } else {
-                $arr_auto_id[] = $obj_entity;
+                $arr_auto_id[] = $obj_google_entity;
             }
         }
         if (!empty($arr_auto_id)) {
@@ -211,9 +211,9 @@ class Gateway
     }
 
     /**
-     * Fetch entity data for an array of Keys
+     * Fetch entity data for an array of Google Datastore Keys
      *
-     * @param $arr_keys
+     * @param \Google_Service_Datastore_Key[] $arr_keys
      * @return mixed
      */
     private function fetchByKeys(array $arr_keys)
@@ -229,7 +229,7 @@ class Gateway
      *
      * @param $str_gql
      * @param array $arr_params
-     * @return Model[]
+     * @return Entity[]
      */
     public function gql($str_gql, $arr_params = NULL)
     {
@@ -259,7 +259,9 @@ class Gateway
                     $obj_arg->setCursor($mix_value);
                 } else {
                     $obj_val = new \Google_Service_Datastore_Value();
-                    if(is_int($mix_value)) {
+                    if($mix_value instanceof \Google_Service_Datastore_Key) {
+                        $obj_val->setKeyValue($mix_value);
+                    } elseif (is_int($mix_value)) {
                         $obj_val->setIntegerValue($mix_value);
                     } else {
                         $obj_val->setStringValue($mix_value);

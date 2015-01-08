@@ -33,11 +33,18 @@ class Store
     private $obj_gateway = NULL;
 
     /**
-     * The GDS Schema defining the Model we're operating with
+     * The GDS Schema defining the Entity we're operating with
      *
      * @var Schema
      */
     private $obj_schema = NULL;
+
+    /**
+     * Mapper
+     *
+     * @var Mapper|null
+     */
+    private $obj_mapper = NULL;
 
     /**
      * The last GQL query
@@ -54,6 +61,13 @@ class Store
     private $str_last_cursor = NULL;
 
     /**
+     * The class to use when instantiating new Entity objects
+     *
+     * @var string
+     */
+    private $str_entity_class = '\\GDS\\Entity';
+
+    /**
      * Gateway and Schema/Kind required on construction
      *
      * @param Gateway $obj_gateway
@@ -64,6 +78,7 @@ class Store
     {
         $this->obj_gateway = $obj_gateway;
         $this->obj_schema = $this->determineSchema($mix_schema);
+        $this->obj_mapper = new Mapper($this->obj_schema);
         $this->str_last_query = 'SELECT * FROM ' . $this->obj_schema->getKind() . ' ORDER BY __key__ ASC';
     }
 
@@ -89,17 +104,17 @@ class Store
     }
 
     /**
-     * Write one or more new/changed Model objects to the Datastore
+     * Write one or more new/changed Entity objects to the Datastore
      *
      * @param mixed
      * @return bool
      */
-    public function upsert($arr_models)
+    public function upsert($arr_entities)
     {
-        if($arr_models instanceof Model) {
-            $arr_models = [$arr_models];
+        if($arr_entities instanceof Entity) {
+            $arr_entities = [$arr_entities];
         }
-        $arr_entities = (new Mapper($this->getSchema()))->createFromModels($arr_models);
+        $arr_entities = $this->obj_mapper->mapGoogleEntities($arr_entities);
         return $this->obj_gateway->putMulti($arr_entities);
     }
 
@@ -109,46 +124,50 @@ class Store
      * @param mixed
      * @return bool
      */
-    public function delete($arr_models)
+    public function delete($arr_entities)
     {
-        if($arr_models instanceof Model) {
-            $arr_models = [$arr_models];
+        if($arr_entities instanceof Entity) {
+            $arr_entities = [$arr_entities];
         }
-        $arr_keys = (new Mapper($this->getSchema()))->createKeys($arr_models);
+        $arr_keys = $this->obj_mapper->createKeys($arr_entities);
         return $this->obj_gateway->deleteMulti($arr_keys);
     }
 
     /**
-     * Fetch a single Model from the Datastore, by it's Key ID
+     * Fetch a single Entity from the Datastore, by it's Key ID
+     *
+     * Only works for root Entities (i.e. those without parent Entities)
      *
      * @param $str_id
-     * @return Model|null
+     * @return Entity|null
      */
     public function fetchById($str_id)
     {
         return $this->mapOneFromResults(
-            $this->obj_gateway->fetchById($this->getSchema()->getKind(), $str_id)
+            $this->obj_gateway->fetchById($this->obj_schema->getKind(), $str_id)
         );
     }
 
     /**
-     * Fetch a single Model from the Datastore, by it's Key Name
+     * Fetch a single Entity from the Datastore, by it's Key Name
+     *
+     * Only works for root Entities (i.e. those without parent Entities)
      *
      * @param $str_name
-     * @return Model|null
+     * @return Entity|null
      */
     public function fetchByName($str_name)
     {
         return $this->mapOneFromResults(
-            $this->obj_gateway->fetchByName($this->getSchema()->getKind(), $str_name)
+            $this->obj_gateway->fetchByName($this->obj_schema->getKind(), $str_name)
         );
     }
 
     /**
-     * Fetch Models based on a GQL query
+     * Fetch Entities based on a GQL query
      *
      * @param $str_query
-     * @return Model[]
+     * @return Entity[]
      */
     public function query($str_query)
     {
@@ -158,10 +177,10 @@ class Store
     }
 
     /**
-     * Fetch ONE Model based on a GQL query
+     * Fetch ONE Entity based on a GQL query
      *
      * @param $str_query
-     * @return Model
+     * @return Entity
      */
     public function fetchOne($str_query = NULL)
     {
@@ -173,10 +192,10 @@ class Store
     }
 
     /**
-     * Fetch Models based on a GQL query
+     * Fetch Entities (optionally based on a GQL query)
      *
      * @param $str_query
-     * @return Model[]
+     * @return Entity[]
      */
     public function fetchAll($str_query = NULL)
     {
@@ -188,11 +207,11 @@ class Store
     }
 
     /**
-     * Fetch (a page of) Models based on a GQL query
+     * Fetch (a page of) Entities (optionally based on a GQL query)
      *
      * @param $int_page_size
      * @param null $mix_offset
-     * @return Model[]
+     * @return Entity[]
      */
     public function fetchPage($int_page_size, $mix_offset = NULL)
     {
@@ -211,6 +230,19 @@ class Store
             $arr_params['startCursor'] = $this->str_last_cursor;
         }
         $arr_results = $this->obj_gateway->gql($this->str_last_query . " LIMIT {$int_page_size} {$str_offset}", $arr_params);
+        $this->str_last_cursor = $this->obj_gateway->getEndCursor();
+        return $this->mapFromResults($arr_results);
+    }
+
+    /**
+     * Fetch all of the entities in a particular group
+     *
+     * @param Entity $obj_entity
+     * @return Entity[]
+     */
+    public function fetchEntityGroup(Entity $obj_entity)
+    {
+        $arr_results = $this->obj_gateway->gql("SELECT * FROM " . $this->obj_schema->getKind() . " WHERE __key__ HAS ANCESTOR @ancestorKey", ['ancestorKey' => $this->obj_mapper->createKey($obj_entity)]);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
         return $this->mapFromResults($arr_results);
     }
@@ -238,73 +270,75 @@ class Store
     }
 
     /**
-     * Create a Model object and populate with data
-     *
-     * @param array $arr_data
-     * @return Model
-     */
-    public function createFromArray(array $arr_data)
-    {
-        $obj_model = $this->createModel();
-        foreach($arr_data as $str_property => $mix_value) {
-            $obj_model->__set($str_property, $mix_value);
-        }
-        return $obj_model;
-    }
-
-    /**
-     * Map a single query result into a Model object
+     * Map a single query result into a Entity object
      *
      * @param $arr_results
-     * @return Model|null
+     * @return Entity|null
      */
     private function mapOneFromResults($arr_results)
     {
-        $arr_models = $this->mapFromResults($arr_results);
-        if(count($arr_models) > 0) {
-            return $arr_models[0];
+        $arr_entities = $this->mapFromResults($arr_results);
+        if(count($arr_entities) > 0) {
+            return $arr_entities[0];
         }
         return NULL;
     }
 
     /**
-     * Map all query results from the Gateway into Model objects
+     * Map all query results from the Gateway into Entity objects
      *
-     * @param array $arr_results
-     * @return Model[]
+     * @param \Google_Service_Datastore_EntityResult[] $arr_results
+     * @return Entity[]
      */
     private function mapFromResults(array $arr_results)
     {
-        $arr_models = [];
-        $obj_mapper = new Mapper($this->getSchema());
-        foreach ($arr_results as $arr_result) {
-            $arr_models[] = $obj_mapper->mapFromRawData($arr_result, $this->createModel());
+        $arr_entities = [];
+        foreach ($arr_results as $obj_result) {
+            $arr_entities[] = $this->obj_mapper->mapGDSEntity($obj_result, $this->createEntity());
         }
-        return $arr_models;
+        return $arr_entities;
     }
 
     /**
-     * Get the schema for this GDS Model
+     * Create a new instance of this GDS Entity class
      *
-     * @return Schema
+     * @param array|null $arr_data
+     * @return Entity
      */
-    private function getSchema()
+    public final function createEntity($arr_data = NULL)
     {
-        return $this->obj_schema;
+        $obj_entity = (new $this->str_entity_class())->setKind($this->obj_schema->getKind());
+        if(NULL !== $arr_data) {
+            foreach ($arr_data as $str_property => $mix_value) {
+                $obj_entity->__set($str_property, $mix_value);
+            }
+        }
+        return $obj_entity;
     }
 
     /**
-     * Create a new instance of this GDS Model class
+     * Set the class to use when instantiating new Entity objects
      *
-     * @return Model
+     * Must be GDS\Entity, or a sub-class of it
+     *
+     * @param $str_class
+     * @throws \Exception
      */
-    public function createModel()
+    public final function setEntityClass($str_class)
     {
-        return new Model();
+        if(class_exists($str_class)) {
+            if(is_a($str_class, '\\GDS\\Entity', TRUE)) {
+                $this->str_entity_class = $str_class;
+            } else {
+                throw new \Exception('Cannot set an Entity class that does not extend "GDS\Entity": ' . $str_class);
+            }
+        } else {
+            throw new \Exception('Cannot set missing Entity class: ' . $str_class);
+        }
     }
 
     /**
-     * Build and return a Schema object describing the data model
+     * Optionally build and return a Schema object describing the data model
      *
      * This method is intended to be overridden in any extended Store classes
      *

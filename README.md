@@ -8,7 +8,7 @@ This library is intended to make it easier for you to get started with and to us
 
 I find examples a great way to decide if I want to even try out a library, so here's a couple for you. Check out the examples folder for full code samples.
 
-Firstly, we'll need a `GDS\Store` through which we will read and write `GDS\Model` objects to and from Datastore. 
+Firstly, we'll need a `GDS\Store` through which we will read and write `GDS\Entity` objects to and from Datastore. 
 
 The Store needs a `GDS\Gateway` to talk to Google. The gateway needs a `Google_Client` for authentication.
 
@@ -21,7 +21,7 @@ $obj_book_store = new GDS\Store($obj_gateway, 'Book');
 Create a record and insert into the Datastore (see below for [Alternative Array Syntax](#alternative-array-syntax)) 
 
 ```php
-$obj_book = new GDS\Model();
+$obj_book = new GDS\Entity();
 $obj_book->title = 'Romeo and Juliet';
 $obj_book->author = 'William Shakespeare';
 $obj_book->isbn = '1840224339';
@@ -38,7 +38,7 @@ foreach($obj_book_store->fetchAll() as $obj_book) {
 }
 ```
 
-These examples use the generic `GDS\Model` class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on custom Models, Schemas and indexed fields.
+These examples use the generic `GDS\Entity` class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on custom Entities, Schemas and indexed fields.
 
 ## Getting Started ##
 
@@ -65,7 +65,7 @@ Or, you can pass in your own `Google_Client` object, configured with whatever au
 
 ## Defining Your Model ##
 
-Because Datastore is schemaless, the library also supports fields/properties that are not explicitly defined. But it often makes a lot of sense to define your Model Schema up front.
+Because Datastore is schemaless, the library also supports fields/properties that are not explicitly defined. But it often makes a lot of sense to define your Entity Schema up front.
 
 Here is how we might build the Schema for our examples, with a Datastore Entity Kind of "Book" and 3 fields.
 
@@ -91,18 +91,18 @@ Avaialable Schema configuration methods:
 
 Take a look at the `examples` folder for a fully operational set of code.
 
-### Custom Models and Stores ###
+### Custom Entities and Stores ###
 
-Whilst you can use the `GDS\Model` and `GDS\Store` classes directly, as per the examples above, you may find it useful to extend both and have the extended Store contain the Schema definition.
+Whilst you can use the `GDS\Entity` and `GDS\Store` classes directly, as per the examples above, you may find it useful to extend both and have the extended Store contain the Schema definition.
 
 For example
 
 ```php
-class Book extends GDS\Model { /* ... */ }
+class Book extends GDS\Entity { /* ... */ }
 class BookStore extends GDS\Store { /* ... */ }
 ```
 
-This way, when you pull objects out of Datastore, they are objects of your defined Model class.
+This way, when you pull objects out of Datastore, they are objects of your defined Entity class.
 
 ```php
 $obj_store = new BookStore($obj_gateway);
@@ -121,7 +121,7 @@ I've included a simple example (paginated) re-index script in the examples folde
 
 ### Alternative Array Syntax ###
 
-There is an alternative to directly constructing a new `GDS\Model` and setting it's member data, which is to use the `GDS\Store::createFromArray` factory method as follows.
+There is an alternative to directly constructing a new `GDS\Entity` and setting it's member data, which is to use the `GDS\Store::createFromArray` factory method as follows.
 
 ```php
 $obj_book = $obj_book_store->createFromArray([
@@ -216,6 +216,23 @@ $obj_namespaced_book_store = new BookStore($obj_namespaced_gateway);
 
 Further examples are included in the examples folder.
 
+## Entity Groups, Hierarchy & Ancestors ##
+
+Google Datastore allows for (and encourages) Entities to be organised in a hierarchy.
+
+The hierarchy allows for some amount of "relational" data. e.g. a `ForumThread` entity might have one more more `ForumPosts` entities as children.
+
+Entity groups are quite an advanced topic, but can positively affect your application in a number of areas including
+ 
+- Transactional integrity
+- Strongly consistent data
+
+At the time of writing, I support working with entity groups through the following methods
+
+- `GDS\Entity::setAncestry`
+- `GDS\Entity::getAncestry`
+- `GDS\Store::fetchEntityGroup`
+
 ## More About Google Cloud Datastore ##
 
 What Google say:
@@ -230,6 +247,7 @@ A few highlighted topics you might want to read up on
 - [Entities, Data Types etc.](https://cloud.google.com/datastore/docs/concepts/entities)
 - [More information on GQL](https://cloud.google.com/datastore/docs/concepts/gql)
 - [Indexes](https://cloud.google.com/datastore/docs/concepts/indexes)
+- [Ancestors](https://cloud.google.com/datastore/docs/concepts/entities#Datastore_Ancestor_paths)
 
 ## Footnotes ##
 

@@ -4,7 +4,7 @@
  *
  * @author Tom Walder <tom@docnet.nu>
  */
-class Book extends GDS\Model
+class Book extends GDS\Entity
 {
 
 }

@@ -28,14 +28,14 @@ class Schema
     /**
      * Field data types
      */
-    const FIELD_STRING = 1;
-    const FIELD_INTEGER = 2;
-    const FIELD_DATETIME = 3;
-    const FIELD_DOUBLE = 4;
-    const FIELD_FLOAT = 4; // FLOAT === DOUBLE
-    const FIELD_BOOLEAN = 10; // 10 types of people...
-    const FIELD_STRING_LIST = 20;
-    const FIELD_DETECT = 99; // used for auto-detection
+    const PROPERTY_STRING = 1;
+    const PROPERTY_INTEGER = 2;
+    const PROPERTY_DATETIME = 3;
+    const PROPERTY_DOUBLE = 4;
+    const PROPERTY_FLOAT = 4; // FLOAT === DOUBLE
+    const PROPERTY_BOOLEAN = 10; // 10 types of people...
+    const PROPERTY_STRING_LIST = 20;
+    const PROPERTY_DETECT = 99; // used for auto-detection
 
     /**
      * Kind (like database 'Table')
@@ -49,7 +49,7 @@ class Schema
      *
      * @var array
      */
-    private $arr_fields = [];
+    private $arr_defined_properties = [];
 
     /**
      * Kind is required
@@ -69,9 +69,9 @@ class Schema
      * @param bool $bol_index
      * @return $this
      */
-    public function addField($str_name, $int_type = self::FIELD_STRING, $bol_index = FALSE)
+    public function addProperty($str_name, $int_type = self::PROPERTY_STRING, $bol_index = FALSE)
     {
-        $this->arr_fields[$str_name] = [
+        $this->arr_defined_properties[$str_name] = [
             'type' => $int_type,
             'index' => $bol_index
         ];
@@ -87,7 +87,7 @@ class Schema
      */
     public function addString($str_name, $bol_index = FALSE)
     {
-        return $this->addField($str_name, self::FIELD_STRING, $bol_index);
+        return $this->addProperty($str_name, self::PROPERTY_STRING, $bol_index);
     }
 
     /**
@@ -99,7 +99,7 @@ class Schema
      */
     public function addInteger($str_name, $bol_index = FALSE)
     {
-        return $this->addField($str_name, self::FIELD_INTEGER, $bol_index);
+        return $this->addProperty($str_name, self::PROPERTY_INTEGER, $bol_index);
     }
 
     /**
@@ -111,7 +111,7 @@ class Schema
      */
     public function addDatetime($str_name, $bol_index = FALSE)
     {
-        return $this->addField($str_name, self::FIELD_DATETIME, $bol_index);
+        return $this->addProperty($str_name, self::PROPERTY_DATETIME, $bol_index);
     }
 
     /**
@@ -123,7 +123,7 @@ class Schema
      */
     public function addFloat($str_name, $bol_index = FALSE)
     {
-        return $this->addField($str_name, self::FIELD_FLOAT, $bol_index);
+        return $this->addProperty($str_name, self::PROPERTY_FLOAT, $bol_index);
     }
 
     /**
@@ -135,7 +135,7 @@ class Schema
      */
     public function addBoolean($str_name, $bol_index = FALSE)
     {
-        return $this->addField($str_name, self::FIELD_BOOLEAN, $bol_index);
+        return $this->addProperty($str_name, self::PROPERTY_BOOLEAN, $bol_index);
     }
 
     /**
@@ -147,7 +147,7 @@ class Schema
      */
     public function addStringList($str_name, $bol_index = FALSE)
     {
-        return $this->addField($str_name, self::FIELD_STRING_LIST, $bol_index);
+        return $this->addProperty($str_name, self::PROPERTY_STRING_LIST, $bol_index);
     }
 
     /**
@@ -165,9 +165,9 @@ class Schema
      *
      * @return array
      */
-    public function getFields()
+    public function getProperties()
     {
-        return $this->arr_fields;
+        return $this->arr_defined_properties;
     }
 
 }
