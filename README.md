@@ -75,7 +75,7 @@ $obj_schema = (new GDS\Schema('Book'))
    ->addString('author')
    ->addString('isbn', TRUE);
    
-// The Store class accepts either a Schema object or Kind name as it's second parameter
+// The Store accepts a Schema object or Kind name as it's second parameter
 $obj_book_store = new GDS\Store($obj_gateway, $obj_schema);
 ```
 
@@ -136,12 +136,15 @@ $obj_book = $obj_book_store->createFromArray([
 At the time of writing, the `GDS\Store` object uses Datastore GQL as it's query language. Here is an example:
 
 ```php
-$obj_book = $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = '1853260304'");
+$obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = '1853260304'");
 ```
  
-We provide a few helper methods for some more common queries, like `fetchById()` and `fetchByName()`.
+We provide a couple of helper methods for some common queries:
 
-When you instantiate a store object, like `BookStore` in our example, it comes pre-loaded with a default GQL query of the following form
+- `GDS\Store::fetchById`
+- `GDS\Store::fetchByName`
+
+When you instantiate a store object, like `BookStore` in our example, it comes pre-loaded with a default GQL query of the following form (this is "The Default Query")
 
 ```sql
 SELECT * FROM <Kind> ORDER BY __key__ ASC
@@ -150,19 +153,9 @@ SELECT * FROM <Kind> ORDER BY __key__ ASC
 Which means you can quickly and easily get one or many records without needing to write any GQL, like this:
 
 ```php
-$obj_store->fetchOne();
-```
-
-Get all books
-
-```php
-$obj_store->fetchAll();
-```
-
-Get the first 10 books
-
-```php
-$obj_store->fetchPage(10);
+$obj_store->fetchOne();     // Gets the first book
+$obj_store->fetchAll();     // Gets all books
+$obj_store->fetchPage(10);  // Gets the first 10 books
 ```
 
 ### Pagination ###
@@ -185,13 +178,15 @@ In a standard SQL environment, the above pagination would look something like th
 
 Although you can use a very similar syntax with Datastore GQL, it can be unnecessarily costly. This is because each row scanned when running a query is charged for. So, doing the equivalent of `LIMIT 5000, 50` will count as 5,050 reads - not just the 50 we actually get back.
 
-This is all fixed by using Cursors. The implementation is all encapsulated within the `Gateway` class so you don't need to worry about it.
+This is all fixed by using Cursors. The implementation is all encapsulated within the `GDS\Gateway` class so you don't need to worry about it.
+
+Bototm line: the bult-in pagination uses Cursors whenever possible for fastest & cheapest results.
 
 #### Tips for LIMIT-ed fetch operations ####
 
 Do not supply a `LIMIT` clause when calling 
-- `fetchOne()` - it's done for you (we add `LIMIT 1`)
-- `fetchPage()` - again, it's done for you and it will cause a conflict. 
+- `GDS\Store::fetchOne` - it's done for you (we add `LIMIT 1`)
+- `GDS\Store::fetchPage` - again, it's done for you and it will cause a conflict. 
 
 #### Pricing & Cursor References ####
 
@@ -246,6 +241,7 @@ https://cloud.google.com/datastore/
 A few highlighted topics you might want to read up on
 - [Entities, Data Types etc.](https://cloud.google.com/datastore/docs/concepts/entities)
 - [More information on GQL](https://cloud.google.com/datastore/docs/concepts/gql)
+- [GQL Reference](https://cloud.google.com/datastore/docs/apis/gql/gql_reference)
 - [Indexes](https://cloud.google.com/datastore/docs/concepts/indexes)
 - [Ancestors](https://cloud.google.com/datastore/docs/concepts/entities#Datastore_Ancestor_paths)
 
