@@ -38,7 +38,7 @@ foreach($obj_book_store->fetchAll() as $obj_book) {
 }
 ```
 
-These examples use the generic `GDS\Entity` class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on custom Entities, Schemas and indexed fields.
+These examples use the generic `GDS\Entity` class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on custom Schemas and indexed fields.
 
 ## Getting Started ##
 
