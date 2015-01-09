@@ -4,6 +4,19 @@
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
+## Table of Contents ##
+
+- [Basic Examples](#basic-examples)
+- [Getting Started](#getting-started)
+- [Defining Your Model](#defining-your-model)
+- [Creating Records](#creating-records)
+- [Queries, GQL & The Default Query](#queries-gql--the-default-query)
+- [Multi-tenant Applications & Data Namespaces](#multi-tenant-applications--data-namespaces)
+- [Entity Groups, Hierarchy & Ancestors](#entity-groups-hierarchy--ancestors)
+- [Transactions](#transactions)
+- [More About Google Cloud Datastore](#more-about-google-cloud-datastore)
+- [Footnotes](#footnotes)
+
 ## Basic Examples ##
 
 I find examples a great way to decide if I want to even try out a library, so here's a couple for you. Check out the examples folder for full code samples.
@@ -248,8 +261,6 @@ $obj_store->upsert($obj_entity);
 $obj_store->delete($obj_entity);
 ```
 
-[More about Datastore Transactions](https://cloud.google.com/datastore/docs/concepts/transactions)
-
 ## More About Google Cloud Datastore ##
 
 What Google say:
@@ -266,6 +277,7 @@ A few highlighted topics you might want to read up on
 - [GQL Reference](https://cloud.google.com/datastore/docs/apis/gql/gql_reference)
 - [Indexes](https://cloud.google.com/datastore/docs/concepts/indexes)
 - [Ancestors](https://cloud.google.com/datastore/docs/concepts/entities#Datastore_Ancestor_paths)
+- [More about Datastore Transactions](https://cloud.google.com/datastore/docs/concepts/transactions)
 
 ## Footnotes ##
 
