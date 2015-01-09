@@ -137,7 +137,8 @@ class Gateway
         foreach ($arr_google_entities as $obj_google_entity) {
             $obj_key = $this->applyNamespace($obj_google_entity->getKey());
             /** @var \Google_Service_Datastore_KeyPathElement $obj_path_end */
-            $obj_path_end = end($obj_key->getPath());
+            $arr_path = $obj_key->getPath();
+            $obj_path_end = end($arr_path);
             if ($obj_path_end->getId() || $obj_path_end->getName()) {
                 $arr_has_key[] = $obj_google_entity;
             } else {
