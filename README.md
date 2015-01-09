@@ -38,7 +38,7 @@ foreach($obj_book_store->fetchAll() as $obj_book) {
 }
 ```
 
-These examples use the generic `GDS\Entity` class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on custom Entities, Schemas and indexed fields.
+These examples use the generic `GDS\Entity` class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on custom Schemas and indexed fields.
 
 ## Getting Started ##
 
@@ -227,6 +227,28 @@ At the time of writing, I support working with entity groups through the followi
 - `GDS\Entity::setAncestry`
 - `GDS\Entity::getAncestry`
 - `GDS\Store::fetchEntityGroup`
+
+## Transactions ##
+
+The `GDS\Store` supports running updates and deletes in transactions.
+
+To start a transaction
+
+```php
+$obj_store->beginTransaction();
+```
+
+Then, any operation that changes data will commit *and consume* the transaction. So an immediate call to another operation WILL NOT BE TRANSACTIONAL.
+
+```php
+// Data changed within a transaction
+$obj_store->upsert($obj_entity);
+
+// Not transactional
+$obj_store->delete($obj_entity);
+```
+
+[More about Datastore Transactions](https://cloud.google.com/datastore/docs/concepts/transactions)
 
 ## More About Google Cloud Datastore ##
 

@@ -7,7 +7,7 @@
 require_once('boilerplate.php');
 
 // Fetch one record
-$obj_book= $obj_book_store->fetchOne("SELECT * FROM Book");
+$obj_book = $obj_book_store->fetchOne("SELECT * FROM Book");
 echo "   Title: {$obj_book->title}, ISBN: {$obj_book->isbn}", PHP_EOL;
 
 // Update the author

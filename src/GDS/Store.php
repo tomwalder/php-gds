@@ -68,6 +68,13 @@ class Store
     private $str_entity_class = '\\GDS\\Entity';
 
     /**
+     * Transaction ID
+     *
+     * @var null|string
+     */
+    private $str_transaction_id = NULL;
+
+    /**
      * Gateway and Schema/Kind required on construction
      *
      * @param Gateway $obj_gateway
@@ -115,7 +122,8 @@ class Store
             $arr_entities = [$arr_entities];
         }
         $arr_entities = $this->obj_mapper->mapGoogleEntities($arr_entities);
-        return $this->obj_gateway->putMulti($arr_entities);
+        // @todo transaction (set & clear)
+        return $this->obj_gateway->withTransaction($this->consumeTransaction())->putMulti($arr_entities);
     }
 
     /**
@@ -130,7 +138,8 @@ class Store
             $arr_entities = [$arr_entities];
         }
         $arr_keys = $this->obj_mapper->createKeys($arr_entities);
-        return $this->obj_gateway->deleteMulti($arr_keys);
+        // @todo transaction (set & clear)
+        return $this->obj_gateway->withTransaction($this->consumeTransaction())->deleteMulti($arr_keys);
     }
 
     /**
@@ -263,10 +272,12 @@ class Store
      * Usually before continuing through a paged result set
      *
      * @param $str_cursor
+     * @return $this
      */
     public function setCursor($str_cursor)
     {
         $this->str_last_cursor = $str_cursor;
+        return $this;
     }
 
     /**
@@ -322,6 +333,7 @@ class Store
      * Must be GDS\Entity, or a sub-class of it
      *
      * @param $str_class
+     * @return $this
      * @throws \Exception
      */
     public final function setEntityClass($str_class)
@@ -335,6 +347,30 @@ class Store
         } else {
             throw new \Exception('Cannot set missing Entity class: ' . $str_class);
         }
+        return $this;
+    }
+
+    /**
+     * Begin a transaction
+     *
+     * @return $this
+     */
+    public function beginTransaction()
+    {
+        $this->str_transaction_id = $this->obj_gateway->beginTransaction();
+        return $this;
+    }
+
+    /**
+     * Clear and return the current transaction ID
+     *
+     * @return string|null
+     */
+    private function consumeTransaction()
+    {
+        $str_transaction_id = $this->str_transaction_id;
+        $this->str_transaction_id = NULL;
+        return $str_transaction_id;
     }
 
     /**

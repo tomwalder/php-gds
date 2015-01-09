@@ -54,6 +54,13 @@ class Gateway
     private $obj_last_response = NULL;
 
     /**
+     * The transaction ID to use on the next commit
+     *
+     * @var null|string
+     */
+    private $str_next_transaction = NULL;
+
+    /**
      * Create a new GDS service
      *
      * Optional namespace (for multi-tenant applications)
@@ -91,6 +98,18 @@ class Gateway
             )
         );
         return $obj_client;
+    }
+
+    /**
+     * Set the transaction ID to be used next (once)
+     *
+     * @param $str_transaction_id
+     * @return $this
+     */
+    public function withTransaction($str_transaction_id)
+    {
+        $this->str_next_transaction = $str_transaction_id;
+        return $this;
     }
 
     /**
@@ -170,7 +189,13 @@ class Gateway
     private function commitMutation(\Google_Service_Datastore_Mutation $obj_mutation)
     {
         $obj_request = new \Google_Service_Datastore_CommitRequest();
-        $obj_request->setMode('NON_TRANSACTIONAL');
+        if(NULL === $this->str_next_transaction) {
+            $obj_request->setMode('NON_TRANSACTIONAL');
+        } else {
+            $obj_request->setMode('TRANSACTIONAL');
+            $obj_request->setTransaction($this->str_next_transaction);
+            $this->str_next_transaction = NULL;
+        }
         $obj_request->setMutation($obj_mutation);
         $this->obj_last_response = $this->obj_datasets->commit($this->str_dataset_id, $obj_request);
         return $this->obj_last_response;
@@ -317,7 +342,20 @@ class Gateway
         $obj_mutation = new \Google_Service_Datastore_Mutation();
         $obj_mutation->setDelete($arr_keys);
         $this->obj_last_response = $this->commitMutation($obj_mutation);
-        return (count($arr_keys) == $this->obj_last_response->getMutationResult()['indexUpdates']);
+        return TRUE;
+    }
+
+    /**
+     * Begin a transaction and return it's reference id
+     *
+     * @return string
+     */
+    public function beginTransaction()
+    {
+        $obj_request = new \Google_Service_Datastore_BeginTransactionRequest();
+        /** @var \Google_Service_Datastore_BeginTransactionResponse $obj_response */
+        $obj_response = $this->obj_datasets->beginTransaction($this->str_dataset_id, $obj_request);
+        return $obj_response->getTransaction();
     }
 
     /**
