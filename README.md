@@ -134,10 +134,10 @@ I've included a simple example (paginated) re-index script in the examples folde
 
 ### Alternative Array Syntax ###
 
-There is an alternative to directly constructing a new `GDS\Entity` and setting it's member data, which is to use the `GDS\Store::create` factory method as follows.
+There is an alternative to directly constructing a new `GDS\Entity` and setting it's member data, which is to use the `GDS\Store::createEntity` factory method as follows.
 
 ```php
-$obj_book = $obj_book_store->create([
+$obj_book = $obj_book_store->createEntity([
     'title' => 'The Merchant of Venice',
     'author' => 'William Shakespeare',
     'isbn' => '1840224312'
