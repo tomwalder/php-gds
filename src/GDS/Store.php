@@ -122,7 +122,6 @@ class Store
             $arr_entities = [$arr_entities];
         }
         $arr_entities = $this->obj_mapper->mapGoogleEntities($arr_entities);
-        // @todo transaction (set & clear)
         return $this->obj_gateway->withTransaction($this->consumeTransaction())->putMulti($arr_entities);
     }
 
@@ -138,7 +137,6 @@ class Store
             $arr_entities = [$arr_entities];
         }
         $arr_keys = $this->obj_mapper->createKeys($arr_entities);
-        // @todo transaction (set & clear)
         return $this->obj_gateway->withTransaction($this->consumeTransaction())->deleteMulti($arr_keys);
     }
 

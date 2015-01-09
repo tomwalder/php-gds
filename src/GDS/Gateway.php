@@ -126,8 +126,6 @@ class Gateway
     /**
      * Put an array of Entities into the Datastore
      *
-     * @todo Transactions
-     *
      * @param \Google_Service_Datastore_Entity[] $arr_google_entities
      * @return bool
      */
@@ -158,8 +156,6 @@ class Gateway
 
     /**
      * Apply the current namespace to an object or array of objects
-     *
-     * @todo Validate it's OK to set one partition instance on multiple entities
      *
      * @param $mix_target
      * @return mixed

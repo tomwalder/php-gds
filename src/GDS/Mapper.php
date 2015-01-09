@@ -85,8 +85,6 @@ class Mapper
     /**
      * Create a fully qualified Key path
      *
-     * @todo Consider pulling the Kind from the Entity (not Schema) and validate a match
-     *
      * @param Entity $obj_gds_entity
      * @param bool $bol_first_node
      * @return array
@@ -94,13 +92,12 @@ class Mapper
      */
     public function buildKeyPath(Entity $obj_gds_entity, $bol_first_node = TRUE)
     {
-
         $str_kind = $obj_gds_entity->getKind();
         if(NULL === $str_kind) {
             if($bol_first_node) {
                 $str_kind = $this->obj_schema->getKind();
             } else {
-                throw new \Exception('Could not build full key path, no Kind set on GDS Entity');
+                throw new \Exception('Could not build full key path, no Kind set on (nth node) GDS Entity');
             }
         }
 
