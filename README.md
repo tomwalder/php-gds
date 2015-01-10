@@ -155,8 +155,10 @@ $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = '1853260304'");
 And with support for named parameters
 
  ```php
- $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = @isbnNumber", ['isbnNumber' => '1853260304']);
- ```
+$obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = @isbnNumber", [
+    'isbnNumber' => '1853260304'
+]);
+```
 
 We provide a couple of helper methods for some common (root Entity) queries:
 
