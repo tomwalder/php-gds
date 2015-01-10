@@ -122,7 +122,9 @@ class Store
             $arr_entities = [$arr_entities];
         }
         $arr_entities = $this->obj_mapper->mapGoogleEntities($arr_entities);
-        return $this->obj_gateway->withTransaction($this->consumeTransaction())->putMulti($arr_entities);
+        return $this->obj_gateway
+            ->withTransaction($this->consumeTransaction())
+            ->putMulti($arr_entities);
     }
 
     /**
@@ -137,7 +139,9 @@ class Store
             $arr_entities = [$arr_entities];
         }
         $arr_keys = $this->obj_mapper->createKeys($arr_entities);
-        return $this->obj_gateway->withTransaction($this->consumeTransaction())->deleteMulti($arr_keys);
+        return $this->obj_gateway
+            ->withTransaction($this->consumeTransaction())
+            ->deleteMulti($arr_keys);
     }
 
     /**
@@ -151,7 +155,9 @@ class Store
     public function fetchById($str_id)
     {
         return $this->mapOneFromResults(
-            $this->obj_gateway->fetchById($this->obj_schema->getKind(), $str_id)
+            $this->obj_gateway
+                ->withTransaction($this->str_transaction_id)
+                ->fetchById($this->obj_schema->getKind(), $str_id)
         );
     }
 
@@ -166,7 +172,9 @@ class Store
     public function fetchByName($str_name)
     {
         return $this->mapOneFromResults(
-            $this->obj_gateway->fetchByName($this->obj_schema->getKind(), $str_name)
+            $this->obj_gateway
+                ->withTransaction($this->str_transaction_id)
+                ->fetchByName($this->obj_schema->getKind(), $str_name)
         );
     }
 
@@ -194,7 +202,9 @@ class Store
         if(NULL !== $str_query) {
             $this->query($str_query);
         }
-        $arr_results = $this->obj_gateway->gql($this->str_last_query . ' LIMIT 1');
+        $arr_results = $this->obj_gateway
+            ->withTransaction($this->str_transaction_id)
+            ->gql($this->str_last_query . ' LIMIT 1');
         return $this->mapOneFromResults($arr_results);
     }
 
@@ -209,7 +219,9 @@ class Store
         if(NULL !== $str_query) {
             $this->query($str_query);
         }
-        $arr_results = $this->obj_gateway->gql($this->str_last_query);
+        $arr_results = $this->obj_gateway
+            ->withTransaction($this->str_transaction_id)
+            ->gql($this->str_last_query);
         return $this->mapFromResults($arr_results);
     }
 
@@ -236,7 +248,9 @@ class Store
             $str_offset = 'OFFSET @startCursor';
             $arr_params['startCursor'] = $this->str_last_cursor;
         }
-        $arr_results = $this->obj_gateway->gql($this->str_last_query . " LIMIT {$int_page_size} {$str_offset}", $arr_params);
+        $arr_results = $this->obj_gateway
+            ->withTransaction($this->str_transaction_id)
+            ->gql($this->str_last_query . " LIMIT {$int_page_size} {$str_offset}", $arr_params);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
         return $this->mapFromResults($arr_results);
     }
@@ -249,7 +263,11 @@ class Store
      */
     public function fetchEntityGroup(Entity $obj_entity)
     {
-        $arr_results = $this->obj_gateway->gql("SELECT * FROM " . $this->obj_schema->getKind() . " WHERE __key__ HAS ANCESTOR @ancestorKey", ['ancestorKey' => $this->obj_mapper->createKey($obj_entity)]);
+        $arr_results = $this->obj_gateway
+            ->withTransaction($this->str_transaction_id)
+            ->gql("SELECT * FROM " . $this->obj_schema->getKind() . " WHERE __key__ HAS ANCESTOR @ancestorKey", [
+                'ancestorKey' => $this->obj_mapper->createKey($obj_entity)
+            ]);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
         return $this->mapFromResults($arr_results);
     }

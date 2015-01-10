@@ -240,7 +240,7 @@ class Gateway
      */
     private function fetchByKeys(array $arr_keys)
     {
-        $obj_request = new \Google_Service_Datastore_LookupRequest();
+        $obj_request = $this->applyTransaction(new \Google_Service_Datastore_LookupRequest());
         $obj_request->setKeys($this->applyNamespace($arr_keys));
         $this->obj_last_response = $this->obj_datasets->lookup($this->str_dataset_id, $obj_request);
         return $this->obj_last_response->getFound();
@@ -304,7 +304,11 @@ class Gateway
      */
     private function executeQuery(\Google_Collection $obj_query)
     {
-        $obj_request = $this->applyNamespace(new \Google_Service_Datastore_RunQueryRequest());
+        $obj_request = $this->applyTransaction(
+            $this->applyNamespace(
+                new \Google_Service_Datastore_RunQueryRequest()
+            )
+        );
         if ($obj_query instanceof \Google_Service_Datastore_GqlQuery) {
             $obj_request->setGqlQuery($obj_query);
         } else {
@@ -315,6 +319,22 @@ class Gateway
             return $this->obj_last_response['batch']['entityResults'];
         }
         return [];
+    }
+
+    /**
+     * If we are in a transaction, apply it to the request object
+     *
+     * @param $obj_request
+     * @return mixed
+     */
+    private function applyTransaction($obj_request) {
+        if(NULL !== $this->str_next_transaction) {
+            $obj_read_options = new \Google_Service_Datastore_ReadOptions();
+            $obj_read_options->setTransaction($this->str_next_transaction);
+            $obj_request->setReadOptions($obj_read_options);
+            $this->str_next_transaction = NULL;
+        }
+        return $obj_request;
     }
 
     /**
