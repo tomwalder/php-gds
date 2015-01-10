@@ -151,8 +151,14 @@ At the time of writing, the `GDS\Store` object uses Datastore GQL as it's query 
 ```php
 $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = '1853260304'");
 ```
- 
-We provide a couple of helper methods for some common queries:
+
+And with support for named parameters
+
+ ```php
+ $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = @isbnNumber", ['isbnNumber' => '1853260304']);
+ ```
+
+We provide a couple of helper methods for some common (root Entity) queries:
 
 - `GDS\Store::fetchById`
 - `GDS\Store::fetchByName`
