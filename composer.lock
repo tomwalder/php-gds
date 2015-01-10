@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/google/google-api-php-client.git",
-                "reference": "f07769e15dc0fdc30056e488e84bc042bd6a1c2d"
+                "reference": "36ebd3f9002343beb194c04c2fce47872b5fb085"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/google/google-api-php-client/zipball/f07769e15dc0fdc30056e488e84bc042bd6a1c2d",
-                "reference": "f07769e15dc0fdc30056e488e84bc042bd6a1c2d",
+                "url": "https://api.github.com/repos/google/google-api-php-client/zipball/36ebd3f9002343beb194c04c2fce47872b5fb085",
+                "reference": "36ebd3f9002343beb194c04c2fce47872b5fb085",
                 "shasum": ""
             },
             "require": {
@@ -46,7 +46,7 @@
             "keywords": [
                 "google"
             ],
-            "time": "2015-01-07 11:03:15"
+            "time": "2015-01-09 11:05:10"
         }
     ],
     "packages-dev": [],
