@@ -54,6 +54,13 @@ class Store
     private $str_last_query = NULL;
 
     /**
+     * Named parameters for the last query
+     *
+     * @var array|null
+     */
+    private $arr_last_params = NULL;
+
+    /**
      * The last result cursor
      *
      * @var string|null
@@ -182,11 +189,13 @@ class Store
      * Fetch Entities based on a GQL query
      *
      * @param $str_query
+     * @param array|null $arr_params
      * @return Entity[]
      */
-    public function query($str_query)
+    public function query($str_query, $arr_params = NULL)
     {
         $this->str_last_query = $str_query;
+        $this->arr_last_params = $arr_params;
         $this->str_last_cursor = NULL;
         return $this;
     }
@@ -195,16 +204,17 @@ class Store
      * Fetch ONE Entity based on a GQL query
      *
      * @param $str_query
+     * @param array|null $arr_params
      * @return Entity
      */
-    public function fetchOne($str_query = NULL)
+    public function fetchOne($str_query = NULL, $arr_params = NULL)
     {
         if(NULL !== $str_query) {
-            $this->query($str_query);
+            $this->query($str_query, $arr_params);
         }
         $arr_results = $this->obj_gateway
             ->withTransaction($this->str_transaction_id)
-            ->gql($this->str_last_query . ' LIMIT 1');
+            ->gql($this->str_last_query . ' LIMIT 1', $this->arr_last_params);
         return $this->mapOneFromResults($arr_results);
     }
 
@@ -212,16 +222,17 @@ class Store
      * Fetch Entities (optionally based on a GQL query)
      *
      * @param $str_query
+     * @param array|null $arr_params
      * @return Entity[]
      */
-    public function fetchAll($str_query = NULL)
+    public function fetchAll($str_query = NULL, $arr_params = NULL)
     {
         if(NULL !== $str_query) {
-            $this->query($str_query);
+            $this->query($str_query, $arr_params);
         }
         $arr_results = $this->obj_gateway
             ->withTransaction($this->str_transaction_id)
-            ->gql($this->str_last_query);
+            ->gql($this->str_last_query, $this->arr_last_params);
         return $this->mapFromResults($arr_results);
     }
 
@@ -235,7 +246,7 @@ class Store
     public function fetchPage($int_page_size, $mix_offset = NULL)
     {
         $str_offset = '';
-        $arr_params = [];
+        $arr_params = (array)$this->arr_last_params;
         if(NULL !== $mix_offset) {
             if(is_int($mix_offset)) {
                 $str_offset = 'OFFSET @intOffset';
@@ -247,6 +258,9 @@ class Store
         } else if (strlen($this->str_last_cursor) > 1) {
             $str_offset = 'OFFSET @startCursor';
             $arr_params['startCursor'] = $this->str_last_cursor;
+        }
+        if(empty($arr_params)) {
+            $arr_params = NULL;
         }
         $arr_results = $this->obj_gateway
             ->withTransaction($this->str_transaction_id)
