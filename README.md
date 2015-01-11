@@ -221,7 +221,9 @@ Google Datastore supports segregating data within a single "Dataset" using somet
 
 Generally, this is intended for multi-tenant applications where each customer would have separate data, even within the same "Kind".
 
-This library supports namespaces, and they can be configured per `Gateway` instance ny passing in the optional namespace parameter.
+This library supports namespaces, and they are be configured per `Gateway` instance by passing in the optional 3rd namespace parameter.
+
+<strong>ALL operations carried out through a Gateway with a namespace configured are done in the context of that namespace. The namespace is automatically applied to Keys when doing upsert/delete/fetch-by-key and to Requests when running GQL queries.</strong>
 
 ```php
 // Create a store for a particular customer or 'application namespace'
