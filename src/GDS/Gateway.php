@@ -357,6 +357,9 @@ class Gateway
     public function deleteMulti(array $arr_keys)
     {
         $obj_mutation = new \Google_Service_Datastore_Mutation();
+        foreach($arr_keys as $obj_key) {
+            $this->applyNamespace($obj_key);
+        }
         $obj_mutation->setDelete($arr_keys);
         $this->obj_last_response = $this->commitMutation($obj_mutation);
         return TRUE;
