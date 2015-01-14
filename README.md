@@ -53,6 +53,14 @@ foreach($obj_book_store->fetchAll() as $obj_book) {
 
 These examples use the generic `GDS\Entity` class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on custom Schemas and indexed fields.
 
+### Demo App ###
+
+A trivial guest book application
+
+Application: http://php-gds-demo.appspot.com/
+
+Code: https://github.com/tomwalder/php-gds-demo
+
 ## Getting Started ##
 
 Are you sitting comfortably? before we begin, you will need: 
