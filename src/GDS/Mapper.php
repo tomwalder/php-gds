@@ -58,7 +58,7 @@ class Mapper
      * Create an array of Datastore Entity from an array of GDS Entities
      *
      * @param array $arr_gds_entities
-     * @return array
+     * @return \Google_Service_Datastore_Entity[]
      */
     public function mapGoogleEntities(array $arr_gds_entities)
     {
