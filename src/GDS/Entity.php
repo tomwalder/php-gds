@@ -183,6 +183,8 @@ class Entity
     }
 
     /**
+     * Get the ancestry of the entity
+     * 
      * @return null|array
      */
     public function getAncestry()
