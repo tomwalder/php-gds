@@ -120,18 +120,30 @@ class Store
     /**
      * Write one or more new/changed Entity objects to the Datastore
      *
-     * @param mixed
-     * @return bool
+     * @param Entity|Entity[]
      */
     public function upsert($arr_entities)
     {
         if($arr_entities instanceof Entity) {
             $arr_entities = [$arr_entities];
         }
-        $arr_entities = $this->obj_mapper->mapGoogleEntities($arr_entities);
-        return $this->obj_gateway
+        $arr_google_entities = $this->obj_mapper->mapGoogleEntities($arr_entities);
+        $this->obj_gateway
             ->withTransaction($this->consumeTransaction())
-            ->putMulti($arr_entities);
+            ->putMulti($arr_google_entities);
+
+        // Map new Auto Insert Key IDs from the Google_Entity objects back onto the GDS\Entities
+        // We don't need to map the full path as it shouldn't have changed. We expect the order of items to match.
+        foreach ($arr_google_entities as $int_index => $obj_google_entity) {
+            $obj_gds_entity = $arr_entities[$int_index];
+            if(NULL === $obj_gds_entity->getKeyId() && NULL === $obj_gds_entity->getKeyName()) {
+                $arr_path = $obj_google_entity->getKey()->getPath();
+                $arr_path_end = end($arr_path);
+                if(isset($arr_path_end['id'])) {
+                    $obj_gds_entity->setKeyId($arr_path_end['id']);
+                }
+            }
+        }
     }
 
     /**
