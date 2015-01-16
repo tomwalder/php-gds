@@ -188,6 +188,8 @@ class Store
     /**
      * Fetch Entities based on a GQL query
      *
+     * Convert any Entity parameters into Keys using the Mapper
+     *
      * @param $str_query
      * @param array|null $arr_params
      * @return Entity[]
@@ -195,6 +197,13 @@ class Store
     public function query($str_query, $arr_params = NULL)
     {
         $this->str_last_query = $str_query;
+        if(is_array($arr_params)) {
+            foreach($arr_params as $str_key => $mix_val) {
+                if($mix_val instanceof Entity) {
+                    $arr_params[$str_key] = $this->obj_mapper->createKey($mix_val);
+                }
+            }
+        }
         $this->arr_last_params = $arr_params;
         $this->str_last_cursor = NULL;
         return $this;
