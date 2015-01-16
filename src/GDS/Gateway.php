@@ -152,6 +152,15 @@ class Gateway
             $obj_mutation->setUpsert($arr_has_key);
         }
         $this->commitMutation($obj_mutation);
+
+        // Record the Auto-generated Key IDs against the Entities.
+        // https://cloud.google.com/datastore/docs/apis/v1beta2/datasets/commit
+        // "Keys for insertAutoId entities. One per entity from the request, in the same order."
+        if (!empty($arr_auto_id)) {
+            foreach ($this->obj_last_response['mutationResult']['insertAutoIdKeys'] as $int_index => $obj_auto_insert_key) {
+                $arr_auto_id[$int_index]->setKey($obj_auto_insert_key);
+            }
+        }
         return TRUE;
     }
 
