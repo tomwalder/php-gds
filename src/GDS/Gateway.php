@@ -120,14 +120,13 @@ class Gateway
      */
     public function put(\Google_Service_Datastore_Entity $obj_google_entity)
     {
-        return $this->putMulti([$obj_google_entity]);
+        $this->putMulti([$obj_google_entity]);
     }
 
     /**
      * Put an array of Entities into the Datastore
      *
      * @param \Google_Service_Datastore_Entity[] $arr_google_entities
-     * @return bool
      */
     public function putMulti(array $arr_google_entities)
     {
@@ -161,7 +160,6 @@ class Gateway
                 $arr_auto_id[$int_index]->setKey($obj_auto_insert_key);
             }
         }
-        return TRUE;
     }
 
     /**
