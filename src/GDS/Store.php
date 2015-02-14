@@ -93,7 +93,7 @@ class Store
         $this->obj_gateway = $obj_gateway;
         $this->obj_schema = $this->determineSchema($mix_schema);
         $this->obj_mapper = new Mapper($this->obj_schema);
-        $this->str_last_query = 'SELECT * FROM ' . $this->obj_schema->getKind() . ' ORDER BY __key__ ASC';
+        $this->str_last_query = 'SELECT * FROM `' . $this->obj_schema->getKind() . '` ORDER BY __key__ ASC';
     }
 
     /**
@@ -300,7 +300,7 @@ class Store
     {
         $arr_results = $this->obj_gateway
             ->withTransaction($this->str_transaction_id)
-            ->gql("SELECT * FROM " . $this->obj_schema->getKind() . " WHERE __key__ HAS ANCESTOR @ancestorKey", [
+            ->gql("SELECT * FROM `" . $this->obj_schema->getKind() . "` WHERE __key__ HAS ANCESTOR @ancestorKey", [
                 'ancestorKey' => $this->obj_mapper->createKey($obj_entity)
             ]);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
