@@ -188,7 +188,15 @@ class Mapper
                         break;
 
                     case 'array':
+                        $int_dynamic_type = Schema::PROPERTY_STRING_LIST;
+                        break;
+
                     case 'object':
+                        if($mix_value instanceof \DateTime) {
+                            $int_dynamic_type = Schema::PROPERTY_DATETIME;
+                            break;
+                        }
+
                     case 'resource':
                     case 'NULL':
                     case 'unknown type':
@@ -231,7 +239,12 @@ class Mapper
                 break;
 
             case Schema::PROPERTY_DATETIME:
-                $obj_property->setDateTimeValue((new \DateTime($mix_value))->format(\DateTime::ATOM));
+                if($mix_value instanceof \DateTime) {
+                    $obj_dtm = $mix_value;
+                } else {
+                    $obj_dtm = new \DateTime($mix_value);
+                }
+                $obj_property->setDateTimeValue($obj_dtm->format(\DateTime::ATOM));
                 break;
 
             case Schema::PROPERTY_DOUBLE:

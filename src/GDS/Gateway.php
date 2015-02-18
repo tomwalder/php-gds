@@ -290,6 +290,8 @@ class Gateway
                     $obj_val = new \Google_Service_Datastore_Value();
                     if($mix_value instanceof \Google_Service_Datastore_Key) {
                         $obj_val->setKeyValue($mix_value);
+                    } elseif($mix_value instanceof \DateTime) {
+                        $obj_val->setDateTimeValue($mix_value->format(\DateTime::ATOM));
                     } elseif (is_int($mix_value)) {
                         $obj_val->setIntegerValue($mix_value);
                     } else {

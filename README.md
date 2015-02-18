@@ -152,6 +152,17 @@ $obj_book = $obj_book_store->createEntity([
 ]);
 ```
 
+Support for DateTime object binding was added recently (also see query parameter binding below)
+
+```php
+$obj_book = $obj_book_store->createEntity([
+    'title' => 'Some Book',
+    'author' => 'A N Other Guy',
+    'isbn' => '1840224313',
+    'published' => new DateTime('-5 years')
+]);
+```
+
 ## Queries, GQL & The Default Query ##
 
 At the time of writing, the `GDS\Store` object uses Datastore GQL as it's query language. Here is an example:
@@ -160,11 +171,19 @@ At the time of writing, the `GDS\Store` object uses Datastore GQL as it's query 
 $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = '1853260304'");
 ```
 
-And with support for named parameters
+And with support for named parameter binding (strings, integers)
 
  ```php
 $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = @isbnNumber", [
     'isbnNumber' => '1853260304'
+]);
+```
+
+Support for DateTime object binding
+
+ ```php
+$obj_book_store->fetchOne("SELECT * FROM Task WHERE date_date < @now", [
+    'now' => new DateTime()
 ]);
 ```
 
