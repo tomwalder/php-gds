@@ -13,8 +13,8 @@ $obj_book->author = 'William Shakespeare';
 $obj_book->isbn = '1840224339';
 
 // Insert 1 into the Datastore
-$bol_result = $obj_book_store->upsert($obj_book);
-var_dump($bol_result);
+$obj_book_store->upsert($obj_book);
+echo "Created: ", $obj_book->getKeyId(), PHP_EOL;
 
 // So now create a simple Model object (2)
 $obj_book2 = new Book();
@@ -28,8 +28,9 @@ $obj_book3->title = 'Hamlet';
 $obj_book3->author = 'William Shakespeare';
 $obj_book3->isbn = '1853260096';
 
-$bol_multi_result = $obj_book_store->upsert([$obj_book2, $obj_book3]);
-var_dump($bol_multi_result);
+$obj_book_store->upsert([$obj_book2, $obj_book3]);
+echo "Created: ", $obj_book2->getKeyId(), PHP_EOL;
+echo "Created: ", $obj_book3->getKeyId(), PHP_EOL;
 
 // Create using our factory method
 $obj_book4 = $obj_book_store->createEntity([
@@ -37,6 +38,5 @@ $obj_book4 = $obj_book_store->createEntity([
     'author' => 'William Shakespeare',
     'isbn' => '1840224312'
 ]);
-$bol_factory_result = $obj_book_store->upsert($obj_book4);
-var_dump($bol_factory_result);
-
+$obj_book_store->upsert($obj_book4);
+echo "Created: ", $obj_book4->getKeyId(), PHP_EOL;
