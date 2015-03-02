@@ -97,6 +97,8 @@ class Gateway
                 $str_key
             )
         );
+        // App Engine php55 runtime dev server problems...
+        $obj_client->setClassConfig('Google_Http_Request', 'disable_gzip', TRUE);
         return $obj_client;
     }
 
