@@ -94,13 +94,15 @@ Here is how we might build the Schema for our examples, with a Datastore Entity 
 $obj_schema = (new GDS\Schema('Book'))
    ->addString('title')
    ->addString('author')
-   ->addString('isbn', TRUE);
+   ->addString('isbn');
    
 // The Store accepts a Schema object or Kind name as it's second parameter
 $obj_book_store = new GDS\Store($obj_gateway, $obj_schema);
 ```
 
-In this example, the ISBN field has been specifically set as an indexed string field. By default, fields are string fields and are NOT indexed. An indexed field can be used in a WHERE clause.
+By default, fields are indexed. An indexed field can be used in a WHERE clause. You can explicitly configure a field to be not indexed by passing in `FALSE` as the second parameter to `addString()`.
+
+If you use a dynamic schema (i.e. do not define on, but just use the Entity name) then all fields will be indexed for that record.
 
 Avaialable Schema configuration methods:
 - `GDS\Schema::addString`
