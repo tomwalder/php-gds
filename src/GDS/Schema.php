@@ -69,7 +69,7 @@ class Schema
      * @param bool $bol_index
      * @return $this
      */
-    public function addProperty($str_name, $int_type = self::PROPERTY_STRING, $bol_index = FALSE)
+    public function addProperty($str_name, $int_type = self::PROPERTY_STRING, $bol_index = TRUE)
     {
         $this->arr_defined_properties[$str_name] = [
             'type' => $int_type,
@@ -85,7 +85,7 @@ class Schema
      * @param bool $bol_index
      * @return Schema
      */
-    public function addString($str_name, $bol_index = FALSE)
+    public function addString($str_name, $bol_index = TRUE)
     {
         return $this->addProperty($str_name, self::PROPERTY_STRING, $bol_index);
     }
@@ -97,7 +97,7 @@ class Schema
      * @param bool $bol_index
      * @return Schema
      */
-    public function addInteger($str_name, $bol_index = FALSE)
+    public function addInteger($str_name, $bol_index = TRUE)
     {
         return $this->addProperty($str_name, self::PROPERTY_INTEGER, $bol_index);
     }
@@ -109,7 +109,7 @@ class Schema
      * @param bool $bol_index
      * @return Schema
      */
-    public function addDatetime($str_name, $bol_index = FALSE)
+    public function addDatetime($str_name, $bol_index = TRUE)
     {
         return $this->addProperty($str_name, self::PROPERTY_DATETIME, $bol_index);
     }
@@ -121,7 +121,7 @@ class Schema
      * @param bool $bol_index
      * @return Schema
      */
-    public function addFloat($str_name, $bol_index = FALSE)
+    public function addFloat($str_name, $bol_index = TRUE)
     {
         return $this->addProperty($str_name, self::PROPERTY_FLOAT, $bol_index);
     }
@@ -133,7 +133,7 @@ class Schema
      * @param bool $bol_index
      * @return Schema
      */
-    public function addBoolean($str_name, $bol_index = FALSE)
+    public function addBoolean($str_name, $bol_index = TRUE)
     {
         return $this->addProperty($str_name, self::PROPERTY_BOOLEAN, $bol_index);
     }
@@ -145,7 +145,7 @@ class Schema
      * @param bool $bol_index
      * @return Schema
      */
-    public function addStringList($str_name, $bol_index = FALSE)
+    public function addStringList($str_name, $bol_index = TRUE)
     {
         return $this->addProperty($str_name, self::PROPERTY_STRING_LIST, $bol_index);
     }

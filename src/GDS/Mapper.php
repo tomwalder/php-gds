@@ -196,6 +196,7 @@ class Mapper
                             $int_dynamic_type = Schema::PROPERTY_DATETIME;
                             break;
                         }
+                        // No break on purpose - 'other' objects will be cast to string ;(
 
                     case 'resource':
                     case 'NULL':
@@ -205,7 +206,7 @@ class Mapper
                         $int_dynamic_type = Schema::PROPERTY_STRING;
                         $mix_value = (string)$mix_value;
                 }
-                $arr_property_map[$str_field_name] = $this->createProperty(['type' => $int_dynamic_type, 'index' => FALSE], $mix_value);
+                $arr_property_map[$str_field_name] = $this->createProperty(['type' => $int_dynamic_type, 'index' => TRUE], $mix_value);
             }
         }
         return $arr_property_map;
@@ -223,9 +224,9 @@ class Mapper
         $obj_property = new \Google_Service_Datastore_Property();
 
         // Indexed?
-        $bol_index = FALSE;
-        if(isset($arr_field_def['index']) && TRUE === $arr_field_def['index']) {
-            $bol_index = TRUE;
+        $bol_index = TRUE;
+        if(isset($arr_field_def['index']) && FALSE === $arr_field_def['index']) {
+            $bol_index = FALSE;
         }
         $obj_property->setIndexed($bol_index);
 
