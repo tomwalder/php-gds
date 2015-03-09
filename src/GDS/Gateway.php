@@ -208,20 +208,36 @@ class Gateway
     }
 
     /**
-     * Fetch entity data by Key ID
+     * Fetch one entity by Key ID
      *
      * @param $str_kind
-     * @param $str_key_id
+     * @param $int_key_id
      * @return array
      */
-    public function fetchById($str_kind, $str_key_id)
+    public function fetchById($str_kind, $int_key_id)
     {
-        $obj_path = new \Google_Service_Datastore_KeyPathElement();
-        $obj_path->setKind($str_kind);
-        $obj_path->setId($str_key_id);
-        $obj_key = new \Google_Service_Datastore_Key();
-        $obj_key->setPath([$obj_path]);
-        return $this->fetchByKeys([$obj_key]);
+        return $this->fetchByIds($str_kind, [$int_key_id]);
+    }
+
+    /**
+     * Fetch many entities by their Key ID
+     *
+     * @param $str_kind
+     * @param $arr_ids
+     * @return mixed
+     */
+    public function fetchByIds($str_kind, array $arr_ids)
+    {
+        $arr_keys = [];
+        foreach($arr_ids as $int_id) {
+            $obj_key = new \Google_Service_Datastore_Key();
+            $obj_element = new \Google_Service_Datastore_KeyPathElement();
+            $obj_element->setKind($str_kind);
+            $obj_element->setId((int)$int_id);
+            $obj_key->setPath([$obj_element]);
+            $arr_keys[] = $obj_key;
+        }
+        return $this->fetchByKeys($arr_keys);
     }
 
     /**

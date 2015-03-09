@@ -181,6 +181,21 @@ class Store
     }
 
     /**
+     * Fetch multiple entities by Key ID
+     *
+     * @param $arr_ids
+     * @return Entity[]
+     */
+    public function fetchByIds($arr_ids)
+    {
+        return $this->mapFromResults(
+            $this->obj_gateway
+                ->withTransaction($this->str_transaction_id)
+                ->fetchByIds($this->obj_schema->getKind(), $arr_ids)
+        );
+    }
+
+    /**
      * Fetch a single Entity from the Datastore, by it's Key Name
      *
      * Only works for root Entities (i.e. those without parent Entities)

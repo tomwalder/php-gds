@@ -24,11 +24,16 @@ describeResult($arr_books);
 
 // Fetch paginated
 $obj_book_store->query('SELECT * FROM Book');
-while($arr_page = $obj_book_store->fetchPage(5)) {
+while($arr_page = $obj_book_store->fetchPage(50)) {
     describeResult($arr_page);
 }
 
-
+// Retrieve multiple rows by ID
+echo "Multi fetch:", PHP_EOL;
+$arr_books = $obj_book_store->fetchByIds(['5692592335355904', '5149586599444480']);
+foreach($arr_books as $obj_book) {
+    describeResult($obj_book);
+}
 
 /**
  * Helper function to simplify results display
