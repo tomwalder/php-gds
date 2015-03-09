@@ -192,7 +192,7 @@ $obj_book_store->fetchOne("SELECT * FROM Task WHERE date_date < @now", [
 We provide a couple of helper methods for some common (root Entity) queries:
 
 - `GDS\Store::fetchById`
-- `GDS\Store::fetchByIds` allows for batch fetching (much more efficient than many individual ones)
+- `GDS\Store::fetchByIds` - batch fetching (much more efficient than many individual ones)
 - `GDS\Store::fetchByName`
 
 When you instantiate a store object, like `BookStore` in our example, it comes pre-loaded with a default GQL query of the following form (this is "The Default Query")
