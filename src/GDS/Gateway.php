@@ -249,12 +249,28 @@ class Gateway
      */
     public function fetchByName($str_kind, $str_key_name)
     {
-        $obj_path = new \Google_Service_Datastore_KeyPathElement();
-        $obj_path->setKind($str_kind);
-        $obj_path->setName($str_key_name);
-        $obj_key = new \Google_Service_Datastore_Key();
-        $obj_key->setPath([$obj_path]);
-        return $this->fetchByKeys([$obj_key]);
+        return $this->fetchByNames($str_kind, [$str_key_name]);
+    }
+
+    /**
+     * Fetch many entities by their Key Name
+     *
+     * @param $str_kind
+     * @param $arr_key_names
+     * @return mixed
+     */
+    public function fetchByNames($str_kind, array $arr_key_names)
+    {
+        $arr_keys = [];
+        foreach($arr_key_names as $str_key_name) {
+            $obj_key = new \Google_Service_Datastore_Key();
+            $obj_element = new \Google_Service_Datastore_KeyPathElement();
+            $obj_element->setKind($str_kind);
+            $obj_element->setName($str_key_name);
+            $obj_key->setPath([$obj_element]);
+            $arr_keys[] = $obj_key;
+        }
+        return $this->fetchByKeys($arr_keys);
     }
 
     /**

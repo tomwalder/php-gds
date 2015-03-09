@@ -35,6 +35,12 @@ foreach($arr_books as $obj_book) {
     describeResult($obj_book);
 }
 
+$obj_store = new GDS\Store($obj_gateway, 'Contact');
+$arr_contacts = $obj_store->fetchByNames(['tom@docnet.nu', 'beermonster@gmail.com']);
+foreach($arr_contacts as $obj_contact) {
+    echo "  Found: {$obj_contact->first_name}, {$obj_contact->last_name}", PHP_EOL;
+}
+
 /**
  * Helper function to simplify results display
  *

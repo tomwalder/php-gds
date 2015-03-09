@@ -186,7 +186,7 @@ class Store
      * @param $arr_ids
      * @return Entity[]
      */
-    public function fetchByIds($arr_ids)
+    public function fetchByIds(array $arr_ids)
     {
         return $this->mapFromResults(
             $this->obj_gateway
@@ -209,6 +209,23 @@ class Store
             $this->obj_gateway
                 ->withTransaction($this->str_transaction_id)
                 ->fetchByName($this->obj_schema->getKind(), $str_name)
+        );
+    }
+
+    /**
+     * Fetch one or more Entities from the Datastore, by their Key Name
+     *
+     * Only works for root Entities (i.e. those without parent Entities)
+     *
+     * @param $arr_names
+     * @return Entity|null
+     */
+    public function fetchByNames(array $arr_names)
+    {
+        return $this->mapFromResults(
+            $this->obj_gateway
+                ->withTransaction($this->str_transaction_id)
+                ->fetchByNames($this->obj_schema->getKind(), $arr_names)
         );
     }
 
