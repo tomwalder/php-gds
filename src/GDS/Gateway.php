@@ -233,7 +233,7 @@ class Gateway
             $obj_key = new \Google_Service_Datastore_Key();
             $obj_element = new \Google_Service_Datastore_KeyPathElement();
             $obj_element->setKind($str_kind);
-            $obj_element->setId((int)$int_id);
+            $obj_element->setId($int_id);
             $obj_key->setPath([$obj_element]);
             $arr_keys[] = $obj_key;
         }
