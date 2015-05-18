@@ -70,14 +70,9 @@ Are you sitting comfortably? before we begin, you will need:
 
 ### Composer, Dependencies ###
 
-To install using composer, use this require line
+To install using composer, use this require line (for production)
 
-`"tomwalder/php-gds": "dev-master"`
-
-I use the Google php api client for low-level access to Datastore services, so that will get pulled in to your project too.
-Since the Google php api client development version is used, you also need to add 
-
-`"minimum-stability": "dev"` to your composer file.
+`"tomwalder/php-gds": "v1.2.0"`
 
 ### Running the examples ###
 
