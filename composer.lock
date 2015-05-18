@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "41b52af54d409f1bd29e622bc91a37cd",
+    "hash": "01f189e10b72a820dc2d85fb969901c5",
     "packages": [
         {
             "name": "google/apiclient",
-            "version": "dev-master",
+            "version": "1.1.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/google/google-api-php-client.git",
-                "reference": "9c0cedd51cd780c2a6c235655f981abc041e02c3"
+                "reference": "523430f21a92c54172099d12d0f31d40f3de67e9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/google/google-api-php-client/zipball/9c0cedd51cd780c2a6c235655f981abc041e02c3",
-                "reference": "9c0cedd51cd780c2a6c235655f981abc041e02c3",
+                "url": "https://api.github.com/repos/google/google-api-php-client/zipball/523430f21a92c54172099d12d0f31d40f3de67e9",
+                "reference": "523430f21a92c54172099d12d0f31d40f3de67e9",
                 "shasum": ""
             },
             "require": {
@@ -46,15 +46,13 @@
             "keywords": [
                 "google"
             ],
-            "time": "2015-01-10 11:06:06"
+            "time": "2015-05-17 00:43:01"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "google/apiclient": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
