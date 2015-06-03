@@ -63,6 +63,13 @@ class Entity
     private $arr_data = [];
 
     /**
+     * The Schema for the Entity, if known.
+     *
+     * @var Schema|null
+     */
+    private $obj_schema = NULL;
+
+    /**
      * Get the Entity Kind
      *
      * @return null
@@ -176,10 +183,12 @@ class Entity
      * Set the Entity's ancestry. This either an array of paths OR another Entity
      *
      * @param $mix_path
+     * @return $this
      */
     public function setAncestry($mix_path)
     {
         $this->mix_ancestry = $mix_path;
+        return $this;
     }
 
     /**
@@ -190,6 +199,29 @@ class Entity
     public function getAncestry()
     {
         return $this->mix_ancestry;
+    }
+
+    /**
+     * The Schema for the Entity, if known.
+     *
+     * @return Schema|null
+     */
+    public function getSchema()
+    {
+        return $this->obj_schema;
+    }
+
+    /**
+     * Set the Schema for the Entity
+     *
+     * @param Schema $obj_schema
+     * @return $this
+     */
+    public function setSchema(Schema $obj_schema)
+    {
+        $this->obj_schema = $obj_schema;
+        $this->setKind($obj_schema->getKind());
+        return $this;
     }
 
 }

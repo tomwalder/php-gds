@@ -17,10 +17,11 @@
 namespace GDS;
 
 /**
- * GDS Datastore
+ * A Kind-specific data store.
+ *
+ * MUST be for a specific Entity Kind (as defined by the Schema or Kind passed in on construction)
  *
  * @author Tom Walder <tom@docnet.nu>
- * @package GDS
  */
 class Store
 {
@@ -38,13 +39,6 @@ class Store
      * @var Schema
      */
     private $obj_schema = NULL;
-
-    /**
-     * Mapper
-     *
-     * @var Mapper|null
-     */
-    private $obj_mapper = NULL;
 
     /**
      * The last GQL query
@@ -92,14 +86,13 @@ class Store
     {
         $this->obj_gateway = $obj_gateway;
         $this->obj_schema = $this->determineSchema($mix_schema);
-        $this->obj_mapper = new Mapper($this->obj_schema);
         $this->str_last_query = 'SELECT * FROM `' . $this->obj_schema->getKind() . '` ORDER BY __key__ ASC';
     }
 
     /**
      * Set up the Schema for the current data model, based on the provided Kind/Schema/buildSchema
      *
-     * @param $mix_schema
+     * @param Schema|string|null $mix_schema
      * @return Schema
      * @throws \Exception
      */
@@ -127,23 +120,10 @@ class Store
         if($arr_entities instanceof Entity) {
             $arr_entities = [$arr_entities];
         }
-        $arr_google_entities = $this->obj_mapper->mapGoogleEntities($arr_entities);
         $this->obj_gateway
+            ->withSchema($this->obj_schema)
             ->withTransaction($this->consumeTransaction())
-            ->putMulti($arr_google_entities);
-
-        // Map new Auto Insert Key IDs from the Google_Entity objects back onto the GDS\Entities
-        // We don't need to map the full path as it shouldn't have changed. We expect the order of items to match.
-        foreach ($arr_google_entities as $int_index => $obj_google_entity) {
-            $obj_gds_entity = $arr_entities[$int_index];
-            if(NULL === $obj_gds_entity->getKeyId() && NULL === $obj_gds_entity->getKeyName()) {
-                $arr_path = $obj_google_entity->getKey()->getPath();
-                $arr_path_end = end($arr_path);
-                if(isset($arr_path_end['id'])) {
-                    $obj_gds_entity->setKeyId($arr_path_end['id']);
-                }
-            }
-        }
+            ->putMulti($arr_entities);
     }
 
     /**
@@ -157,10 +137,10 @@ class Store
         if($arr_entities instanceof Entity) {
             $arr_entities = [$arr_entities];
         }
-        $arr_keys = $this->obj_mapper->createKeys($arr_entities);
         return $this->obj_gateway
+            ->withSchema($this->obj_schema)
             ->withTransaction($this->consumeTransaction())
-            ->deleteMulti($arr_keys);
+            ->deleteMulti($arr_entities);
     }
 
     /**
@@ -173,11 +153,10 @@ class Store
      */
     public function fetchById($str_id)
     {
-        return $this->mapOneFromResults(
-            $this->obj_gateway
-                ->withTransaction($this->str_transaction_id)
-                ->fetchById($this->obj_schema->getKind(), $str_id)
-        );
+        return $this->obj_gateway
+            ->withSchema($this->obj_schema)
+            ->withTransaction($this->str_transaction_id)
+            ->fetchById($str_id);
     }
 
     /**
@@ -188,11 +167,10 @@ class Store
      */
     public function fetchByIds(array $arr_ids)
     {
-        return $this->mapFromResults(
-            $this->obj_gateway
-                ->withTransaction($this->str_transaction_id)
-                ->fetchByIds($this->obj_schema->getKind(), $arr_ids)
-        );
+        return $this->obj_gateway
+            ->withSchema($this->obj_schema)
+            ->withTransaction($this->str_transaction_id)
+            ->fetchByIds($arr_ids);
     }
 
     /**
@@ -205,11 +183,10 @@ class Store
      */
     public function fetchByName($str_name)
     {
-        return $this->mapOneFromResults(
-            $this->obj_gateway
-                ->withTransaction($this->str_transaction_id)
-                ->fetchByName($this->obj_schema->getKind(), $str_name)
-        );
+        return $this->obj_gateway
+            ->withSchema($this->obj_schema)
+            ->withTransaction($this->str_transaction_id)
+            ->fetchByName($str_name);
     }
 
     /**
@@ -222,17 +199,18 @@ class Store
      */
     public function fetchByNames(array $arr_names)
     {
-        return $this->mapFromResults(
-            $this->obj_gateway
-                ->withTransaction($this->str_transaction_id)
-                ->fetchByNames($this->obj_schema->getKind(), $arr_names)
-        );
+        return $this->obj_gateway
+            ->withSchema($this->obj_schema)
+            ->withTransaction($this->str_transaction_id)
+            ->fetchByNames($arr_names);
     }
 
     /**
      * Fetch Entities based on a GQL query
      *
      * Convert any Entity parameters into Keys using the Mapper
+     *
+     * @todo FIXME, using v1.x Mapper
      *
      * @param $str_query
      * @param array|null $arr_params
@@ -256,6 +234,8 @@ class Store
     /**
      * Fetch ONE Entity based on a GQL query
      *
+     * @todo FIXME, mapping
+     *
      * @param $str_query
      * @param array|null $arr_params
      * @return Entity
@@ -266,6 +246,7 @@ class Store
             $this->query($str_query, $arr_params);
         }
         $arr_results = $this->obj_gateway
+            ->withSchema($this->obj_schema)
             ->withTransaction($this->str_transaction_id)
             ->gql($this->str_last_query . ' LIMIT 1', $this->arr_last_params);
         return $this->mapOneFromResults($arr_results);
@@ -273,6 +254,8 @@ class Store
 
     /**
      * Fetch Entities (optionally based on a GQL query)
+     *
+     * @todo FIXME, mapping
      *
      * @param $str_query
      * @param array|null $arr_params
@@ -284,6 +267,7 @@ class Store
             $this->query($str_query, $arr_params);
         }
         $arr_results = $this->obj_gateway
+            ->withSchema($this->obj_schema)
             ->withTransaction($this->str_transaction_id)
             ->gql($this->str_last_query, $this->arr_last_params);
         return $this->mapFromResults($arr_results);
@@ -291,6 +275,8 @@ class Store
 
     /**
      * Fetch (a page of) Entities (optionally based on a GQL query)
+     *
+     * @todo FIXME, mapping
      *
      * @param $int_page_size
      * @param null $mix_offset
@@ -316,6 +302,7 @@ class Store
             $arr_params = NULL;
         }
         $arr_results = $this->obj_gateway
+            ->withSchema($this->obj_schema)
             ->withTransaction($this->str_transaction_id)
             ->gql($this->str_last_query . " LIMIT {$int_page_size} {$str_offset}", $arr_params);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
@@ -325,12 +312,15 @@ class Store
     /**
      * Fetch all of the entities in a particular group
      *
+     * @todo FIXME, mapping
+     *
      * @param Entity $obj_entity
      * @return Entity[]
      */
     public function fetchEntityGroup(Entity $obj_entity)
     {
         $arr_results = $this->obj_gateway
+            ->withSchema($this->obj_schema)
             ->withTransaction($this->str_transaction_id)
             ->gql("SELECT * FROM `" . $this->obj_schema->getKind() . "` WHERE __key__ HAS ANCESTOR @ancestorKey", [
                 'ancestorKey' => $this->obj_mapper->createKey($obj_entity)
@@ -364,36 +354,6 @@ class Store
     }
 
     /**
-     * Map a single query result into a Entity object
-     *
-     * @param $arr_results
-     * @return Entity|null
-     */
-    private function mapOneFromResults($arr_results)
-    {
-        $arr_entities = $this->mapFromResults($arr_results);
-        if(count($arr_entities) > 0) {
-            return $arr_entities[0];
-        }
-        return NULL;
-    }
-
-    /**
-     * Map all query results from the Gateway into Entity objects
-     *
-     * @param \Google_Service_Datastore_EntityResult[] $arr_results
-     * @return Entity[]
-     */
-    private function mapFromResults(array $arr_results)
-    {
-        $arr_entities = [];
-        foreach ($arr_results as $obj_result) {
-            $arr_entities[] = $this->obj_mapper->mapGDSEntity($obj_result, $this->createEntity());
-        }
-        return $arr_entities;
-    }
-
-    /**
      * Create a new instance of this GDS Entity class
      *
      * @param array|null $arr_data
@@ -401,7 +361,7 @@ class Store
      */
     public final function createEntity($arr_data = NULL)
     {
-        $obj_entity = (new $this->str_entity_class())->setKind($this->obj_schema->getKind());
+        $obj_entity = (new $this->str_entity_class())->setSchema($this->obj_schema);
         if(NULL !== $arr_data) {
             foreach ($arr_data as $str_property => $mix_value) {
                 $obj_entity->__set($str_property, $mix_value);
@@ -424,6 +384,10 @@ class Store
         if(class_exists($str_class)) {
             if(is_a($str_class, '\\GDS\\Entity', TRUE)) {
                 $this->str_entity_class = $str_class;
+
+                // @todo see if this makes sense...
+                $this->obj_schema->setEntityClass($str_class);
+
             } else {
                 throw new \Exception('Cannot set an Entity class that does not extend "GDS\Entity": ' . $str_class);
             }
@@ -436,11 +400,12 @@ class Store
     /**
      * Begin a transaction
      *
+     * @param bool $bol_cross_group
      * @return $this
      */
-    public function beginTransaction()
+    public function beginTransaction($bol_cross_group = FALSE)
     {
-        $this->str_transaction_id = $this->obj_gateway->beginTransaction();
+        $this->str_transaction_id = $this->obj_gateway->beginTransaction($bol_cross_group);
         return $this;
     }
 

@@ -17,7 +17,7 @@
 namespace GDS;
 
 /**
- * GDS Model Schema
+ * GDS Entity Schema
  *
  * @author Tom Walder <tom@docnet.nu>
  * @package GDS
