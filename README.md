@@ -4,6 +4,14 @@
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
+## Version 2.x ALPHA ##
+
+**Please note, this 2.0-series branch is in ALPHA and not suitable (yet) for production**
+
+The primary new feature is support for the native Google Protocol Buffer method of access to Datastore, which will improve performance.
+
+In addition, the documentation is yet to be updated fully.
+
 ## Table of Contents ##
 
 - [Basic Examples](#basic-examples)
@@ -15,6 +23,7 @@ This library is intended to make it easier for you to get started with and to us
 - [Entity Groups, Hierarchy & Ancestors](#entity-groups-hierarchy--ancestors)
 - [Transactions](#transactions)
 - [More About Google Cloud Datastore](#more-about-google-cloud-datastore)
+- [Unit Tests](#unit-tests)
 - [Footnotes](#footnotes)
 
 ## Basic Examples ##
@@ -317,6 +326,10 @@ A few highlighted topics you might want to read up on
 - [Indexes](https://cloud.google.com/datastore/docs/concepts/indexes)
 - [Ancestors](https://cloud.google.com/datastore/docs/concepts/entities#Datastore_Ancestor_paths)
 - [More about Datastore Transactions](https://cloud.google.com/datastore/docs/concepts/transactions)
+
+## Unit Tests ##
+
+A full suite of unit tests is in the works. [Click here for more details](UnitTests.md).
 
 ## Footnotes ##
 
