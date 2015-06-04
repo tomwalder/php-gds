@@ -42,15 +42,20 @@ class ProtoBuf extends \GDS\Gateway
      * @todo Review use of $_SERVER.
      * Google propose a 'better' way of auto detecting app id,
      * but it's not perfect (does not work) in the dev environment
+     * \google\appengine\api\app_identity\AppIdentityService::getApplicationId();
      *
-     * @param $str_dataset
-     * @param null $str_namespace
+     * @param null|string $str_dataset
+     * @param null|string $str_namespace
+     * @throws \Exception
      */
     public function __construct($str_dataset = NULL, $str_namespace = NULL)
     {
         if(NULL === $str_dataset) {
-            $this->str_dataset_id = $_SERVER['APPLICATION_ID'];
-            // \google\appengine\api\app_identity\AppIdentityService::getApplicationId();
+            if(isset($_SERVER['APPLICATION_ID'])) {
+                $this->str_dataset_id = $_SERVER['APPLICATION_ID'];
+            } else {
+                throw new \Exception('Could not determine DATASET, please pass to ' . get_class($this) . '::__construct()');
+            }
         } else {
             $this->str_dataset_id = $str_dataset;
         }
