@@ -76,16 +76,18 @@ class Store
     private $str_transaction_id = NULL;
 
     /**
-     * Gateway and Schema/Kind required on construction
+     * Gateway and Schema/Kind can be supplied on construction
      *
-     * @param Gateway $obj_gateway
+     * @todo We'll do our best to use sensible defaults
+     *
      * @param Schema|string|null $mix_schema
+     * @param Gateway $obj_gateway
      * @throws \Exception
      */
-    public function __construct(Gateway $obj_gateway, $mix_schema = NULL)
+    public function __construct($mix_schema = NULL, Gateway $obj_gateway = NULL)
     {
-        $this->obj_gateway = $obj_gateway;
         $this->obj_schema = $this->determineSchema($mix_schema);
+        $this->obj_gateway = (NULL === $obj_gateway) ? new \GDS\Gateway\ProtoBuf() : $obj_gateway;
         $this->str_last_query = 'SELECT * FROM `' . $this->obj_schema->getKind() . '` ORDER BY __key__ ASC';
     }
 
