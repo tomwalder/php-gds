@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-use google\appengine\testing\ApiProxyTestBase;
 
 /**
  * Tests for Protocol Buffer Deletes
  *
  * @author Tom Walder <tom@docnet.nu>
  */
-class ProtoBufDeleteTest extends ApiProxyTestBase {
+class ProtoBufDeleteTest extends GDSTest {
 
     /**
      * Delete one
@@ -41,8 +40,7 @@ class ProtoBufDeleteTest extends ApiProxyTestBase {
 
         $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
 
-        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
-        $obj_store = new GDS\Store($obj_gateway, 'Book');
+        $obj_store = $this->createBasicStore();
         $obj_result = $obj_store->delete($obj_store->createEntity()->setKeyId(9876543321));
 
         $this->assertEquals($obj_result, TRUE);
@@ -74,8 +72,7 @@ class ProtoBufDeleteTest extends ApiProxyTestBase {
 
         $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
 
-        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
-        $obj_store = new GDS\Store($obj_gateway, 'Book');
+        $obj_store = $this->createBasicStore();
         $obj_result = $obj_store->delete([
             $obj_store->createEntity()->setKeyId(9876543321),
             $obj_store->createEntity()->setKeyId(9876543322),

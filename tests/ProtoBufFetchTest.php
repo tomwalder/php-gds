@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-use google\appengine\testing\ApiProxyTestBase;
 
 /**
  * Tests for Protocol Buffer Fetching
  *
  * @author Tom Walder <tom@docnet.nu>
  */
-class ProtoBufFetchTest extends ApiProxyTestBase {
+class ProtoBufFetchTest extends GDSTest {
 
     /**
      * Fetch by Name
@@ -39,9 +38,7 @@ class ProtoBufFetchTest extends ApiProxyTestBase {
 
         $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $obj_request, new \google\appengine\datastore\v4\LookupResponse());
 
-        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
-        $obj_store = new GDS\Store($obj_gateway, 'Book');
-        $obj_result = $obj_store->fetchByName('Romeo');
+        $obj_result = $this->createBasicStore()->fetchByName('Romeo');
         $this->assertEquals($obj_result, NULL);
 
         $this->apiProxyMock->verify();
@@ -71,9 +68,7 @@ class ProtoBufFetchTest extends ApiProxyTestBase {
 
         $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $obj_request, new \google\appengine\datastore\v4\LookupResponse());
 
-        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
-        $obj_store = new GDS\Store($obj_gateway, 'Book');
-        $obj_result = $obj_store->fetchByNames(['Romeo', 'Juliet']);
+        $obj_result = $this->createBasicStore()->fetchByNames(['Romeo', 'Juliet']);
         $this->assertEquals($obj_result, []);
 
         $this->apiProxyMock->verify();
@@ -95,9 +90,7 @@ class ProtoBufFetchTest extends ApiProxyTestBase {
 
         $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $obj_request, new \google\appengine\datastore\v4\LookupResponse());
 
-        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
-        $obj_store = new GDS\Store($obj_gateway, 'Book');
-        $obj_result = $obj_store->fetchById(123456789);
+        $obj_result = $this->createBasicStore()->fetchById(123456789);
         $this->assertEquals($obj_result, NULL);
 
         $this->apiProxyMock->verify();
@@ -127,9 +120,7 @@ class ProtoBufFetchTest extends ApiProxyTestBase {
 
         $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $obj_request, new \google\appengine\datastore\v4\LookupResponse());
 
-        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
-        $obj_store = new GDS\Store($obj_gateway, 'Book');
-        $obj_result = $obj_store->fetchByIds([123456789, 123456790]);
+        $obj_result = $this->createBasicStore()->fetchByIds([123456789, 123456790]);
         $this->assertEquals($obj_result, []);
 
         $this->apiProxyMock->verify();

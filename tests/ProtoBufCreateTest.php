@@ -14,14 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-use google\appengine\testing\ApiProxyTestBase;
 
 /**
  * Tests for Protocol Buffer Creates
  *
  * @author Tom Walder <tom@docnet.nu>
  */
-class ProtoBufCreateTest extends ApiProxyTestBase {
+class ProtoBufCreateTest extends GDSTest {
 
     /**
      * Insert One
@@ -47,8 +46,7 @@ class ProtoBufCreateTest extends ApiProxyTestBase {
 
         $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
 
-        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
-        $obj_store = new GDS\Store($obj_gateway, 'Book');
+        $obj_store = $this->createBasicStore();
         $obj_ex = NULL;
         try {
             $obj_store->upsert($obj_store->createEntity([
@@ -85,8 +83,7 @@ class ProtoBufCreateTest extends ApiProxyTestBase {
 
         $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
 
-        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
-        $obj_store = new GDS\Store($obj_gateway, 'Book');
+        $obj_store = $this->createBasicStore();
         $obj_ex = NULL;
         $obj_store->upsert(
             $obj_store->createEntity([

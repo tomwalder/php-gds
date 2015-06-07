@@ -2,8 +2,11 @@
 /**
  * Any set-up needed to run the tests
  */
-require(dirname(__FILE__) . '/../vendor/autoload.php');
 
+// Autoloader for GDS
+require_once(dirname(__FILE__) . '/../vendor/autoload.php');
+
+// Autoloader for the App Engine SDK
 foreach($_SERVER['argv'] as $str_arg) {
     if(strpos($str_arg, '=')) {
         $arr_kv_pair = explode('=', $str_arg, 2);
@@ -12,3 +15,6 @@ foreach($_SERVER['argv'] as $str_arg) {
         }
     }
 }
+
+// Base Test Files
+require_once(dirname(__FILE__) . '/base/GDSTest.php');

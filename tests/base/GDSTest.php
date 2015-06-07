@@ -14,24 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+use google\appengine\testing\ApiProxyTestBase;
 
 /**
- * Tests for Protocol Buffer Errors
+ * Contains shared code for our tests
  *
  * @author Tom Walder <tom@docnet.nu>
  */
-class ProtoBufErrorTest extends GDSTest {
-
+abstract class GDSTest extends ApiProxyTestBase
+{
     /**
-     * Missing Dataset
+     * Create a basic Store & Gateway
+     *
+     * @return \GDS\Store
      */
-    public function testMissingDataset()
+    protected function createBasicStore()
     {
-        $obj_ex = NULL;
-        try {
-            $obj_gateway = new GDS\Gateway\ProtoBuf();
-        } catch (\Exception $obj_ex) {}
-        $this->assertEquals($obj_ex, new \Exception('Could not determine DATASET, please pass to GDS\Gateway\ProtoBuf::__construct()'));
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        return $obj_store;
     }
-
 }
