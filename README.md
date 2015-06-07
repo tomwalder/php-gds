@@ -349,7 +349,7 @@ A few highlighted topics you might want to read up on
 
 ## Unit Tests ##
 
-A full suite of unit tests is in the works. [Click here for more details](UnitTests.md).
+A full suite of unit tests is in the works. [Click here for more details](tests/).
 
 ## Footnotes ##
 
