@@ -12,7 +12,7 @@ The documentation is not yet fully representative of 2.x implementation.
 
 ## Table of Contents ##
 
-- [Basic Examples](#basic-examples)
+- [Examples](#examples)
 - [Changes in 2.0](#changes-in-version-20)
 - [Getting Started](#getting-started)
 - [Defining Your Model](#defining-your-model)
@@ -25,13 +25,12 @@ The documentation is not yet fully representative of 2.x implementation.
 - [Unit Tests](#unit-tests)
 - [Footnotes](#footnotes)
 
-## Basic Examples ##
+## Examples ##
 
 I find examples a great way to decide if I want to even try out a library, so here's a couple for you. 
-Check out the examples folder for full code samples.
 
 ```php
-// Build the entity
+// Build a new entity
 $obj_book = new GDS\Entity();
 $obj_book->title = 'Romeo and Juliet';
 $obj_book->author = 'William Shakespeare';
@@ -42,27 +41,27 @@ $obj_store = new GDS\Store('Book');
 $obj_store->upsert($obj_book);
 ```
 
-We use a `GDS\Store` to read and write `GDS\Entity` objects to and from Datastore. 
-
-These initial examples assume you are either running a Google AppEngine application or in a local AppEngine dev environment. 
-In both of these cases, we can auto detect the **dataset** and use the default Protocol Buffer Gateway.
- 
-See below for [Alternative Array Syntax](#alternative-array-syntax) for creating Entities.
-
-Here's another example - fetch all the Books from the Datastore and display their titles and ISBN numbers
+Now let's fetch all the Books from the Datastore and display their titles and ISBN numbers
 
 ```php
 $obj_store = new GDS\Store('Book');
 foreach($obj_store->fetchAll() as $obj_book) {
-    echo "Title: {$obj_book->title}, ISBN: {$obj_book->isbn}", PHP_EOL;
+    echo "Title: {$obj_book->title}, ISBN: {$obj_book->isbn} <br />", PHP_EOL;
 }
 ```
 
+### More Examples ###
+
+These initial examples assume you are either running a Google AppEngine application or in a local AppEngine dev environment. 
+In both of these cases, we can auto detect the **dataset** and use the default ***Protocol Buffer Gateway*** (new in 2.0).
+
+We use a `GDS\Store` to read and write `GDS\Entity` objects to and from Datastore. 
+
 These examples use the generic `GDS\Entity` class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on custom Schemas and indexed fields.
 
-> @todo Types of Gateway and requirements for each. 
-> Simplest example is App Engine or App Engine development environment, 
-> where we can detect the dataset and default to a ProtoBuf Gateway
+See below for [Alternative Array Syntax](#alternative-array-syntax) for creating Entities.
+
+Check out the [examples](examples/) folder for many more and fuller code samples.
 
 ### Using the Google PHP API and the JSON Datastore API ###
 
@@ -75,8 +74,6 @@ $obj_client = GDS\Gateway\GoogleAPIClient::createGoogleClient(APP_NAME, ACCOUNT_
 $obj_gateway = new GDS\Gateway\GoogleAPIClient($obj_client, DATASET_ID);
 $obj_book_store = new GDS\Store('Book', $obj_gateway);
 ```
-
-The rest of the examples above are the same.
 
 ### Demo App ###
 
