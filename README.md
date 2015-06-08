@@ -8,15 +8,12 @@ This library is intended to make it easier for you to get started with and to us
 
 **Please note, this 2.0-series branch is in ALPHA and not suitable (yet) for production**
 
-The primary new feature is support for the native Google Protocol Buffer method of access to Datastore, which will improve performance.
-
-In addition, the documentation is yet to be updated fully.
-
-> @todo Version 1.x documentation can be found here...
+The documentation is not yet fully representative of 2.x implementation.
 
 ## Table of Contents ##
 
 - [Basic Examples](#basic-examples)
+- [Changes in 2.0](#changes-in-version-2x)
 - [Getting Started](#getting-started)
 - [Defining Your Model](#defining-your-model)
 - [Creating Records](#creating-records)
@@ -39,6 +36,7 @@ $obj_book = new GDS\Entity();
 $obj_book->title = 'Romeo and Juliet';
 $obj_book->author = 'William Shakespeare';
 $obj_book->isbn = '1840224339';
+
 // Write it to Datastore
 $obj_store = new GDS\Store('Book');
 $obj_store->upsert($obj_book);
@@ -87,6 +85,15 @@ A trivial guest book application
 Application: http://php-gds-demo.appspot.com/
 
 Code: https://github.com/tomwalder/php-gds-demo
+
+## Changes in Version 2.0 ##
+
+The primary new feature is support for the native Google Protocol Buffer method of access to Datastore, which will improve performance and make it even easier to get started in AppEngine environments (dev/local and live).
+
+The primary BC-break is the re-ordering of construction parameters for the `GDS\Store` object.
+
+`GDS\Store::__construct(<Kind or Schema>, <Gateway>)`
+
 
 ## Getting Started ##
 
