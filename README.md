@@ -13,7 +13,7 @@ The documentation is not yet fully representative of 2.x implementation.
 ## Table of Contents ##
 
 - [Basic Examples](#basic-examples)
-- [Changes in 2.0](#changes-in-version-2x)
+- [Changes in 2.0](#changes-in-version-20)
 - [Getting Started](#getting-started)
 - [Defining Your Model](#defining-your-model)
 - [Creating Records](#creating-records)
