@@ -236,8 +236,6 @@ class Store
     /**
      * Fetch ONE Entity based on a GQL query
      *
-     * @todo FIXME, mapping
-     *
      * @param $str_query
      * @param array|null $arr_params
      * @return Entity
@@ -251,13 +249,11 @@ class Store
             ->withSchema($this->obj_schema)
             ->withTransaction($this->str_transaction_id)
             ->gql($this->str_last_query . ' LIMIT 1', $this->arr_last_params);
-        return $this->mapOneFromResults($arr_results);
+        return count($arr_results) > 0 ? $arr_results[0] : NULL;
     }
 
     /**
      * Fetch Entities (optionally based on a GQL query)
-     *
-     * @todo FIXME, mapping
      *
      * @param $str_query
      * @param array|null $arr_params
@@ -272,13 +268,11 @@ class Store
             ->withSchema($this->obj_schema)
             ->withTransaction($this->str_transaction_id)
             ->gql($this->str_last_query, $this->arr_last_params);
-        return $this->mapFromResults($arr_results);
+        return $arr_results;
     }
 
     /**
      * Fetch (a page of) Entities (optionally based on a GQL query)
-     *
-     * @todo FIXME, mapping
      *
      * @param $int_page_size
      * @param null $mix_offset
@@ -314,7 +308,7 @@ class Store
     /**
      * Fetch all of the entities in a particular group
      *
-     * @todo FIXME, mapping
+     * @todo FIXME, mapping for createKey
      *
      * @param Entity $obj_entity
      * @return Entity[]
