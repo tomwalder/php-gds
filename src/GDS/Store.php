@@ -308,7 +308,7 @@ class Store
             ->withTransaction($this->str_transaction_id)
             ->gql($this->str_last_query . " LIMIT {$int_page_size} {$str_offset}", $arr_params);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
-        return $this->mapFromResults($arr_results);
+        return $arr_results;
     }
 
     /**
@@ -328,7 +328,7 @@ class Store
                 'ancestorKey' => $this->obj_mapper->createKey($obj_entity)
             ]);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
-        return $this->mapFromResults($arr_results);
+        return $arr_results;
     }
 
     /**

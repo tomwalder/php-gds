@@ -22,6 +22,7 @@ use google\appengine\datastore\v4\CommitRequest\Mode;
 use google\appengine\datastore\v4\CommitResponse;
 use google\appengine\datastore\v4\LookupRequest;
 use google\appengine\datastore\v4\LookupResponse;
+use google\appengine\datastore\v4\QueryResultBatch;
 use google\appengine\datastore\v4\RunQueryRequest;
 use google\appengine\datastore\v4\RunQueryResponse;
 use google\appengine\runtime\ApiProxy;
@@ -258,18 +259,54 @@ class ProtoBuf extends \GDS\Gateway
     /**
      * Fetch some Entities, based on the supplied GQL and, optionally, parameters
      *
-     * @todo
+     * @todo Handle parameters
+     * @todo break out for local dev GQL interpretation
      */
-    public function gql($str_gql, $arr_params = NULL){}
+    public function gql($str_gql, $arr_params = NULL)
+    {
+        $obj_query_request = $this->setupRunQuery();
+        $obj_gql_query = $obj_query_request->mutableGqlQuery();
+        $obj_gql_query->setQueryString($str_gql);
+        $obj_gql_query->setAllowLiteral(TRUE);
+        if(NULL !== $arr_params) {
+            $this->addParamsToQuery($obj_gql_query, $arr_params);
+        }
+        $obj_gql_response = $this->execute('RunQuery', $obj_query_request, new RunQueryResponse());
+        $arr_mapped_results = $this->createMapper()->mapFromResults($obj_gql_response->getBatch()->getEntityResultList());
+        $this->obj_schema = NULL; // Consume Schema
+        return $arr_mapped_results;
+    }
+
+    /**
+     * Add Parameters to a GQL Query object
+     *
+     * @todo Add support for non-cursor parameters (see API Client version)
+     *
+     * @param \google\appengine\datastore\v4\GqlQuery $obj_query
+     * @param array $arr_params
+     * @throws \Exception
+     */
+    private function addParamsToQuery(\google\appengine\datastore\v4\GqlQuery $obj_query, array $arr_params)
+    {
+        if(count($arr_params) > 0) {
+            foreach ($arr_params as $str_name => $mix_value) {
+                $obj_arg = $obj_query->addNameArg();
+                $obj_arg->setName($str_name);
+                if ('startCursor' == $str_name) {
+                    $obj_arg->setCursor($mix_value);
+                } else {
+                    throw new \Exception(__METHOD__ . '() unimplemented for non-start-cursor args');
+                }
+            }
+        }
+    }
 
     /**
      * Get the end cursor from the last response
-     *
-     * @todo
      */
     public function getEndCursor()
     {
-        // Evaluate $this->obj_last_response
+        return $this->obj_last_response->getBatch()->getEndCursor();
     }
 
     /**
