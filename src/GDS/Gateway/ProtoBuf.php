@@ -302,7 +302,7 @@ class ProtoBuf extends \GDS\Gateway
                     $obj_val = $obj_arg->mutableValue();
                     if($mix_value instanceof Entity) {
                         // @todo review re-use of Mapper
-                        $obj_key = $obj_val->getKeyValue();
+                        $obj_key = $obj_val->mutableKeyValue();
                         $this->createMapper()->configureGoogleKey($obj_key, $mix_value);
                     } elseif($mix_value instanceof \DateTime) {
                         $obj_val->setTimestampMicrosecondsValue($mix_value->format('Uu'));
