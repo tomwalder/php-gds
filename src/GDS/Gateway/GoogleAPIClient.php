@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 namespace GDS\Gateway;
+use GDS\Entity;
 
 /**
  * GoogleAPIClient Datastore Gateway
@@ -288,8 +289,9 @@ class GoogleAPIClient extends \GDS\Gateway
                     $obj_arg->setCursor($mix_value);
                 } else {
                     $obj_val = new \Google_Service_Datastore_Value();
-                    if($mix_value instanceof \Google_Service_Datastore_Key) {
-                        $obj_val->setKeyValue($mix_value);
+                    if($mix_value instanceof Entity) {
+                        // @todo review re-use of Mapper
+                        $obj_val->setKeyValue($this->createMapper()->createKey($mix_value));
                     } elseif($mix_value instanceof \DateTime) {
                         $obj_val->setDateTimeValue($mix_value->format(\DateTime::ATOM));
                     } elseif (is_int($mix_value)) {
