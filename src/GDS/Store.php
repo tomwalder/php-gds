@@ -210,9 +210,7 @@ class Store
     /**
      * Fetch Entities based on a GQL query
      *
-     * Convert any Entity parameters into Keys using the Mapper
-     *
-     * @todo FIXME, using v1.x Mapper
+     * Supported parameter types: String, Integer, DateTime, GDS\Entity
      *
      * @param $str_query
      * @param array|null $arr_params
@@ -221,13 +219,6 @@ class Store
     public function query($str_query, $arr_params = NULL)
     {
         $this->str_last_query = $str_query;
-        if(is_array($arr_params)) {
-            foreach($arr_params as $str_key => $mix_val) {
-                if($mix_val instanceof Entity) {
-                    $arr_params[$str_key] = $this->obj_mapper->createKey($mix_val);
-                }
-            }
-        }
         $this->arr_last_params = $arr_params;
         $this->str_last_cursor = NULL;
         return $this;
@@ -308,8 +299,6 @@ class Store
     /**
      * Fetch all of the entities in a particular group
      *
-     * @todo FIXME, mapping for createKey
-     *
      * @param Entity $obj_entity
      * @return Entity[]
      */
@@ -319,7 +308,7 @@ class Store
             ->withSchema($this->obj_schema)
             ->withTransaction($this->str_transaction_id)
             ->gql("SELECT * FROM `" . $this->obj_schema->getKind() . "` WHERE __key__ HAS ANCESTOR @ancestorKey", [
-                'ancestorKey' => $this->obj_mapper->createKey($obj_entity)
+                'ancestorKey' => $obj_entity
             ]);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
         return $arr_results;
