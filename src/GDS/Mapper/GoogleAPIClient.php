@@ -144,7 +144,7 @@ class GoogleAPIClient extends \GDS\Mapper
      * @param Entity $obj_gds_entity
      * @return \Google_Service_Datastore_Key
      */
-    protected function createKey(Entity $obj_gds_entity)
+    public function createKey(Entity $obj_gds_entity)
     {
         $obj_key = new \Google_Service_Datastore_Key();
         $obj_key->setPath($this->buildKeyPath($obj_gds_entity));

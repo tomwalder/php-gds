@@ -15,11 +15,13 @@
  * limitations under the License.
  */
 namespace GDS\Gateway;
+use GDS\Entity;
 use google\appengine\datastore\v4\BeginTransactionRequest;
 use google\appengine\datastore\v4\BeginTransactionResponse;
 use google\appengine\datastore\v4\CommitRequest;
 use google\appengine\datastore\v4\CommitRequest\Mode;
 use google\appengine\datastore\v4\CommitResponse;
+use google\appengine\datastore\v4\Key;
 use google\appengine\datastore\v4\LookupRequest;
 use google\appengine\datastore\v4\LookupResponse;
 use google\appengine\datastore\v4\QueryResultBatch;
@@ -259,8 +261,12 @@ class ProtoBuf extends \GDS\Gateway
     /**
      * Fetch some Entities, based on the supplied GQL and, optionally, parameters
      *
-     * @todo Handle parameters
      * @todo break out for local dev GQL interpretation
+     *
+     * @param string $str_gql
+     * @param array|null $arr_params
+     * @return \GDS\Entity[]|null
+     * @throws \Exception
      */
     public function gql($str_gql, $arr_params = NULL)
     {
@@ -280,8 +286,6 @@ class ProtoBuf extends \GDS\Gateway
     /**
      * Add Parameters to a GQL Query object
      *
-     * @todo Add support for non-cursor parameters (see API Client version)
-     *
      * @param \google\appengine\datastore\v4\GqlQuery $obj_query
      * @param array $arr_params
      * @throws \Exception
@@ -295,7 +299,18 @@ class ProtoBuf extends \GDS\Gateway
                 if ('startCursor' == $str_name) {
                     $obj_arg->setCursor($mix_value);
                 } else {
-                    throw new \Exception(__METHOD__ . '() unimplemented for non-start-cursor args');
+                    $obj_val = $obj_arg->mutableValue();
+                    if($mix_value instanceof Entity) {
+                        // @todo review re-use of Mapper
+                        $obj_key = $obj_val->getKeyValue();
+                        $this->createMapper()->configureGoogleKey($obj_key, $mix_value);
+                    } elseif($mix_value instanceof \DateTime) {
+                        $obj_val->setTimestampMicrosecondsValue($mix_value->format('Uu'));
+                    } elseif (is_int($mix_value)) {
+                        $obj_val->setIntegerValue($mix_value);
+                    } else {
+                        $obj_val->setStringValue($mix_value);
+                    }
                 }
             }
         }
