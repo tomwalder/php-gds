@@ -164,4 +164,40 @@ class ProtoBufFetchTest extends GDSTest {
         $this->apiProxyMock->verify();
     }
 
+    /**
+     * Fetch with no schema for all supported property types
+     *
+     * @todo consider DateTime return type... string or DateTime object?
+     */
+    public function testFetchByIdWithVariantDataTypeResult()
+    {
+        $obj_response = new \google\appengine\datastore\v4\LookupResponse();
+        $obj_found = $obj_response->addFound();
+        $obj_entity = $obj_found->mutableEntity();
+        $obj_result_key = $obj_entity->mutableKey();
+        $obj_result_kpe = $obj_result_key->addPathElement();
+        $obj_result_kpe->setKind('Person');
+        $obj_result_kpe->setId(123456789);
+
+        $obj_entity->addProperty()->setName('name')->mutableValue()->setIndexed(TRUE)->setStringValue('Tom');
+        $obj_entity->addProperty()->setName('age')->mutableValue()->setIndexed(TRUE)->setIntegerValue(36);
+        $obj_entity->addProperty()->setName('dob')->mutableValue()->setIndexed(TRUE)->setTimestampMicrosecondsValue(286965000000000);
+        $obj_entity->addProperty()->setName('weight')->mutableValue()->setIndexed(TRUE)->setDoubleValue(94.50);
+        $obj_entity->addProperty()->setName('likes_php')->mutableValue()->setIndexed(TRUE)->setBooleanValue(TRUE);
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $this->getBasicBookByIdRequest(), $obj_response);
+
+        $obj_result = $this->createBasicStore()->fetchById(123456789);
+
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
+        $this->assertEquals($obj_result->getData(), [
+            'name' => 'Tom',
+            'age' => 36,
+            'dob' => '1979-02-04 08:30:00',
+            'weight' => 94.50,
+            'likes_php' => TRUE
+        ]);
+
+        $this->apiProxyMock->verify();
+    }
 }
