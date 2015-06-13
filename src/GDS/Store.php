@@ -214,7 +214,7 @@ class Store
      *
      * @param $str_query
      * @param array|null $arr_params
-     * @return Entity[]
+     * @return $this
      */
     public function query($str_query, $arr_params = NULL)
     {
@@ -273,6 +273,7 @@ class Store
     {
         $str_offset = '';
         $arr_params = (array)$this->arr_last_params;
+        $arr_params['intPageSize'] = $int_page_size;
         if(NULL !== $mix_offset) {
             if(is_int($mix_offset)) {
                 $str_offset = 'OFFSET @intOffset';
@@ -291,7 +292,7 @@ class Store
         $arr_results = $this->obj_gateway
             ->withSchema($this->obj_schema)
             ->withTransaction($this->str_transaction_id)
-            ->gql($this->str_last_query . " LIMIT {$int_page_size} {$str_offset}", $arr_params);
+            ->gql($this->str_last_query . " LIMIT @intPageSize {$str_offset}", $arr_params);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
         return $arr_results;
     }
