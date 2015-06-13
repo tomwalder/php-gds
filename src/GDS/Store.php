@@ -286,9 +286,6 @@ class Store
             $str_offset = 'OFFSET @startCursor';
             $arr_params['startCursor'] = $this->str_last_cursor;
         }
-        if(empty($arr_params)) {
-            $arr_params = NULL;
-        }
         $arr_results = $this->obj_gateway
             ->withSchema($this->obj_schema)
             ->withTransaction($this->str_transaction_id)
