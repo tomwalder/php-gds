@@ -23,15 +23,26 @@
 class ProtoBufGqlTest extends GDSTest {
 
     /**
+     * This request is re-used a lot in the tests
+     *
+     * @return \google\appengine\datastore\v4\RunQueryRequest
+     */
+    private function getBasicFetchRequest()
+    {
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        return $obj_request;
+    }
+
+    /**
      * Fetch one test
      */
     public function testFetchOneNoParams()
     {
         $str_gql = "SELECT * FROM Kind";
-        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
-        $obj_request->mutableReadOptions();
-        $obj_partition = $obj_request->mutablePartitionId();
-        $obj_partition->setDatasetId('Dataset');
+        $obj_request = $this->getBasicFetchRequest();
         $obj_gql_query = $obj_request->mutableGqlQuery();
         $obj_gql_query->setAllowLiteral(TRUE);
         $obj_gql_query->setQueryString($str_gql . " LIMIT 1");
@@ -50,13 +61,14 @@ class ProtoBufGqlTest extends GDSTest {
      */
     public function testFetchPageNoParams(){
         $str_gql = "SELECT * FROM Kind";
-        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
-        $obj_request->mutableReadOptions();
-        $obj_partition = $obj_request->mutablePartitionId();
-        $obj_partition->setDatasetId('Dataset');
+        $obj_request = $this->getBasicFetchRequest();
         $obj_gql_query = $obj_request->mutableGqlQuery();
         $obj_gql_query->setAllowLiteral(TRUE);
-        $obj_gql_query->setQueryString($str_gql . " LIMIT 11 ");
+        $obj_gql_query->setQueryString($str_gql . " LIMIT @intPageSize ");
+
+        $obj_arg = $obj_gql_query->addNameArg();
+        $obj_arg->setName('intPageSize');
+        $obj_arg->mutableValue()->setIntegerValue(11);
 
         $this->apiProxyMock->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
 
@@ -68,15 +80,67 @@ class ProtoBufGqlTest extends GDSTest {
     }
 
     /**
+     * Fetch Page with record integer offset
+     */
+    public function testFetchPageIntegerOffset(){
+        $str_gql = "SELECT * FROM Kind";
+        $obj_request = $this->getBasicFetchRequest();
+        $obj_gql_query = $obj_request->mutableGqlQuery();
+        $obj_gql_query->setAllowLiteral(TRUE);
+        $obj_gql_query->setQueryString($str_gql . " LIMIT @intPageSize OFFSET @intOffset");
+
+        $obj_arg = $obj_gql_query->addNameArg();
+        $obj_arg->setName('intPageSize');
+        $obj_arg->mutableValue()->setIntegerValue(11);
+
+        $obj_arg_offset = $obj_gql_query->addNameArg();
+        $obj_arg_offset->setName('intOffset');
+        $obj_arg_offset->mutableValue()->setIntegerValue(22);
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_store = $this->createBasicStore();
+        $obj_result = $obj_store->query($str_gql)->fetchPage(11, 22);
+
+        $this->assertEquals($obj_result, []);
+        $this->apiProxyMock->verify();
+    }
+
+    /**
+     * Fetch Page with cursor offset
+     */
+    public function testFetchPageCursorOffset(){
+        $str_gql = "SELECT * FROM Kind";
+        $obj_request = $this->getBasicFetchRequest();
+
+        $obj_gql_query = $obj_request->mutableGqlQuery();
+        $obj_gql_query->setAllowLiteral(TRUE);
+        $obj_gql_query->setQueryString($str_gql . " LIMIT @intPageSize OFFSET @startCursor");
+
+        $obj_arg = $obj_gql_query->addNameArg();
+        $obj_arg->setName('intPageSize');
+        $obj_arg->mutableValue()->setIntegerValue(11);
+
+        $obj_arg_offset = $obj_gql_query->addNameArg();
+        $obj_arg_offset->setName('startCursor');
+        $obj_arg_offset->setCursor('some-cursor-string');
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_store = $this->createBasicStore();
+        $obj_result = $obj_store->query($str_gql)->fetchPage(11, 'some-cursor-string');
+
+        $this->assertEquals($obj_result, []);
+        $this->apiProxyMock->verify();
+    }
+
+    /**
      * GQL Fetch ONE with one string parameter
      */
     public function testFetchOneStringParam()
     {
         $str_gql = "SELECT * FROM Kind WHERE property = @param";
-        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
-        $obj_request->mutableReadOptions();
-        $obj_partition = $obj_request->mutablePartitionId();
-        $obj_partition->setDatasetId('Dataset');
+        $obj_request = $this->getBasicFetchRequest();
 
         $obj_gql_query = $obj_request->mutableGqlQuery();
         $obj_gql_query->setAllowLiteral(TRUE);
@@ -100,10 +164,7 @@ class ProtoBufGqlTest extends GDSTest {
     public function testFetchAllNoParams()
     {
         $str_gql = "SELECT * FROM Kind";
-        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
-        $obj_request->mutableReadOptions();
-        $obj_partition = $obj_request->mutablePartitionId();
-        $obj_partition->setDatasetId('Dataset');
+        $obj_request = $this->getBasicFetchRequest();
         $obj_gql_query = $obj_request->mutableGqlQuery();
         $obj_gql_query->setAllowLiteral(TRUE);
         $obj_gql_query->setQueryString($str_gql);
@@ -123,10 +184,7 @@ class ProtoBufGqlTest extends GDSTest {
     public function testFetchOneMultiParam()
     {
         $str_gql = "SELECT * FROM Kind WHERE property1 = @param1 AND property2 = @param2 AND property3 = @param3";
-        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
-        $obj_request->mutableReadOptions();
-        $obj_partition = $obj_request->mutablePartitionId();
-        $obj_partition->setDatasetId('Dataset');
+        $obj_request = $this->getBasicFetchRequest();
 
         $obj_gql_query = $obj_request->mutableGqlQuery();
         $obj_gql_query->setAllowLiteral(TRUE);
@@ -163,10 +221,7 @@ class ProtoBufGqlTest extends GDSTest {
     public function testFetchOneEntityParam()
     {
         $str_gql = "SELECT * FROM Kind WHERE property = @param";
-        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
-        $obj_request->mutableReadOptions();
-        $obj_partition = $obj_request->mutablePartitionId();
-        $obj_partition->setDatasetId('Dataset');
+        $obj_request = $this->getBasicFetchRequest();
 
         $obj_gql_query = $obj_request->mutableGqlQuery();
         $obj_gql_query->setAllowLiteral(TRUE);
@@ -196,10 +251,7 @@ class ProtoBufGqlTest extends GDSTest {
     public function testFetchEntityGroup()
     {
         $str_gql = "SELECT * FROM `Book` WHERE __key__ HAS ANCESTOR @ancestorKey";
-        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
-        $obj_request->mutableReadOptions();
-        $obj_partition = $obj_request->mutablePartitionId();
-        $obj_partition->setDatasetId('Dataset');
+        $obj_request = $this->getBasicFetchRequest();
 
         $obj_gql_query = $obj_request->mutableGqlQuery();
         $obj_gql_query->setAllowLiteral(TRUE);
