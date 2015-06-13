@@ -24,6 +24,9 @@ class ProtoBufCreateTest extends GDSTest {
 
     /**
      * Insert One
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
      */
     public function testUpsertOneAutoId()
     {
@@ -47,14 +50,9 @@ class ProtoBufCreateTest extends GDSTest {
         $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
 
         $obj_store = $this->createBasicStore();
-        $obj_ex = NULL;
-        try {
-            $obj_store->upsert($obj_store->createEntity([
-                'nickname' => 'Romeo'
-            ]));
-        } catch (\Exception $obj_ex) {}
-
-        $this->assertEquals($obj_ex, new \Exception('Mismatch count of requested & returned Auto IDs'));
+        $obj_store->upsert($obj_store->createEntity([
+            'nickname' => 'Romeo'
+        ]));
         $this->apiProxyMock->verify();
     }
 
@@ -93,4 +91,44 @@ class ProtoBufCreateTest extends GDSTest {
 
         $this->apiProxyMock->verify();
     }
+
+    /**
+     * Put with all supported data types (dynamic Schema)
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
+     */
+    public function testUpsertVariantDataTypes()
+    {
+        $obj_request = new \google\appengine\datastore\v4\CommitRequest();
+        $obj_request->setMode(\google\appengine\datastore\v4\CommitRequest\Mode::NON_TRANSACTIONAL);
+        $obj_mutation = $obj_request->mutableDeprecatedMutation();
+
+        $obj_entity = $obj_mutation->addInsertAutoId();
+        $obj_key = $obj_entity->mutableKey();
+        $obj_partition = $obj_key->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_kpe = $obj_key->addPathElement();
+        $obj_kpe->setKind('Person');
+        $obj_entity->addProperty()->setName('name')->mutableValue()->setIndexed(TRUE)->setStringValue('Tom');
+        $obj_entity->addProperty()->setName('age')->mutableValue()->setIndexed(TRUE)->setIntegerValue(36);
+        $obj_entity->addProperty()->setName('dob')->mutableValue()->setIndexed(TRUE)->setTimestampMicrosecondsValue(286965000000000);
+        $obj_entity->addProperty()->setName('weight')->mutableValue()->setIndexed(TRUE)->setDoubleValue(94.50);
+        $obj_entity->addProperty()->setName('likes_php')->mutableValue()->setIndexed(TRUE)->setBooleanValue(TRUE);
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Person', $obj_gateway);
+        $obj_gds_entity = new GDS\Entity();
+        $obj_gds_entity->name = 'Tom';
+        $obj_gds_entity->age = 36;
+        $obj_gds_entity->dob = new DateTime('1979-02-04 08:30:00');
+        $obj_gds_entity->weight = 94.50;
+        $obj_gds_entity->likes_php = TRUE;
+        $obj_store->upsert($obj_gds_entity);
+
+        $this->apiProxyMock->verify();
+    }
+
 }
