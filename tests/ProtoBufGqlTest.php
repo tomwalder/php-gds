@@ -191,6 +191,50 @@ class ProtoBufGqlTest extends GDSTest {
     }
 
     /**
+     * Fetch Entity Group
+     */
+    public function testFetchEntityGroup()
+    {
+        $str_gql = "SELECT * FROM `Book` WHERE __key__ HAS ANCESTOR @ancestorKey";
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+
+        $obj_gql_query = $obj_request->mutableGqlQuery();
+        $obj_gql_query->setAllowLiteral(TRUE);
+        $obj_gql_query->setQueryString($str_gql);
+
+        $obj_arg = $obj_gql_query->addNameArg();
+        $obj_arg->setName('ancestorKey');
+        $obj_key = $obj_arg->mutableValue()->mutableKeyValue();
+        $obj_kpe = $obj_key->addPathElement();
+        $obj_kpe->setKind('Author');
+        $obj_kpe->setName('test-key-name-here');
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_entity = (new GDS\Entity())->setKind('Author')->setKeyName('test-key-name-here');
+
+        $obj_store = $this->createBasicStore();
+        $arr_results = $obj_store->fetchEntityGroup($obj_entity);
+        $this->assertEquals($arr_results, []);
+        $this->apiProxyMock->verify();
+    }
+
+    /**
+     * Test that we fail on no Schema/Kind
+     */
+    public function testNoSchema()
+    {
+        $obj_ex = NULL;
+        try {
+            new \GDS\Store();
+        } catch (\Exception $obj_ex) {}
+        $this->assertEquals($obj_ex, new \Exception('You must provide a Schema or Kind. Alternatively, you can extend GDS\Store and implement the buildSchema() method.'));
+    }
+
+    /**
      * @todo Fetch with an GDS\Entity parameter (with ancestors)
      */
 
