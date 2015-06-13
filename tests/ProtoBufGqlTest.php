@@ -135,6 +135,37 @@ class ProtoBufGqlTest extends GDSTest {
     }
 
     /**
+     * Fetch Page with cursor offset from historical value, using 'default query'
+     */
+    public function testFetchPageHistoricalCursor() {
+
+        $obj_request = $this->getBasicFetchRequest();
+
+        $obj_gql_query = $obj_request->mutableGqlQuery();
+        $obj_gql_query->setAllowLiteral(TRUE);
+        $obj_gql_query->setQueryString("SELECT * FROM `Person` ORDER BY __key__ ASC LIMIT @intPageSize OFFSET @startCursor");
+
+        $obj_arg = $obj_gql_query->addNameArg();
+        $obj_arg->setName('intPageSize');
+        $obj_arg->mutableValue()->setIntegerValue(11);
+
+        $obj_arg_offset = $obj_gql_query->addNameArg();
+        $obj_arg_offset->setName('startCursor');
+        $obj_arg_offset->setCursor('some-historical-cursor');
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_schema = (new \GDS\Schema('Person'))->addString('name')->addInteger('age');
+        $obj_store = new GDS\Store($obj_schema, $obj_gateway);
+        $obj_store->setCursor('some-historical-cursor');
+
+        $arr_result = $obj_store->fetchPage(11);
+        $this->assertEquals($arr_result, []);
+        $this->apiProxyMock->verify();
+    }
+
+    /**
      * GQL Fetch ONE with one string parameter
      */
     public function testFetchOneStringParam()
