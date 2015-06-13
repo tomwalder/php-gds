@@ -93,6 +93,46 @@ class ProtoBufFetchTest extends GDSTest {
     }
 
     /**
+     * Create a basic "fetch by ID" request for re-use
+     *
+     * @return \google\appengine\datastore\v4\LookupRequest
+     */
+    private function getBasicPersonByIdRequest()
+    {
+        $obj_request = new \google\appengine\datastore\v4\LookupRequest();
+        $obj_request->mutableReadOptions();
+        $obj_key = $obj_request->addKey();
+        $obj_partition = $obj_key->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_kpe = $obj_key->addPathElement();
+        $obj_kpe->setKind('Person');
+        $obj_kpe->setId(123456789);
+        return $obj_request;
+    }
+
+    /**
+     * @return \google\appengine\datastore\v4\LookupResponse
+     */
+    private function getPersonResponse()
+    {
+        $obj_response = new \google\appengine\datastore\v4\LookupResponse();
+        $obj_found = $obj_response->addFound();
+        $obj_entity = $obj_found->mutableEntity();
+        $obj_result_key = $obj_entity->mutableKey();
+        $obj_result_kpe = $obj_result_key->addPathElement();
+        $obj_result_kpe->setKind('Person');
+        $obj_result_kpe->setId(123456789);
+        $obj_entity->addProperty()->setName('name')->mutableValue()->setIndexed(TRUE)->setStringValue('Tom');
+        $obj_entity->addProperty()->setName('age')->mutableValue()->setIndexed(TRUE)->setIntegerValue(36);
+        $obj_entity->addProperty()->setName('dob')->mutableValue()->setIndexed(TRUE)->setTimestampMicrosecondsValue(286965000000000);
+        $obj_entity->addProperty()->setName('weight')->mutableValue()->setIndexed(TRUE)->setDoubleValue(94.50);
+        $obj_entity->addProperty()->setName('likes_php')->mutableValue()->setIndexed(TRUE)->setBooleanValue(TRUE);
+        return $obj_response;
+    }
+
+
+
+    /**
      * Fetch by Id
      */
     public function testFetchById()
@@ -171,24 +211,10 @@ class ProtoBufFetchTest extends GDSTest {
      */
     public function testFetchByIdWithVariantDataTypeResult()
     {
-        $obj_response = new \google\appengine\datastore\v4\LookupResponse();
-        $obj_found = $obj_response->addFound();
-        $obj_entity = $obj_found->mutableEntity();
-        $obj_result_key = $obj_entity->mutableKey();
-        $obj_result_kpe = $obj_result_key->addPathElement();
-        $obj_result_kpe->setKind('Person');
-        $obj_result_kpe->setId(123456789);
-
-        $obj_entity->addProperty()->setName('name')->mutableValue()->setIndexed(TRUE)->setStringValue('Tom');
-        $obj_entity->addProperty()->setName('age')->mutableValue()->setIndexed(TRUE)->setIntegerValue(36);
-        $obj_entity->addProperty()->setName('dob')->mutableValue()->setIndexed(TRUE)->setTimestampMicrosecondsValue(286965000000000);
-        $obj_entity->addProperty()->setName('weight')->mutableValue()->setIndexed(TRUE)->setDoubleValue(94.50);
-        $obj_entity->addProperty()->setName('likes_php')->mutableValue()->setIndexed(TRUE)->setBooleanValue(TRUE);
-
-        $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $this->getBasicBookByIdRequest(), $obj_response);
-
-        $obj_result = $this->createBasicStore()->fetchById(123456789);
-
+        $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $this->getBasicPersonByIdRequest(), $this->getPersonResponse());
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Person', $obj_gateway);
+        $obj_result = $obj_store->fetchById(123456789);
         $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
         $this->assertEquals($obj_result->getData(), [
             'name' => 'Tom',
@@ -197,7 +223,34 @@ class ProtoBufFetchTest extends GDSTest {
             'weight' => 94.50,
             'likes_php' => TRUE
         ]);
+        $this->apiProxyMock->verify();
+    }
 
+    /**
+     * Fetch with Schema for all supported property types
+     */
+    public function testFetchByIdWithVariantSchemaResult()
+    {
+        $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $this->getBasicPersonByIdRequest(), $this->getPersonResponse());
+        $obj_schema = (new \GDS\Schema('Person'))
+            ->addString('name')
+            ->addInteger('age')
+            ->addDatetime('dob')
+            ->addFloat('weight')
+            ->addBoolean('likes_php')
+            // ->addStringList('nicknames')
+        ;
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store($obj_schema, $obj_gateway);
+        $obj_result = $obj_store->fetchById(123456789);
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
+        $this->assertEquals($obj_result->getData(), [
+            'name' => 'Tom',
+            'age' => 36,
+            'dob' => '1979-02-04 08:30:00',
+            'weight' => 94.50,
+            'likes_php' => TRUE
+        ]);
         $this->apiProxyMock->verify();
     }
 }
