@@ -111,6 +111,8 @@ class ProtoBufFetchTest extends GDSTest {
     }
 
     /**
+     * Build and return a person response for re-use in multiple tests
+     *
      * @return \google\appengine\datastore\v4\LookupResponse
      */
     private function getPersonResponse()
@@ -129,8 +131,6 @@ class ProtoBufFetchTest extends GDSTest {
         $obj_entity->addProperty()->setName('likes_php')->mutableValue()->setIndexed(TRUE)->setBooleanValue(TRUE);
         return $obj_response;
     }
-
-
 
     /**
      * Fetch by Id
