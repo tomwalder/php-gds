@@ -19,4 +19,4 @@ script:
   - php vendor/bin/phpunit -d include_path=$SDK_HOME
 
 after_script:
-  - php vendor/bin/coveralls
+  - php vendor/bin/coveralls -v
