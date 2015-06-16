@@ -57,8 +57,8 @@ class ProtoBuf extends \GDS\Mapper
     /**
      * Map a single result out of the Raw response data into a supplied Entity object
      *
-     * @todo Consider comparing results Kind with Schema Kind (and throwing Exception)
-     * @todo Review support for custom Entity classes
+     * @todo Validate dynamic schema mapping in multi-kind responses like fetchEntityGroup()
+     * @todo Review support for custom Entity classes in 2.0
      *
      * @param \google\appengine\datastore\v4\EntityResult $obj_result
      * @return Entity
@@ -90,7 +90,6 @@ class ProtoBuf extends \GDS\Mapper
      * Populate a GDS\Entity with key data
      *
      * @todo Validate dynamic mapping
-     * @todo Upgrade to support ancestor keys
      *
      * @param \google\appengine\datastore\v4\Key\PathElement[] $arr_key_path
      * @param Entity $obj_gds_entity
@@ -101,7 +100,7 @@ class ProtoBuf extends \GDS\Mapper
     {
         // Key for 'self' (the last part of the KEY PATH)
         /* @var $obj_path_end \google\appengine\datastore\v4\Key\PathElement */
-        $obj_path_end = end($arr_key_path);
+        $obj_path_end = array_pop($arr_key_path);
         if($obj_path_end->getKind() == $this->obj_schema->getKind()) {
             $bol_schema_match = TRUE;
             $obj_gds_entity->setSchema($this->obj_schema);
@@ -120,10 +119,17 @@ class ProtoBuf extends \GDS\Mapper
         }
 
         // Ancestors?
-        $int_path_elements = count($arr_key_path);
-        if($int_path_elements > 1) {
-            // print_r($arr_key_path); echo "<==>"; print_r($obj_path_end);
-            throw new \Exception('Unimplemented, Entity with ancestors');
+        $int_ancestor_elements = count($arr_key_path);
+        if($int_ancestor_elements > 0) {
+            $arr_anc_path = [];
+            foreach ($arr_key_path as $obj_kpe) {
+                $arr_anc_path[] = [
+                    'kind' => $obj_kpe->getKind(),
+                    'id' => $obj_kpe->getId(),
+                    'name' => $obj_kpe->getName()
+                ];
+            }
+            $obj_gds_entity->setAncestry($arr_anc_path);
         }
 
         return $bol_schema_match;
@@ -132,26 +138,45 @@ class ProtoBuf extends \GDS\Mapper
     /**
      * Populate a ProtoBuf Key from a GDS Entity
      *
-     * @todo Support Ancestors
-     *
      * @param Key $obj_key
      * @param Entity $obj_gds_entity
      * @return Key
      */
     public function configureGoogleKey(Key $obj_key, Entity $obj_gds_entity)
     {
-        $obj_path_element = $obj_key->addPathElement();
-        $obj_path_element->setKind($obj_gds_entity->getKind());
-        if(NULL !== $obj_gds_entity->getKeyId()) {
-            $obj_path_element->setId($obj_gds_entity->getKeyId());
+        // Add any ancestors FIRST
+        $mix_ancestry = $obj_gds_entity->getAncestry();
+        if(is_array($mix_ancestry)) {
+            // @todo Get direction right!
+            foreach ($mix_ancestry as $arr_ancestor_element) {
+                $this->configureGoogleKeyPathElement($obj_key->addPathElement(), $arr_ancestor_element);
+            }
+        } elseif ($mix_ancestry instanceof Entity) {
+            // Recursive
+            $this->configureGoogleKey($obj_key, $mix_ancestry);
         }
-        if(NULL !== $obj_gds_entity->getKeyName()) {
-            $obj_path_element->setName($obj_gds_entity->getKeyName());
-        }
-        if(NULL !== $obj_gds_entity->getAncestry()) {
-            throw new \RuntimeException("Unimplemented: ancestor support");
-        }
+
+        // Root Key (must be the last in the chain)
+        $this->configureGoogleKeyPathElement($obj_key->addPathElement(), [
+            'kind' => $obj_gds_entity->getKind(),
+            'id' => $obj_gds_entity->getKeyId(),
+            'name' => $obj_gds_entity->getKeyName()
+        ]);
+
         return $obj_key;
+    }
+
+    /**
+     * Configure a Google Key Path Element object
+     *
+     * @param Key\PathElement $obj_path_element
+     * @param array $arr_kpe
+     */
+    private function configureGoogleKeyPathElement(Key\PathElement $obj_path_element, array $arr_kpe)
+    {
+        $obj_path_element->setKind($arr_kpe['kind']);
+        isset($arr_kpe['id']) && $obj_path_element->setId($arr_kpe['id']);
+        isset($arr_kpe['name']) && $obj_path_element->setName($arr_kpe['name']);
     }
 
     /**
@@ -200,7 +225,7 @@ class ProtoBuf extends \GDS\Mapper
                 $obj_val->setBooleanValue((bool)$mix_value);
                 break;
 
-            case Schema::PROPERTY_STRING_LIST:  // @todo FIXME FIXME
+            case Schema::PROPERTY_STRING_LIST:
                 $obj_val->setIndexed(NULL); // Ensure we only index the values, not the list
                 $arr_values = [];
                 foreach ((array)$mix_value as $str) {
@@ -221,7 +246,7 @@ class ProtoBuf extends \GDS\Mapper
     /**
      * Extract a datetime value
      *
-     * @todo FIXME FIXME FIXME validate date('', microseconds) ?
+     * @todo Validate 32bit compatibility. Consider substr()
      *
      * @param object $obj_property
      * @return mixed
