@@ -199,15 +199,10 @@ class GoogleAPIClient extends \GDS\Mapper
      */
     protected function createKeyPathElement(array $arr_kpe)
     {
-        $arr_kpe = array_merge([
-            'kind' => NULL,
-            'id' => NULL,
-            'name' => NULL
-        ], $arr_kpe);
         $obj_element = new \Google_Service_Datastore_KeyPathElement();
         $obj_element->setKind($arr_kpe['kind']);
-        $obj_element->setId($arr_kpe['id']);
-        $obj_element->setName($arr_kpe['name']);
+        isset($arr_kpe['id']) && $obj_element->setId($arr_kpe['id']);
+        isset($arr_kpe['name']) && $obj_element->setName($arr_kpe['name']);
         return $obj_element;
     }
 
@@ -231,7 +226,7 @@ class GoogleAPIClient extends \GDS\Mapper
             $arr_path = $obj_result['entity']['key']['path'];
 
             // Key for 'self' (the last part of the KEY PATH)
-            $arr_path_end = end($arr_path);
+            $arr_path_end = array_pop($arr_path);
 
             // Kind
             if(isset($arr_path_end['kind'])) {
@@ -257,7 +252,7 @@ class GoogleAPIClient extends \GDS\Mapper
 
             // Ancestors?
             $int_path_elements = count($arr_path);
-            if($int_path_elements > 1) {
+            if($int_path_elements > 0) {
                 $arr_anc_path = [];
                 foreach ($arr_path as $arr_kpe) {
                     $arr_anc_path[] = [
@@ -266,7 +261,7 @@ class GoogleAPIClient extends \GDS\Mapper
                         'name' => $arr_kpe['name']
                     ];
                 }
-                $obj_gds_entity->setAncestry(array_slice($arr_anc_path, 0, $int_path_elements - 1));
+                $obj_gds_entity->setAncestry($arr_anc_path);
             }
         } else {
             throw new \RuntimeException("No path for Entity Key?");
