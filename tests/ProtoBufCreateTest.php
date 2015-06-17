@@ -132,7 +132,81 @@ class ProtoBufCreateTest extends GDSTest {
     }
 
     /**
-     * @todo Create with Ancestors+2
+     * Prepare a request for Ancestor testing
+     *
+     * @return \google\appengine\datastore\v4\CommitRequest
+     */
+    private function getUpsertRequestWithBookAndAuthor()
+    {
+        $obj_request = new \google\appengine\datastore\v4\CommitRequest();
+        $obj_request->setMode(\google\appengine\datastore\v4\CommitRequest\Mode::NON_TRANSACTIONAL);
+        $obj_mutation = $obj_request->mutableDeprecatedMutation();
+
+        $obj_entity = $obj_mutation->addInsertAutoId();
+        $obj_key = $obj_entity->mutableKey();
+        $obj_partition = $obj_key->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_kpe = $obj_key->addPathElement();
+        $obj_kpe->setKind('Author');
+        $obj_kpe->setName('WilliamShakespeare');
+        $obj_kpe = $obj_key->addPathElement();
+        $obj_kpe->setKind('Book');
+        $obj_property = $obj_entity->addProperty();
+        $obj_property->setName('nickname');
+        $obj_val = $obj_property->mutableValue();
+        $obj_val->setIndexed(TRUE);
+        $obj_val->setStringValue('Romeo');
+
+        return $obj_request;
+    }
+
+    /**
+     * Insert One with Parent
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
+     */
+    public function testUpsertArrayAncestorOneLevel()
+    {
+        $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $this->getUpsertRequestWithBookAndAuthor(), new \google\appengine\datastore\v4\CommitResponse());
+
+        $obj_store = $this->createBasicStore();
+        $obj_book = $obj_store->createEntity([
+            'nickname' => 'Romeo'
+        ]);
+        $obj_book->setAncestry([[
+            'kind' => 'Author',
+            'name' => 'WilliamShakespeare'
+        ]]);
+        $obj_store->upsert($obj_book);
+        $this->apiProxyMock->verify();
+    }
+
+    /**
+     * Insert One with Parent
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
+     */
+    public function testUpsertEntityAncestorOneLevel()
+    {
+        $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $this->getUpsertRequestWithBookAndAuthor(), new \google\appengine\datastore\v4\CommitResponse());
+
+        $obj_will = new GDS\Entity();
+        $obj_will->setKind('Author');
+        $obj_will->setKeyName('WilliamShakespeare');
+
+        $obj_store = $this->createBasicStore();
+        $obj_book = $obj_store->createEntity([
+            'nickname' => 'Romeo'
+        ]);
+        $obj_book->setAncestry($obj_will);
+        $obj_store->upsert($obj_book);
+        $this->apiProxyMock->verify();
+    }
+
+    /**
+     * @todo Create with 2+ Ancestors
      */
 
 }
