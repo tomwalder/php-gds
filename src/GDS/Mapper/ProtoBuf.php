@@ -109,13 +109,11 @@ class ProtoBuf extends \GDS\Mapper
             $obj_gds_entity->setKind($obj_path_end->getKind());
         }
 
-        // ID or Name
+        // Set ID or Name (will always have one or the other)
         if($obj_path_end->hasId()) {
             $obj_gds_entity->setKeyId($obj_path_end->getId());
-        } elseif ($obj_path_end->hasName()) {
-            $obj_gds_entity->setKeyName($obj_path_end->getName());
         } else {
-            throw new \Exception('Entity without KeyID or KeyName');
+            $obj_gds_entity->setKeyName($obj_path_end->getName());
         }
 
         // Ancestors?
@@ -125,13 +123,14 @@ class ProtoBuf extends \GDS\Mapper
             foreach ($arr_key_path as $obj_kpe) {
                 $arr_anc_path[] = [
                     'kind' => $obj_kpe->getKind(),
-                    'id' => $obj_kpe->getId(),
-                    'name' => $obj_kpe->getName()
+                    'id' => $obj_kpe->hasId() ? $obj_kpe->getId() : NULL,
+                    'name' => $obj_kpe->hasName() ? $obj_kpe->getName() : NULL
                 ];
             }
             $obj_gds_entity->setAncestry($arr_anc_path);
         }
 
+        // Return whether or not the Schema matched
         return $bol_schema_match;
     }
 
