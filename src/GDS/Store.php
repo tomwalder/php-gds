@@ -80,13 +80,13 @@ class Store
      *
      * @todo We'll do our best to use sensible defaults
      *
-     * @param Schema|string|null $mix_schema
+     * @param Schema|string|null $schema
      * @param Gateway $obj_gateway
      * @throws \Exception
      */
-    public function __construct($mix_schema = NULL, Gateway $obj_gateway = NULL)
+    public function __construct($schema = NULL, Gateway $obj_gateway = NULL)
     {
-        $this->obj_schema = $this->determineSchema($mix_schema);
+        $this->obj_schema = $this->determineSchema($schema);
         $this->obj_gateway = (NULL === $obj_gateway) ? new \GDS\Gateway\ProtoBuf() : $obj_gateway;
         $this->str_last_query = 'SELECT * FROM `' . $this->obj_schema->getKind() . '` ORDER BY __key__ ASC';
     }
