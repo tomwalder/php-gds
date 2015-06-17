@@ -175,6 +175,46 @@ class ProtoBufFetchTest extends GDSTest {
     }
 
     /**
+     * Fetch by Id and process result with ancestors
+     */
+    public function testFetchByIdWithAncestorResult()
+    {
+
+        $obj_response = new \google\appengine\datastore\v4\LookupResponse();
+        $obj_found = $obj_response->addFound();
+        $obj_entity = $obj_found->mutableEntity();
+        $obj_result_key = $obj_entity->mutableKey();
+        $obj_result_kpe = $obj_result_key->addPathElement();
+        $obj_result_kpe->setKind('Author');
+        $obj_result_kpe->setName('WilliamShakespeare');
+
+        $obj_result_kpe = $obj_result_key->addPathElement();
+        $obj_result_kpe->setKind('Book');
+        $obj_result_kpe->setId(123456789);
+        $obj_result_property = $obj_entity->addProperty();
+        $obj_result_property->setName('title');
+        $obj_val = $obj_result_property->mutableValue(); // addDeprecatedValue();
+        $obj_val->setStringValue('Romeo and Juliet');
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $this->getBasicBookByIdRequest(), $obj_response);
+
+        $obj_result = $this->createBasicStore()->fetchById(123456789);
+
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
+        $this->assertEquals(1, count($obj_result->getData()));
+        $this->assertEquals('Book', $obj_result->getKind());
+        $this->assertEquals(123456789, $obj_result->getKeyId());
+        $this->assertEquals($obj_result->title, 'Romeo and Juliet');
+        $this->assertEquals($obj_result->getAncestry(), [[
+            'kind' => 'Author',
+            'id' => NULL,
+            'name' => 'WilliamShakespeare',
+        ]]);
+
+        $this->apiProxyMock->verify();
+    }
+
+    /**
      * Fetch by Ids
      */
     public function testFetchByIds()
@@ -256,5 +296,9 @@ class ProtoBufFetchTest extends GDSTest {
 
     /**
      * @todo Fetch with Ancestors+2
+     */
+
+    /**
+     * @todo Fetch with string list
      */
 }

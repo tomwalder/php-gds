@@ -57,6 +57,51 @@ class ProtoBufCreateTest extends GDSTest {
     }
 
     /**
+     * Insert One with Schema
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
+     */
+    public function testUpsertSchemaOneAutoId()
+    {
+        $obj_request = new \google\appengine\datastore\v4\CommitRequest();
+        $obj_request->setMode(\google\appengine\datastore\v4\CommitRequest\Mode::NON_TRANSACTIONAL);
+        $obj_mutation = $obj_request->mutableDeprecatedMutation();
+
+        $obj_entity = $obj_mutation->addInsertAutoId();
+        $obj_key = $obj_entity->mutableKey();
+        $obj_partition = $obj_key->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_kpe = $obj_key->addPathElement();
+        $obj_kpe->setKind('Book');
+        $obj_property = $obj_entity->addProperty();
+        $obj_property->setName('title');
+        $obj_val = $obj_property->mutableValue();
+        $obj_val->setIndexed(FALSE);
+        $obj_val->setStringValue('Romeo and Juliet');
+        $obj_property = $obj_entity->addProperty();
+        $obj_property->setName('published');
+        $obj_val = $obj_property->mutableValue();
+        $obj_val->setIndexed(FALSE);
+        $obj_val->setTimestampMicrosecondsValue(286965000000000);
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
+
+        $_SERVER[''];
+        $obj_schema = (new \GDS\Schema('Book'))
+            ->addString('title', FALSE)
+            ->addDatetime('published', FALSE);
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store($obj_schema, $obj_gateway);
+
+        $obj_store->upsert($obj_store->createEntity([
+            'title' => 'Romeo and Juliet',
+            'published' => '1979-02-04 08:30:00'
+        ]));
+        $this->apiProxyMock->verify();
+    }
+
+    /**
      * Insert one with a Key Name
      */
     public function testUpsertOneWithKeyName()
@@ -207,6 +252,10 @@ class ProtoBufCreateTest extends GDSTest {
 
     /**
      * @todo Create with 2+ Ancestors
+     */
+
+    /**
+     * @todo Create with string list
      */
 
 }
