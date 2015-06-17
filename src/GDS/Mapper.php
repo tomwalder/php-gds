@@ -153,16 +153,7 @@ abstract class Mapper
      * @param object $obj_property
      * @return mixed
      */
-    protected function extractAutoDetectValue($obj_property)
-    {
-        foreach([Schema::PROPERTY_STRING, Schema::PROPERTY_INTEGER, Schema::PROPERTY_DATETIME, Schema::PROPERTY_DOUBLE, Schema::PROPERTY_BOOLEAN] as $int_field_type) {
-            $mix_val = $this->extractPropertyValue($int_field_type, $obj_property); // Recursive detection call
-            if(NULL !== $mix_val) {
-                return $mix_val;
-            }
-        }
-        return NULL;
-    }
+    abstract protected function extractAutoDetectValue($obj_property);
 
     /**
      * Extract a datetime value
