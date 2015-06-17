@@ -8,7 +8,7 @@ This library is intended to make it easier for you to get started with and to us
 
 Version 2.0 development is well underway, bringing with it performance improvements and access to features like cross-group transactions.
 
-[Take a look at the 2.0 branch](/tomwalder/php-gds/tree/2.0)
+[Take a look at the 2.0 branch](https://github.com/tomwalder/php-gds/tree/2.0)
 
 ## Table of Contents ##
 
