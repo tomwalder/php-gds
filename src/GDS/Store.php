@@ -115,17 +115,19 @@ class Store
     /**
      * Write one or more new/changed Entity objects to the Datastore
      *
+     * @todo Consider returning the input
+     *
      * @param Entity|Entity[]
      */
-    public function upsert($arr_entities)
+    public function upsert($entities)
     {
-        if($arr_entities instanceof Entity) {
-            $arr_entities = [$arr_entities];
+        if($entities instanceof Entity) {
+            $entities = [$entities];
         }
         $this->obj_gateway
             ->withSchema($this->obj_schema)
             ->withTransaction($this->consumeTransaction())
-            ->putMulti($arr_entities);
+            ->putMulti($entities);
     }
 
     /**
@@ -134,15 +136,15 @@ class Store
      * @param mixed
      * @return bool
      */
-    public function delete($arr_entities)
+    public function delete($entities)
     {
-        if($arr_entities instanceof Entity) {
-            $arr_entities = [$arr_entities];
+        if($entities instanceof Entity) {
+            $entities = [$entities];
         }
         return $this->obj_gateway
             ->withSchema($this->obj_schema)
             ->withTransaction($this->consumeTransaction())
-            ->deleteMulti($arr_entities);
+            ->deleteMulti($entities);
     }
 
     /**
