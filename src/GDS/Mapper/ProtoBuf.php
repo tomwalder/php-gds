@@ -225,27 +225,21 @@ class ProtoBuf extends \GDS\Mapper
                 break;
 
             case Schema::PROPERTY_STRING_LIST:
-                $obj_val->setIndexed(NULL); // Ensure we only index the values, not the list
-                $arr_values = [];
+                $obj_val->clearIndexed(); // Ensure we only index the values, not the list
                 foreach ((array)$mix_value as $str) {
-                    $obj_value = new \Google_Service_Datastore_Value();
-                    $obj_value->setStringValue($str);
-                    $obj_value->setIndexed($bol_index);
-                    $arr_values[] = $obj_value;
+                    $obj_val->addListValue()->setStringValue($str)->setIndexed($bol_index);
                 }
-                $obj_val->setListValue($arr_values);
                 break;
 
             default:
                 throw new \RuntimeException('Unable to process field type: ' . $arr_field_def['type']);
         }
-
     }
 
     /**
      * Extract a datetime value
      *
-     * @todo Validate 32bit compatibility. Consider substr()
+     * @todo Validate 32bit compatibility. Consider substr() or use bc math
      *
      * @param object $obj_property
      * @return mixed
@@ -299,6 +293,9 @@ class ProtoBuf extends \GDS\Mapper
         }
         if($obj_property->hasBooleanValue()) {
             return $obj_property->getBooleanValue();
+        }
+        if($obj_property->getListValueSize() > 0) {
+            return $this->extractStringListValue($obj_property);
         }
         // $this->extractPropertyValue($int_field_type, $obj_property); // Recursive detection call
         return NULL;
