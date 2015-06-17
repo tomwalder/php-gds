@@ -299,6 +299,45 @@ class ProtoBufFetchTest extends GDSTest {
      */
 
     /**
-     * @todo Fetch with string list
+     * Fetch with string list
      */
+    public function testFetchWithStringListResult()
+    {
+
+        $obj_response = new \google\appengine\datastore\v4\LookupResponse();
+        $obj_found = $obj_response->addFound();
+
+        $obj_entity = $obj_found->mutableEntity();
+        $obj_result_key = $obj_entity->mutableKey();
+        $obj_result_kpe = $obj_result_key->addPathElement();
+        $obj_result_kpe->setKind('Book');
+        $obj_result_kpe->setId(123456789);
+
+        $obj_result_property = $obj_entity->addProperty();
+        $obj_result_property->setName('director');
+        $obj_val = $obj_result_property->mutableValue();
+        $obj_val->setStringValue('Robert Zemeckis');
+
+        $obj_result_property2 = $obj_entity->addProperty();
+        $obj_result_property2->setName('dedications');
+        $obj_val2 = $obj_result_property2->mutableValue();
+        $obj_val2->addListValue()->setStringValue('Marty McFly');
+        $obj_val2->addListValue()->setStringValue('Emmett Brown');
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $this->getBasicBookByIdRequest(), $obj_response);
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_result = $obj_store->fetchById(123456789);
+
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
+        $this->assertEquals(2, count($obj_result->getData()));
+        $this->assertEquals('Book', $obj_result->getKind());
+        $this->assertEquals(123456789, $obj_result->getKeyId());
+        $this->assertEquals('Robert Zemeckis', $obj_result->director);
+        $this->assertEquals(['Marty McFly', 'Emmett Brown'] ,$obj_result->dedications);
+
+        $this->apiProxyMock->verify();
+    }
+
 }

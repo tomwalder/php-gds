@@ -87,7 +87,6 @@ class ProtoBufCreateTest extends GDSTest {
 
         $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
 
-        $_SERVER[''];
         $obj_schema = (new \GDS\Schema('Book'))
             ->addString('title', FALSE)
             ->addDatetime('published', FALSE);
@@ -255,7 +254,49 @@ class ProtoBufCreateTest extends GDSTest {
      */
 
     /**
-     * @todo Create with string list
+     * Insert with a String List
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
      */
+    public function testUpsertStringList()
+    {
+        $obj_request = new \google\appengine\datastore\v4\CommitRequest();
+        $obj_request->setMode(\google\appengine\datastore\v4\CommitRequest\Mode::NON_TRANSACTIONAL);
+        $obj_mutation = $obj_request->mutableDeprecatedMutation();
+
+        $obj_entity = $obj_mutation->addInsertAutoId();
+
+        $obj_result_key = $obj_entity->mutableKey();
+        $obj_partition = $obj_result_key->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_result_kpe = $obj_result_key->addPathElement();
+        $obj_result_kpe->setKind('Film');
+
+        $obj_result_property = $obj_entity->addProperty();
+        $obj_result_property->setName('director');
+        $obj_result_property->mutableValue()->setStringValue('Robert Zemeckis')->setIndexed(FALSE);
+
+        $obj_val2 = $obj_entity->addProperty()->setName('dedications')->mutableValue();
+        $obj_val2->addListValue()->setStringValue('Marty McFly')->setIndexed(FALSE);
+        $obj_val2->addListValue()->setStringValue('Emmett Brown')->setIndexed(FALSE);
+
+        $obj_val3 = $obj_entity->addProperty()->setName('fans')->mutableValue();
+        $obj_val3->addListValue()->setStringValue('Tom Walder')->setIndexed(TRUE);
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
+
+        $obj_schema = (new \GDS\Schema('Film'))
+            ->addString('director', FALSE)
+            ->addStringList('dedications', FALSE);
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store($obj_schema, $obj_gateway);
+        $obj_store->upsert($obj_store->createEntity([
+            'director' => 'Robert Zemeckis',
+            'dedications' => ['Marty McFly', 'Emmett Brown'],
+            'fans' => ['Tom Walder']
+        ]));
+        $this->apiProxyMock->verify();
+    }
 
 }
