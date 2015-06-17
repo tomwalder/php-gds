@@ -16,7 +16,7 @@ The documentation is not yet fully representative of 2.x implementation.
 ## Table of Contents ##
 
 - [Examples](#examples)
-- [Changes in 2.0](#changes-in-version-20)
+- [New in 2.0](#new-in-version-20)
 - [Getting Started](#getting-started)
 - [Defining Your Model](#defining-your-model)
 - [Creating Records](#creating-records)
@@ -44,6 +44,8 @@ $obj_store = new GDS\Store('Book');
 $obj_store->upsert($obj_book);
 ```
 
+See below for [Alternative Array Syntax](#alternative-array-syntax) for creating Entities.
+
 Now let's fetch all the Books from the Datastore and display their titles and ISBN numbers
 
 ```php
@@ -62,8 +64,6 @@ We use a `GDS\Store` to read and write `GDS\Entity` objects to and from Datastor
 
 These examples use the generic `GDS\Entity` class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on custom Schemas and indexed fields.
 
-See below for [Alternative Array Syntax](#alternative-array-syntax) for creating Entities.
-
 Check out the [examples](examples/) folder for many more and fuller code samples.
 
 ### Using the Google PHP API and the JSON Datastore API ###
@@ -78,45 +78,51 @@ $obj_gateway = new GDS\Gateway\GoogleAPIClient($obj_client, DATASET_ID);
 $obj_book_store = new GDS\Store('Book', $obj_gateway);
 ```
 
-### Demo App ###
+### Demo Application ###
 
-A trivial guest book application
+A simple guest book application
 
 Application: http://php-gds-demo.appspot.com/
 
 Code: https://github.com/tomwalder/php-gds-demo
 
-## Changes in Version 2.0 ##
+## New in Version 2.0 ##
 
-The primary new feature is support for the native Google Protocol Buffer method of access to Datastore, which will improve performance and make it even easier to get started in AppEngine environments (dev/local and live).
+New features in 2.0 include 
+* **Faster!** Google Protocol Buffer allows faster, low-level access to Datastore
+* **Easier to use** - sensible defaults and auto-detection for AppEngine environments
+* **Less dependencies** - no need for the Google PHP API Client, unless running remote or from non-AppEngine environments
+* Suite of unit tests
+* Optional drop-in JSON API Gateway for remote or non-AppEngine environments (this was the only Gateway in 1.x)
 
-The primary BC-break is the re-ordering of construction parameters for the `GDS\Store` object.
+### Backwards Compatibility ###
+
+The library is *almost* fully backwards compatible. And in fact, the main operations of the `GDS\Store` class are identical. 
+
+There is one BC-break in 2.0 - the re-ordering of construction parameters for the `GDS\Store` class.
 
 `GDS\Store::__construct(<Kind or Schema>, <Gateway>)`
 
+instead of 
+
+`GDS\Store::__construct(<Gateway>, <Kind or Schema>)`
+
+This is because the Gateway is now optional, an has a sensible, automated, default - the new Protocol Buffer implementation.
 
 ## Getting Started ##
 
-> @todo v2.x updates...
-
 Are you sitting comfortably? before we begin, you will need: 
-- a Google Account (doh)
+- a Google Account (doh), usually for running AppEngine - but not always
 - a Project to work on with the "Google Cloud Datastore API" turned ON [Google Developer Console](https://console.developers.google.com/)
+
+If you want to use the JSON API from remote or non-AppEngine environments, you will also need
 - a "Service account" and a P12 key file for that service account [Service Accounts](https://developers.google.com/accounts/docs/OAuth2#serviceaccount)
 
 ### Composer, Dependencies ###
 
-To install using composer, use this require line (for production)
+To install using composer, use this require line
 
-`"tomwalder/php-gds": "v1.2.0"`
-
-### Running the examples ###
-
-You will need to create 2 files in the `examples/config` folder as follows
-- `config.php` (you can use `_config.php` as a template)
-- `key.p12`
-
-Or, you can pass in your own `Google_Client` object, configured with whatever auth you like.
+`"tomwalder/php-gds": "2.0.*@dev"`
 
 ## Defining Your Model ##
 
@@ -130,11 +136,11 @@ $obj_schema = (new GDS\Schema('Book'))
    ->addString('author')
    ->addString('isbn');
    
-// The Store accepts a Schema object or Kind name as it's second parameter
-$obj_book_store = new GDS\Store($obj_gateway, $obj_schema);
+// The Store accepts a Schema object or Kind name as it's first parameter
+$obj_book_store = new GDS\Store($obj_schema);
 ```
 
-By default, fields are indexed. An indexed field can be used in a WHERE clause. You can explicitly configure a field to be not indexed by passing in `FALSE` as the second parameter to `addString()`.
+By default, all fields are indexed. An indexed field can be used in a WHERE clause. You can explicitly configure a field to be not indexed by passing in `FALSE` as the second parameter to `addString()`.
 
 If you use a dynamic schema (i.e. do not define on, but just use the Entity name) then all fields will be indexed for that record.
 
@@ -147,32 +153,6 @@ Avaialable Schema configuration methods:
 - `GDS\Schema::addStringList`
 
 Take a look at the `examples` folder for a fully operational set of code.
-
-### Custom Entities and Stores ###
-
-Whilst you can use the `GDS\Entity` and `GDS\Store` classes directly, as per the examples above, you may find it useful to extend both and have the extended Store contain the Schema definition.
-
-For example
-
-```php
-class Book extends GDS\Entity { /* ... */ }
-class BookStore extends GDS\Store { /* ... */ }
-```
-
-This way, when you pull objects out of Datastore, they are objects of your defined Entity class.
-
-```php
-$obj_store = new BookStore($obj_gateway);
-$obj_book = $obj_store->fetchOne(); // $obj_book will be a "Book" object
-```
-
-Check out the examples folder for `Book.php` and `BookStore.php` code samples.
-
-### Re-indexing ###
-
-When you change a field from non-indexed to indexed you will need to "re-index" all your existing entities before they will be returned in queries run against that index by Datastore. This is due to the way Google update their BigTable indexes.
-
-I've included a simple example (paginated) re-index script in the examples folder, `reindex.php`.
 
 ## Creating Records ##
 
@@ -336,6 +316,34 @@ $obj_store->upsert($obj_entity);
 $obj_store->delete($obj_entity);
 ```
 
+## Custom Entities and Stores ##
+
+> @todo v2.0 revisions
+
+Whilst you can use the `GDS\Entity` and `GDS\Store` classes directly, as per the examples above, you may find it useful to extend both and have the extended Store contain the Schema definition.
+
+For example
+
+```php
+class Book extends GDS\Entity { /* ... */ }
+class BookStore extends GDS\Store { /* ... */ }
+```
+
+This way, when you pull objects out of Datastore, they are objects of your defined Entity class.
+
+```php
+$obj_store = new BookStore($obj_gateway);
+$obj_book = $obj_store->fetchOne(); // $obj_book will be a "Book" object
+```
+
+Check out the examples folder for `Book.php` and `BookStore.php` code samples.
+
+## Re-indexing ##
+
+When you change a field from non-indexed to indexed you will need to "re-index" all your existing entities before they will be returned in queries run against that index by Datastore. This is due to the way Google update their BigTable indexes.
+
+I've included a simple example (paginated) re-index script in the examples folder, `reindex.php`.
+
 ## More About Google Cloud Datastore ##
 
 What Google say:
@@ -361,6 +369,4 @@ A full suite of unit tests is in the works. [Click here for more details](tests/
 ## Footnotes ##
 
 I am certainly more familiar with SQL and relational data models so I think that may end up coming across in the code - rightly so or not!
-
-I've been trying to decide if & what sort of Patterns this library contains. [PEAA](http://martinfowler.com/eaaCatalog/index.html). What I decided is that I'm not really following DataMapper or Repository to the letter of how they were envisaged. Probably it's closest to DataMapper. 
 
