@@ -254,9 +254,6 @@ class GoogleAPIClient extends \GDS\Gateway
     /**
      * Fetch some Entities, based on the supplied GQL and, optionally, parameters
      *
-     * @todo FIXME, mapper
-     * @todo consume Schema
-     *
      * @param $str_gql
      * @param array $arr_params
      * @return Entity[]
@@ -269,7 +266,9 @@ class GoogleAPIClient extends \GDS\Gateway
         if(NULL !== $arr_params) {
             $this->addParamsToQuery($obj_query, $arr_params);
         }
-        return $this->executeQuery($obj_query);
+        $arr_mapped_results = $this->createMapper()->mapFromResults($this->executeQuery($obj_query));
+        $this->obj_schema = NULL; // Consume Schema
+        return $arr_mapped_results;
     }
 
     /**
