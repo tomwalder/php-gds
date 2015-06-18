@@ -65,12 +65,19 @@ class ProtoBufErrorTest extends GDSTest {
         $obj_val->setIndexed(TRUE);
         $obj_val->setStringValue('success!');
 
+        $obj_property = $obj_entity->addProperty();
+        $obj_property->setName('blank');
+        $obj_val = $obj_property->mutableValue();
+        $obj_val->setIndexed(TRUE);
+
+
         $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
 
         $obj_store = $this->createBasicStore();
         $obj_store->upsert($obj_store->createEntity([
             'property' => new stdClass(),
-            'simple' => new Simple()
+            'simple' => new Simple(),
+            'blank' => NULL
         ]));
 
         $this->apiProxyMock->verify();
