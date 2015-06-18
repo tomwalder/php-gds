@@ -299,4 +299,45 @@ class ProtoBufCreateTest extends GDSTest {
         $this->apiProxyMock->verify();
     }
 
+
+    /**
+     * Insert One WITH result
+     */
+    public function testUpsertOneAutoIdWithResult()
+    {
+        $obj_request = new \google\appengine\datastore\v4\CommitRequest();
+        $obj_request->setMode(\google\appengine\datastore\v4\CommitRequest\Mode::NON_TRANSACTIONAL);
+        $obj_mutation = $obj_request->mutableDeprecatedMutation();
+        $obj_entity = $obj_mutation->addInsertAutoId();
+        $obj_key = $obj_entity->mutableKey();
+        $obj_partition = $obj_key->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_kpe = $obj_key->addPathElement();
+        $obj_kpe->setKind('Film');
+        $obj_property = $obj_entity->addProperty();
+        $obj_property->setName('title');
+        $obj_val = $obj_property->mutableValue();
+        $obj_val->setIndexed(TRUE);
+        $obj_val->setStringValue('Back to the Future');
+
+        $obj_response = new \google\appengine\datastore\v4\CommitResponse();
+        $obj_mutation_result = $obj_response->mutableDeprecatedMutationResult();
+        $obj_ai_key = $obj_mutation_result->addInsertAutoIdKey();
+        $obj_ai_kpe = $obj_ai_key->addPathElement();
+        $obj_ai_kpe->setKind('Film')->setId(499190400);
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, $obj_response);
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Film', $obj_gateway);
+        $obj_book = $obj_store->createEntity([
+            'title' => 'Back to the Future'
+        ]);
+        $obj_store->upsert($obj_book);
+
+        $this->assertEquals(499190400, $obj_book->getKeyId());
+
+        $this->apiProxyMock->verify();
+    }
+
 }
