@@ -23,3 +23,4 @@ foreach($_SERVER['argv'] as $str_arg) {
 
 // Base Test Files
 require_once(dirname(__FILE__) . '/base/GDSTest.php');
+require_once(dirname(__FILE__) . '/base/Simple.php');

@@ -77,15 +77,20 @@ abstract class Mapper
                     $int_dynamic_type = Schema::PROPERTY_DATETIME;
                     break;
                 }
-            // No break on purpose - 'other' objects will be cast to string ;(
+                $int_dynamic_type = Schema::PROPERTY_STRING;
+                if(method_exists($mix_value, '__toString')) {
+                    $mix_value = $mix_value->__toString();
+                } else {
+                    $mix_value = NULL;
+                }
+                break;
 
             case 'resource':
             case 'NULL':
             case 'unknown type':
             default:
-                trigger_error('Unsupported dynamic type, casting to string: ' . gettype($mix_value), E_USER_WARNING);
                 $int_dynamic_type = Schema::PROPERTY_STRING;
-                $mix_value = (string)$mix_value;
+                $mix_value = NULL;
         }
         return [
             'type' => $int_dynamic_type,

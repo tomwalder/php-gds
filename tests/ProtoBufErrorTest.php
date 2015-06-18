@@ -24,14 +24,56 @@ class ProtoBufErrorTest extends GDSTest {
 
     /**
      * Missing Dataset
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Could not determine DATASET, please pass to GDS\Gateway\ProtoBuf::__construct()
      */
     public function testMissingDataset()
     {
-        $obj_ex = NULL;
-        try {
-            $obj_gateway = new GDS\Gateway\ProtoBuf();
-        } catch (\Exception $obj_ex) {}
-        $this->assertEquals($obj_ex, new \Exception('Could not determine DATASET, please pass to GDS\Gateway\ProtoBuf::__construct()'));
+        new GDS\Gateway\ProtoBuf();
+    }
+
+    /**
+     * Attempt an upsert with an unrecognised property type
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
+     */
+    public function testUnknownTypes()
+    {
+
+        $obj_request = new \google\appengine\datastore\v4\CommitRequest();
+        $obj_request->setMode(\google\appengine\datastore\v4\CommitRequest\Mode::NON_TRANSACTIONAL);
+        $obj_mutation = $obj_request->mutableDeprecatedMutation();
+
+        $obj_entity = $obj_mutation->addInsertAutoId();
+        $obj_key = $obj_entity->mutableKey();
+        $obj_partition = $obj_key->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_kpe = $obj_key->addPathElement();
+        $obj_kpe->setKind('Book');
+
+        $obj_property = $obj_entity->addProperty();
+        $obj_property->setName('property');
+        $obj_val = $obj_property->mutableValue();
+        $obj_val->setIndexed(TRUE);
+        // $obj_val->setStringValue('');
+
+        $obj_property = $obj_entity->addProperty();
+        $obj_property->setName('simple');
+        $obj_val = $obj_property->mutableValue();
+        $obj_val->setIndexed(TRUE);
+        $obj_val->setStringValue('success!');
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
+
+        $obj_store = $this->createBasicStore();
+        $obj_store->upsert($obj_store->createEntity([
+            'property' => new stdClass(),
+            'simple' => new Simple()
+        ]));
+
+        $this->apiProxyMock->verify();
     }
 
 }

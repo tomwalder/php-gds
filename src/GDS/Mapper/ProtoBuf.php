@@ -196,6 +196,11 @@ class ProtoBuf extends \GDS\Mapper
         }
         $obj_val->setIndexed($bol_index);
 
+        // NULL checks
+        if(NULL === $mix_value) {
+            return;
+        }
+
         // Value
         switch ($arr_field_def['type']) {
             case Schema::PROPERTY_STRING:
