@@ -5,7 +5,7 @@
         </testsuite>
     </testsuites>
     <php>
-        <includePath>vendor/google/appengine-php-sdk<includePath>
+        <includePath>vendor/google/appengine-php-sdk</includePath>
     </php>
     <logging>
         <log type="coverage-clover" target="build/logs/clover.xml"/>
