@@ -11,7 +11,7 @@ before_script:
 
 script:
   - mkdir -p build/logs
-  - php vendor/bin/phpunit -d include_path=vendor/google/appengine-php-sdk/
+  - php vendor/bin/phpunit 
 
 after_script:
   - php vendor/bin/coveralls -v
