@@ -5,5 +5,5 @@ Assuming you have PHPUnit installed and ready to roll... if not, [go here](https
 Run PHPUnit, passing in the SDK include path
 
 ```bash
-phpunit -d include_path=vendor/google/appengine-php-sdk/
+phpunit
 ```
