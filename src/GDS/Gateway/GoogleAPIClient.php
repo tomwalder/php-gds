@@ -76,6 +76,24 @@ class GoogleAPIClient extends \GDS\Gateway
     }
 
     /**
+     * Create a configured Google Client ready for Datastore use, using the JSON service file from Google Dev Console
+     *
+     * @param $str_json_file
+     * @return \Google_Client
+     */
+    public static function createClientFromJson($str_json_file)
+    {
+        $obj_client = new \Google_Client();
+        $obj_client->setAssertionCredentials($obj_client->loadServiceAccountJson(
+            $str_json_file,
+            [\Google_Service_Datastore::DATASTORE, \Google_Service_Datastore::USERINFO_EMAIL]
+        ));
+        // App Engine php55 runtime dev server problems...
+        $obj_client->setClassConfig('Google_Http_Request', 'disable_gzip', TRUE);
+        return $obj_client;
+    }
+
+    /**
      * Put an array of Entities into the Datastore. Return any that need AutoIDs
      *
      * @todo Validate support for per-entity Schemas
