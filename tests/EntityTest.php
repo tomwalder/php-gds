@@ -20,7 +20,8 @@
  *
  * @author Tom Walder <tom@docnet.nu>
  */
-class EntityTest extends \PHPUnit_Framework_TestCase {
+class EntityTest extends \PHPUnit_Framework_TestCase
+{
 
     /**
      * Check our Kind and KeyId/KeyName setters, getters
