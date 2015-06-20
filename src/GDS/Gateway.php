@@ -129,10 +129,10 @@ abstract class Gateway
     /**
      * Delete an Entity
      *
-     * @param object $obj_key
+     * @param Entity $obj_key
      * @return bool
      */
-    public function delete($obj_key)
+    public function delete(Entity $obj_key)
     {
         return $this->deleteMulti([$obj_key]);
     }
