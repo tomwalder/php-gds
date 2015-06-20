@@ -62,13 +62,6 @@ class Store
     private $str_last_cursor = NULL;
 
     /**
-     * The class to use when instantiating new Entity objects
-     *
-     * @var string
-     */
-    private $str_entity_class = '\\GDS\\Entity';
-
-    /**
      * Transaction ID
      *
      * @var null|string
@@ -346,7 +339,7 @@ class Store
      */
     public final function createEntity($arr_data = NULL)
     {
-        $obj_entity = (new $this->str_entity_class())->setSchema($this->obj_schema);
+        $obj_entity = $this->obj_schema->createEntity();
         if(NULL !== $arr_data) {
             foreach ($arr_data as $str_property => $mix_value) {
                 $obj_entity->__set($str_property, $mix_value);
@@ -360,25 +353,15 @@ class Store
      *
      * Must be GDS\Entity, or a sub-class of it
      *
+     * This method is here to maintain backwards compatibility. The Schema is responsible in 2.0+
+     *
      * @param $str_class
      * @return $this
      * @throws \Exception
      */
-    public final function setEntityClass($str_class)
+    public function setEntityClass($str_class)
     {
-        if(class_exists($str_class)) {
-            if(is_a($str_class, '\\GDS\\Entity', TRUE)) {
-                $this->str_entity_class = $str_class;
-
-                // @todo see if this makes sense...
-                $this->obj_schema->setEntityClass($str_class);
-
-            } else {
-                throw new \Exception('Cannot set an Entity class that does not extend "GDS\Entity": ' . $str_class);
-            }
-        } else {
-            throw new \Exception('Cannot set missing Entity class: ' . $str_class);
-        }
+        $this->obj_schema->setEntityClass($str_class);
         return $this;
     }
 

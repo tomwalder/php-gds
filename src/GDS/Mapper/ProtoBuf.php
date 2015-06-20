@@ -66,11 +66,8 @@ class ProtoBuf extends \GDS\Mapper
      */
     public function mapOneFromResult($obj_result)
     {
-        $obj_gds_entity = new Entity();
-
         // Key & Ancestry
-        $arr_key_path = $obj_result->getEntity()->getKey()->getPathElementList();
-        $bol_schema_match = $this->configureGDSKey($arr_key_path, $obj_gds_entity);
+        list($obj_gds_entity, $bol_schema_match) = $this->createEntityWithKey($obj_result);
 
         // Properties
         $arr_property_definitions = $this->obj_schema->getProperties();
@@ -91,22 +88,24 @@ class ProtoBuf extends \GDS\Mapper
      *
      * @todo Validate dynamic mapping
      *
-     * @param \google\appengine\datastore\v4\Key\PathElement[] $arr_key_path
-     * @param Entity $obj_gds_entity
-     * @return bool
-     * @throws \Exception
+     * @param \google\appengine\datastore\v4\EntityResult $obj_result
+     * @return array
      */
-    private function configureGDSKey(array $arr_key_path, Entity $obj_gds_entity)
+    private function createEntityWithKey(\google\appengine\datastore\v4\EntityResult $obj_result)
     {
+        // Get the full key path
+        $arr_key_path = $obj_result->getEntity()->getKey()->getPathElementList();
+
         // Key for 'self' (the last part of the KEY PATH)
         /* @var $obj_path_end \google\appengine\datastore\v4\Key\PathElement */
         $obj_path_end = array_pop($arr_key_path);
         if($obj_path_end->getKind() == $this->obj_schema->getKind()) {
             $bol_schema_match = TRUE;
+            $obj_gds_entity = $this->obj_schema->createEntity();
             $obj_gds_entity->setSchema($this->obj_schema);
         } else {
             $bol_schema_match = FALSE;
-            $obj_gds_entity->setKind($obj_path_end->getKind());
+            $obj_gds_entity = (new \GDS\Entity())->setKind($obj_path_end->getKind());
         }
 
         // Set ID or Name (will always have one or the other)
@@ -131,7 +130,7 @@ class ProtoBuf extends \GDS\Mapper
         }
 
         // Return whether or not the Schema matched
-        return $bol_schema_match;
+        return [$obj_gds_entity, $bol_schema_match];
     }
 
     /**

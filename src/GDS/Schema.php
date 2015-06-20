@@ -52,6 +52,13 @@ class Schema
     private $arr_defined_properties = [];
 
     /**
+     * The class to use when instantiating new Entity objects
+     *
+     * @var string
+     */
+    private $str_entity_class = '\\GDS\\Entity';
+
+    /**
      * Kind is required
      *
      * @param $str_kind
@@ -168,6 +175,39 @@ class Schema
     public function getProperties()
     {
         return $this->arr_defined_properties;
+    }
+
+    /**
+     * Set the class to use when instantiating new Entity objects
+     *
+     * Must be GDS\Entity, or a sub-class of it
+     *
+     * @param $str_class
+     * @return $this
+     * @throws \InvalidArgumentException
+     */
+    public final function setEntityClass($str_class)
+    {
+        if(class_exists($str_class)) {
+            if(is_a($str_class, '\\GDS\\Entity', TRUE)) {
+                $this->str_entity_class = $str_class;
+            } else {
+                throw new \InvalidArgumentException('Cannot set an Entity class that does not extend "GDS\Entity": ' . $str_class);
+            }
+        } else {
+            throw new \InvalidArgumentException('Cannot set missing Entity class: ' . $str_class);
+        }
+        return $this;
+    }
+
+    /**
+     * Create a new instance of this GDS Entity class
+     *
+     * @return Entity
+     */
+    public final function createEntity()
+    {
+        return (new $this->str_entity_class())->setSchema($this);
     }
 
 }
