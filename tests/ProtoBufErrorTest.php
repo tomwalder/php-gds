@@ -34,6 +34,17 @@ class ProtoBufErrorTest extends GDSTest {
     }
 
     /**
+     * Pass in non-Enttiy objects
+     *
+     * @expectedException        InvalidArgumentException
+     * @expectedExceptionMessage You gave me something other than GDS\Entity objects.. not gonna fly!
+     */
+    public function testDodgyUpsertParams()
+    {
+        $this->createBasicStore()->upsert([NULL, FALSE, TRUE, new stdClass()]);
+    }
+
+    /**
      * Attempt an upsert with an unrecognised property type
      *
      * @expectedException        Exception
