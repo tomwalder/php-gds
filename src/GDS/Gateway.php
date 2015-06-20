@@ -157,7 +157,7 @@ abstract class Gateway
      */
     public function putMulti(array $arr_entities)
     {
-        // Ensure all the supplied Entities have a Kind & Schema
+        // Ensure all the supplied are Entities and have a Kind & Schema
         $this->ensureSchema($arr_entities);
 
         // Record the Auto-generated Key IDs against the GDS Entities.
@@ -202,8 +202,12 @@ abstract class Gateway
     protected function ensureSchema($arr_entities)
     {
         foreach($arr_entities as $obj_gds_entity) {
-            if (NULL === $obj_gds_entity->getKind()) {
-                $obj_gds_entity->setSchema($this->obj_schema);
+            if($obj_gds_entity instanceof Entity) {
+                if (NULL === $obj_gds_entity->getKind()) {
+                    $obj_gds_entity->setSchema($this->obj_schema);
+                }
+            } else {
+                throw new \InvalidArgumentException('You gave me something other than GDS\Entity objects.. not gonna fly!');
             }
         }
     }
