@@ -23,6 +23,8 @@
 class ProtoBufNamepsaceTest extends GDSTest {
 
     /**
+     * Build a name-spaced Store
+     *
      * @return \GDS\Store
      */
     private function getBookstoreWithTestNamespace()
@@ -34,7 +36,7 @@ class ProtoBufNamepsaceTest extends GDSTest {
     }
 
     /**
-     * Test basic upsert
+     * Test upsert, with namespace
      *
      * @expectedException        Exception
      * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
@@ -58,6 +60,46 @@ class ProtoBufNamepsaceTest extends GDSTest {
             'title' => 'Patterns of Enterprise Application Architecture'
         ]));
 
+        $this->apiProxyMock->verify();
+    }
+
+    /**
+     * Fetch by Name, with namespace
+     */
+    public function testFetchByName()
+    {
+        $obj_request = new \google\appengine\datastore\v4\LookupRequest();
+        $obj_request->mutableReadOptions();
+        $obj_key = $obj_request->addKey();
+        $obj_key->mutablePartitionId()->setDatasetId('Dataset')->setNamespace('Test');
+        $obj_key->addPathElement()->setKind('Book')->setName('PoEAA');
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $obj_request, new \google\appengine\datastore\v4\LookupResponse());
+
+        $obj_result = $this->getBookstoreWithTestNamespace()->fetchByName('PoEAA');
+        $this->assertEquals($obj_result, NULL);
+
+        $this->apiProxyMock->verify();
+    }
+
+    /**
+     * Delete one, with namespace
+     */
+    public function testDeleteOne()
+    {
+        $obj_request = new \google\appengine\datastore\v4\CommitRequest();
+        $obj_request->setMode(\google\appengine\datastore\v4\CommitRequest\Mode::NON_TRANSACTIONAL);
+        $obj_mutation = $obj_request->mutableDeprecatedMutation();
+        $obj_key = $obj_mutation->addDelete();
+        $obj_key->mutablePartitionId()->setDatasetId('Dataset')->setNamespace('Test');
+        $obj_key->addPathElement()->setKind('Book')->setName('PoEAA');
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
+
+        $obj_store = $this->getBookstoreWithTestNamespace();
+        $obj_result = $obj_store->delete($obj_store->createEntity()->setKeyName('PoEAA'));
+
+        $this->assertEquals($obj_result, TRUE);
         $this->apiProxyMock->verify();
     }
 
