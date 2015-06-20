@@ -34,7 +34,7 @@ class ProtoBufErrorTest extends GDSTest {
     }
 
     /**
-     * Pass in non-Enttiy objects
+     * Pass in non-Entity objects
      *
      * @expectedException        InvalidArgumentException
      * @expectedExceptionMessage You gave me something other than GDS\Entity objects.. not gonna fly!
