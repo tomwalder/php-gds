@@ -103,4 +103,28 @@ class ProtoBufNamepsaceTest extends GDSTest {
         $this->apiProxyMock->verify();
     }
 
+    /**
+     * GQL Fetch ONE with one string parameter and namespace
+     */
+    public function testFetchOneStringParam()
+    {
+        $str_gql = "SELECT * FROM Kind WHERE property = @param";
+        
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_request->mutablePartitionId()->setDatasetId('Dataset')->setNamespace('Test');
+
+        $obj_gql_query = $obj_request->mutableGqlQuery()->setAllowLiteral(TRUE)->setQueryString($str_gql . " LIMIT 1");
+        $obj_arg = $obj_gql_query->addNameArg();
+        $obj_arg->setName('param');
+        $obj_arg->mutableValue()->setStringValue('test');
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_result = $this->getBookstoreWithTestNamespace()->fetchOne($str_gql, ['param' => 'test']);
+
+        $this->assertEquals($obj_result, NULL);
+        $this->apiProxyMock->verify();
+    }
+
 }
