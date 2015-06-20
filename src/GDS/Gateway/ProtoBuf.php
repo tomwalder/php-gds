@@ -236,7 +236,7 @@ class ProtoBuf extends \GDS\Gateway
      *
      * Consumes Schema
      *
-     * @todo determine success?
+     * @todo Determine success. Not 100% how to do this from the response yet.
      *
      * @param array $arr_entities
      * @return bool
@@ -261,7 +261,7 @@ class ProtoBuf extends \GDS\Gateway
     /**
      * Fetch some Entities, based on the supplied GQL and, optionally, parameters
      *
-     * @todo break out for local dev GQL interpretation
+     * @todo Introduce local dev GQL interpretation. Low priority.
      *
      * @param string $str_gql
      * @param array|null $arr_params
