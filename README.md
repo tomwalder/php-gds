@@ -115,8 +115,10 @@ Are you sitting comfortably? before we begin, you will need:
 - a Google Account (doh), usually for running AppEngine - but not always
 - a Project to work on with the "Google Cloud Datastore API" turned ON [Google Developer Console](https://console.developers.google.com/)
 
-If you want to use the JSON API from remote or non-AppEngine environments, you will also need
-- a "Service account" and a P12 key file for that service account [Service Accounts](https://developers.google.com/accounts/docs/OAuth2#serviceaccount)
+If you want to use the JSON API from remote or non-App Engine environments, you will also need
+- a "Service account" and **either** 
+ - **(recommended, simpler)** the JSON service key file, downloadable from the Developer Console
+ - or a P12 key file for that service account [Service Accounts](https://developers.google.com/accounts/docs/OAuth2#serviceaccount) along with the service account name
 
 ### Composer, Dependencies ###
 
