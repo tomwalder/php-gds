@@ -19,4 +19,4 @@ $obj_gateway = new GDS\Gateway\GoogleAPIClient($obj_client, GDS_DATASET_ID);
 $obj_book_schema = (new GDS\Schema('Book'))->addString('title')->addString('author')->addString('isbn', TRUE);
 
 // Store requires a Gateway and Schema
-$obj_book_store = new GDS\Store($obj_gateway, $obj_book_schema);
+$obj_book_store = new GDS\Store($obj_book_schema, $obj_gateway);
