@@ -28,29 +28,36 @@ class Google_IO_Fake extends Google_IO_Stream
      */
     public function executeRequest(Google_Http_Request $request)
     {
-        $this->str_request_body_for_testing = $request->getPostBody();
-        $this->str_request_url_for_testing = $request->getUrl();
+        PHPUnit_Framework_Assert::assertEquals($this->str_request_body_for_testing, $request->getPostBody());
+        PHPUnit_Framework_Assert::assertEquals($this->str_request_url_for_testing, $request->getUrl());
         return array(json_encode((object)['test' => true]), [], '200');
     }
 
-    /**
-     * Get the client built request body
-     *
-     * @return string|null
-     */
-    public function getRequestBody()
+//    /**
+//     * Get the client built request body
+//     *
+//     * @return string|null
+//     */
+//    public function getRequestBody()
+//    {
+//        return $this->str_request_body_for_testing;
+//    }
+//
+//    /**
+//     * Get the client built request URL
+//     *
+//     * @return string|null
+//     */
+//    public function getRequestUrl()
+//    {
+//        return $this->str_request_url_for_testing;
+//    }
+
+    public function expectRequest($str_url, $str_req)
     {
-        return $this->str_request_body_for_testing;
+        $this->str_request_url_for_testing = $str_url;
+        $this->str_request_body_for_testing = $str_req;
     }
 
-    /**
-     * Get the client built request URL
-     *
-     * @return string|null
-     */
-    public function getRequestUrl()
-    {
-        return $this->str_request_url_for_testing;
-    }
 
 }
