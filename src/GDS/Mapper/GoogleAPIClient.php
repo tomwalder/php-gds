@@ -216,6 +216,31 @@ class GoogleAPIClient extends \GDS\Mapper
     public function mapOneFromResult($obj_result)
     {
         // Key & Ancestry
+        list($obj_gds_entity, $bol_schema_match) = $this->createEntityWithKey($obj_result);
+
+        // Properties
+        $arr_property_definitions = $this->obj_schema->getProperties();
+        foreach ((array)$obj_result['entity']['properties'] as $str_field => $obj_property) {
+            /** @var $obj_property \Google_Service_Datastore_Property */
+            if ($bol_schema_match && isset($arr_property_definitions[$str_field])) {
+                $obj_gds_entity->__set($str_field, $this->extractPropertyValue($arr_property_definitions[$str_field]['type'], $obj_property));
+            } else {
+                $obj_gds_entity->__set($str_field, $this->extractPropertyValue(Schema::PROPERTY_DETECT, $obj_property));
+            }
+        }
+
+        // Done
+        return $obj_gds_entity;
+    }
+
+    /**
+     * Create & populate a GDS\Entity with key data
+     *
+     * @param \Google_Service_Datastore_EntityResult $obj_result
+     * @return array
+     */
+    private function createEntityWithKey(\Google_Service_Datastore_EntityResult $obj_result)
+    {
         if(isset($obj_result['entity']['key']['path'])) {
             $arr_path = $obj_result['entity']['key']['path'];
 
@@ -227,7 +252,6 @@ class GoogleAPIClient extends \GDS\Mapper
                 if($arr_path_end['kind'] == $this->obj_schema->getKind()) {
                     $bol_schema_match = TRUE;
                     $obj_gds_entity = $this->obj_schema->createEntity();
-                    $obj_gds_entity->setSchema($this->obj_schema);
                 } else {
                     // Attempt to handle a non-schema-match
                     $bol_schema_match = FALSE;
@@ -263,19 +287,8 @@ class GoogleAPIClient extends \GDS\Mapper
             throw new \RuntimeException("No path for Entity Key?");
         }
 
-        // Properties
-        $arr_property_definitions = $this->obj_schema->getProperties();
-        foreach ((array)$obj_result['entity']['properties'] as $str_field => $obj_property) {
-            /** @var $obj_property \Google_Service_Datastore_Property */
-            if ($bol_schema_match && isset($arr_property_definitions[$str_field])) {
-                $obj_gds_entity->__set($str_field, $this->extractPropertyValue($arr_property_definitions[$str_field]['type'], $obj_property));
-            } else {
-                $obj_gds_entity->__set($str_field, $this->extractPropertyValue(Schema::PROPERTY_DETECT, $obj_property));
-            }
-        }
-
-        // Done
-        return $obj_gds_entity;
+        // Return whether or not the Schema matched
+        return [$obj_gds_entity, $bol_schema_match];
     }
 
     /**
