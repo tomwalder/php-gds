@@ -17,6 +17,7 @@
 namespace GDS\Mapper;
 use GDS\Entity;
 use GDS\Schema;
+use google\appengine\datastore\v4\EntityResult;
 use google\appengine\datastore\v4\Key;
 use google\appengine\datastore\v4\Value;
 
@@ -58,11 +59,9 @@ class ProtoBuf extends \GDS\Mapper
      * Map a single result out of the Raw response data into a supplied Entity object
      *
      * @todo Validate dynamic schema mapping in multi-kind responses like fetchEntityGroup()
-     * @todo Review support for custom Entity classes in 2.0
      *
-     * @param \google\appengine\datastore\v4\EntityResult $obj_result
+     * @param EntityResult $obj_result
      * @return Entity
-     * @throws \Exception
      */
     public function mapOneFromResult($obj_result)
     {
@@ -88,10 +87,10 @@ class ProtoBuf extends \GDS\Mapper
      *
      * @todo Validate dynamic mapping
      *
-     * @param \google\appengine\datastore\v4\EntityResult $obj_result
+     * @param EntityResult $obj_result
      * @return array
      */
-    private function createEntityWithKey(\google\appengine\datastore\v4\EntityResult $obj_result)
+    private function createEntityWithKey(EntityResult $obj_result)
     {
         // Get the full key path
         $arr_key_path = $obj_result->getEntity()->getKey()->getPathElementList();
