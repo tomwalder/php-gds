@@ -84,7 +84,7 @@ class ProtoBuf extends \GDS\Mapper
     }
 
     /**
-     * Populate a GDS\Entity with key data
+     * Create & populate a GDS\Entity with key data
      *
      * @todo Validate dynamic mapping
      *
@@ -102,7 +102,6 @@ class ProtoBuf extends \GDS\Mapper
         if($obj_path_end->getKind() == $this->obj_schema->getKind()) {
             $bol_schema_match = TRUE;
             $obj_gds_entity = $this->obj_schema->createEntity();
-            $obj_gds_entity->setSchema($this->obj_schema);
         } else {
             $bol_schema_match = FALSE;
             $obj_gds_entity = (new \GDS\Entity())->setKind($obj_path_end->getKind());
