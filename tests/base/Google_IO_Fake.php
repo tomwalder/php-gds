@@ -19,6 +19,11 @@ class Google_IO_Fake extends Google_IO_Stream
     protected $str_request_url_for_testing = NULL;
 
     /**
+     * @var string
+     */
+    protected $str_expected_response = NULL;
+
+    /**
      * Replace the execute method, so we can test against the contents
      *
      * Don't actually do anything, just return a faked up response
@@ -30,33 +35,21 @@ class Google_IO_Fake extends Google_IO_Stream
     {
         PHPUnit_Framework_Assert::assertEquals($this->str_request_body_for_testing, $request->getPostBody());
         PHPUnit_Framework_Assert::assertEquals($this->str_request_url_for_testing, $request->getUrl());
-        return array(json_encode((object)['test' => true]), [], '200');
+        return array($this->str_expected_response, [], '200');
     }
 
-//    /**
-//     * Get the client built request body
-//     *
-//     * @return string|null
-//     */
-//    public function getRequestBody()
-//    {
-//        return $this->str_request_body_for_testing;
-//    }
-//
-//    /**
-//     * Get the client built request URL
-//     *
-//     * @return string|null
-//     */
-//    public function getRequestUrl()
-//    {
-//        return $this->str_request_url_for_testing;
-//    }
-
-    public function expectRequest($str_url, $str_req)
+    /**
+     * Set up the expected request and response strings
+     * 
+     * @param $str_url
+     * @param $str_req
+     * @param $str_response
+     */
+    public function expectRequest($str_url, $str_req, $str_response)
     {
         $this->str_request_url_for_testing = $str_url;
         $this->str_request_body_for_testing = $str_req;
+        $this->str_expected_response = $str_response;
     }
 
 

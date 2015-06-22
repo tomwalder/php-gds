@@ -43,10 +43,13 @@ class JSONTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Tell the Fake IO what to expect...
+     *
+     * @param $str_url
+     * @param $str_req
      */
-    private function expectRequest($str_url, $str_req)
+    private function expectRequest($str_url, $str_req, $str_response = '{}')
     {
-        $this->obj_fake_io->expectRequest($str_url, $str_req);
+        $this->obj_fake_io->expectRequest($str_url, $str_req, $str_response);
     }
 
     /**
