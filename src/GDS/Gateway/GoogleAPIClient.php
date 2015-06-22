@@ -136,10 +136,12 @@ class GoogleAPIClient extends \GDS\Gateway
     protected function extractAutoIDs()
     {
         $arr_ids = [];
-        foreach($this->obj_last_response['mutationResult']['insertAutoIdKeys'] as $obj_key) {
-            $arr_key_path = $obj_key->getPath();
-            $arr_path_end = end($arr_key_path);
-            $arr_ids[] = $arr_path_end['id'];
+        if(isset($this->obj_last_response['mutationResult']) && isset($this->obj_last_response['mutationResult']['insertAutoIdKeys'])) {
+            foreach ($this->obj_last_response['mutationResult']['insertAutoIdKeys'] as $obj_key) {
+                $arr_key_path = $obj_key->getPath();
+                $arr_path_end = end($arr_key_path);
+                $arr_ids[] = $arr_path_end['id'];
+            }
         }
         return $arr_ids;
     }
