@@ -40,7 +40,7 @@ class Google_IO_Fake extends Google_IO_Stream
 
     /**
      * Set up the expected request and response strings
-     * 
+     *
      * @param $str_url
      * @param $str_req
      * @param $str_response

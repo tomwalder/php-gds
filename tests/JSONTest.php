@@ -112,9 +112,6 @@ class JSONTest extends \PHPUnit_Framework_TestCase
 
     /**
      * test upsert Request
-     *
-     * @expectedException        Exception
-     * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
      */
     public function testUpsertAutoIdRequest()
     {
@@ -122,11 +119,14 @@ class JSONTest extends \PHPUnit_Framework_TestCase
         $obj_store = new \GDS\Store('Film', $obj_gateway);
         $this->expectRequest(
             'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/commit',
-            '{"mode":"NON_TRANSACTIONAL","mutation":{"insertAutoId":[{"key":{"path":[{"kind":"Film"}]},"properties":{"title":{"indexed":true,"stringValue":"Back to the Future"}}}]}}'
+            '{"mode":"NON_TRANSACTIONAL","mutation":{"insertAutoId":[{"key":{"path":[{"kind":"Film"}]},"properties":{"title":{"indexed":true,"stringValue":"Back to the Future"}}}]}}',
+            '{"mutationResult":{"indexUpdates":7,"insertAutoIdKeys":[{"partitionId":{"datasetId": "Dataset"},"path":[{"kind": "Film","id": "987654321"}]}]}}'
         );
-        $obj_store->upsert($obj_store->createEntity([
+        $obj_film = $obj_store->createEntity([
             'title' => 'Back to the Future'
-        ]));
+        ]);
+        $obj_store->upsert($obj_film);
+        $this->assertEquals('987654321', $obj_film->getKeyId());
     }
 
     /**
@@ -174,16 +174,48 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test begin transaction Request
+     * test transaction Request
      */
-    public function testBeginTransactionRequest()
+    public function testBeginAndUseTransactionRequest()
     {
         $obj_gateway = new GDS\Gateway\GoogleAPIClient($this->setupTestClient(), 'Dataset');
         $obj_store = new \GDS\Store('Book', $obj_gateway);
         $this->expectRequest(
             'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/beginTransaction',
-            '{}'
+            '{}',
+            '{"transaction":"EeDoHGJsLR4eGjkABRmGMYV-Vj6Gtwn3ayLOvPX8ccUzuR4NZG0MMhmD28O-3gTTwdIUINZeJBk22kubBQPd0-Nz1sY="}'
         );
         $obj_store->beginTransaction();
+
+        // And a second test to show we have correctly extracted the Transaction ID
+        $this->expectRequest(
+            'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/runQuery',
+            '{"readOptions":{"transaction":"EeDoHGJsLR4eGjkABRmGMYV-Vj6Gtwn3ayLOvPX8ccUzuR4NZG0MMhmD28O-3gTTwdIUINZeJBk22kubBQPd0-Nz1sY="},"gqlQuery":{"allowLiteral":true,"queryString":"SELECT * FROM `Book` ORDER BY __key__ ASC LIMIT 1"}}'
+        );
+        $obj_store->fetchOne();
+    }
+
+    /**
+     * test GQL Request
+     */
+    public function testGqlFetchOneWithResult()
+    {
+        $obj_gateway = new GDS\Gateway\GoogleAPIClient($this->setupTestClient(), 'Dataset');
+        $obj_store = new \GDS\Store('Book', $obj_gateway);
+        $this->expectRequest(
+            'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/runQuery',
+            '{"gqlQuery":{"allowLiteral":true,"queryString":"SELECT * FROM Book LIMIT @intPageSize ","nameArgs":[{"name":"intPageSize","value":{"integerValue":1}}]}}',
+            '{"batch": {"entityResultType": "FULL","entityResults": [{"entity": {"key": {"partitionId": {"datasetId": "Dataset"},"path": [{"kind": "Book","id": "4804129360707584"}]},"properties": {"author": {"stringValue": "William Shakespeare","indexed": false},"title": {"stringValue": "A Midsummer Night\'s Dream","indexed": false},"isbn": {"stringValue": "1853260304"}}}}],"endCursor": "CiQSHmoJc35waHAtZ2RzchELEgRCb29rGICAgMDIqsQIDBgAIAA=","moreResults": "MORE_RESULTS_AFTER_LIMIT","skippedResults": null}}'
+        );
+        $arr_result = $obj_store->query("SELECT * FROM Book")->fetchPage(1);
+
+        $this->assertTrue(is_array($arr_result));
+        $this->assertEquals(1, count($arr_result));
+        $obj_result = $arr_result[0];
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
+        $this->assertEquals('4804129360707584', $obj_result->getKeyId());
+        $this->assertEquals('William Shakespeare', $obj_result->author);
+        $this->assertEquals('CiQSHmoJc35waHAtZ2RzchELEgRCb29rGICAgMDIqsQIDBgAIAA=', $obj_store->getCursor());
+
     }
 }
