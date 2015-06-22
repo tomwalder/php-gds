@@ -209,18 +209,12 @@ class GoogleAPIClient extends \GDS\Mapper
     /**
      * Map a single result out of the Raw response data array into a supplied Entity object
      *
-     * @todo Support custom object classes?
-     *
      * @param \Google_Service_Datastore_EntityResult $obj_result
      * @return Entity
      * @throws \Exception
      */
     public function mapOneFromResult($obj_result)
     {
-
-        $obj_gds_entity = new Entity();
-        $bol_schema_match = FALSE;
-
         // Key & Ancestry
         if(isset($obj_result['entity']['key']['path'])) {
             $arr_path = $obj_result['entity']['key']['path'];
@@ -232,10 +226,12 @@ class GoogleAPIClient extends \GDS\Mapper
             if(isset($arr_path_end['kind'])) {
                 if($arr_path_end['kind'] == $this->obj_schema->getKind()) {
                     $bol_schema_match = TRUE;
+                    $obj_gds_entity = $this->obj_schema->createEntity();
                     $obj_gds_entity->setSchema($this->obj_schema);
                 } else {
                     // Attempt to handle a non-schema-match
-                    $obj_gds_entity->setKind($arr_path_end['kind']);
+                    $bol_schema_match = FALSE;
+                    $obj_gds_entity = (new \GDS\Entity())->setKind($arr_path_end['kind']);
                 }
             } else {
                 throw new \RuntimeException("No Kind for end(path) for Entity?");
