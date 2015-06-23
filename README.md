@@ -78,7 +78,7 @@ Are you sitting comfortably? before we begin, you will need:
 
 To install using composer, use this require line (for production)
 
-`"tomwalder/php-gds": "v1.2.0"`
+`"tomwalder/php-gds": "v1.2.1"`
 
 ### Running the examples ###
 
