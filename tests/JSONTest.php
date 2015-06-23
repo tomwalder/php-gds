@@ -404,4 +404,63 @@ class JSONTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('CiQSHmoJc35waHAtZ2RzchELEgRCb29rGICAgMDIqsQIDBgAIAA=', $obj_store->getCursor());
     }
 
+    /**
+     * test upsert Request with key name
+     */
+    public function testUpsertWithKeyNameRequest()
+    {
+        $obj_gateway = new GDS\Gateway\GoogleAPIClient($this->setupTestClient(), 'Dataset');
+        $obj_store = new \GDS\Store('Film', $obj_gateway);
+        $this->expectRequest(
+            'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/commit',
+            '{"mode":"NON_TRANSACTIONAL","mutation":{"upsert":[{"key":{"path":[{"kind":"Film","name":"B2TF"}]},"properties":{"title":{"indexed":true,"stringValue":"Back to the Future"}}}]}}'
+        );
+        $obj_film = $obj_store->createEntity([
+            'title' => 'Back to the Future'
+        ]);
+        $obj_film->setKeyName('B2TF');
+        $obj_store->upsert($obj_film);
+    }
+
+    /**
+     * test upsert in transaction
+     */
+    public function testUpsertWithKeyNameInTransactionRequest()
+    {
+        $obj_gateway = new GDS\Gateway\GoogleAPIClient($this->setupTestClient(), 'Dataset');
+        $obj_store = new \GDS\Store('Film', $obj_gateway);
+
+        $this->expectRequest(
+            'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/beginTransaction',
+            '{}',
+            '{"transaction":"EeDoHGJsLR4eGjkABRmGMYV-Vj6Gtwn3ayLOvPX8ccUzuR4NZG0MMhmD28O-3gTTwdIUINZeJBk22kubBQPd0-Nz1sY="}'
+        );
+        $obj_store->beginTransaction();
+
+
+        $this->expectRequest(
+            'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/commit',
+            '{"mode":"TRANSACTIONAL","transaction":"EeDoHGJsLR4eGjkABRmGMYV-Vj6Gtwn3ayLOvPX8ccUzuR4NZG0MMhmD28O-3gTTwdIUINZeJBk22kubBQPd0-Nz1sY=","mutation":{"upsert":[{"key":{"path":[{"kind":"Film","name":"B2TF"}]},"properties":{"title":{"indexed":true,"stringValue":"Back to the Future"}}}]}}'
+        );
+        $obj_film = $obj_store->createEntity([
+            'title' => 'Back to the Future'
+        ]);
+        $obj_film->setKeyName('B2TF');
+        $obj_store->upsert($obj_film);
+    }
+
+    /**
+     * test Failure on cross-group transactions
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Cross group transactions not supported over JSON API
+
+     */
+    public function testFailCrossGroup()
+    {
+        $obj_gateway = new GDS\Gateway\GoogleAPIClient($this->setupTestClient(), 'Dataset');
+        $obj_store = new \GDS\Store('Film', $obj_gateway);
+        $obj_store->beginTransaction(TRUE);
+    }
+
 }
