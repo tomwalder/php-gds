@@ -324,25 +324,18 @@ $obj_store->delete($obj_entity);
 
 ## Custom Entities and Stores ##
 
-> @todo v2.0 revisions
-
-Whilst you can use the `GDS\Entity` and `GDS\Store` classes directly, as per the examples above, you may find it useful to extend both and have the extended Store contain the Schema definition.
+Whilst you can use the `GDS\Entity` and `GDS\Store` classes directly, as per the examples above, you may find it useful to extend one or the other.
 
 For example
 
 ```php
 class Book extends GDS\Entity { /* ... */ }
-class BookStore extends GDS\Store { /* ... */ }
+$obj_store->setEntityClass('\\Book');
 ```
 
 This way, when you pull objects out of Datastore, they are objects of your defined Entity class.
 
-```php
-$obj_store = new BookStore($obj_gateway);
-$obj_book = $obj_store->fetchOne(); // $obj_book will be a "Book" object
-```
-
-Check out the examples folder for `Book.php` and `BookStore.php` code samples.
+The `Schema` holds the custom entity class name - this can be set directly, or via the `Store` object.
 
 ## Re-indexing ##
 
@@ -376,3 +369,6 @@ A full suite of unit tests is in the works. [Click here for more details](tests/
 
 I am certainly more familiar with SQL and relational data models so I think that may end up coming across in the code - rightly so or not!
 
+Thanks to @sjlangley for any and all input - especially around unit tests for Protocol Buffers.
+
+Whilst I am using this library in production, it is my hope that other people find it of use. Feedback appreciated.
