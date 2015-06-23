@@ -83,7 +83,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test FetchById Request
+     * Test FetchById Request
      */
     public function testFetchByIdRequest()
     {
@@ -97,7 +97,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test FetchByName Request
+     * Test FetchByName Request
      */
     public function testFetchByNameRequest()
     {
@@ -111,7 +111,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test upsert Request
+     * Test upsert Request
      */
     public function testUpsertAutoIdRequest()
     {
@@ -130,7 +130,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test delete Request
+     * Test delete Request
      */
     public function testDeleteRequest()
     {
@@ -146,7 +146,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test GQL Request
+     * Test GQL Request
      */
     public function testBasicGqlRequest()
     {
@@ -160,7 +160,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test FetchById with Namespace Request
+     * Test FetchById with Namespace Request
      */
     public function testNamespacedFetchByIdRequest()
     {
@@ -174,7 +174,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test transaction Request
+     * Test transaction Request
      */
     public function testBeginAndUseTransactionRequest()
     {
@@ -196,7 +196,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test GQL Request
+     * Test GQL Request
      */
     public function testGqlFetchOneWithResult()
     {
@@ -247,7 +247,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
 
 
     /**
-     * test GQL Request with variant data types
+     * Test GQL Request with variant data types
      */
     public function testGqlFetchVariantDataResult()
     {
@@ -278,7 +278,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test Upsert With Schema
+     * Test Upsert With Schema
      *
      * @expectedException        Exception
      * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
@@ -314,7 +314,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
 
 
     /**
-     * test Fetch With Schema
+     * Test Fetch With Schema
      */
     public function testFetchWithSchema()
     {
@@ -405,7 +405,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test upsert Request with key name
+     * Test upsert Request with key name
      */
     public function testUpsertWithKeyNameRequest()
     {
@@ -423,7 +423,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test upsert in transaction
+     * Test upsert in transaction
      */
     public function testUpsertWithKeyNameInTransactionRequest()
     {
@@ -450,7 +450,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * test Failure on cross-group transactions
+     * Test Failure on cross-group transactions
      *
      * @expectedException        Exception
      * @expectedExceptionMessage Cross group transactions not supported over JSON API
