@@ -378,7 +378,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @todo test Fetch With Ancestors
+     * Test Fetch With Ancestors
      */
     public function testFetchWithAncestors()
     {
