@@ -369,7 +369,7 @@ class Mapper
                 return NULL;
 
             case Schema::PROPERTY_DETECT:
-                foreach([Schema::PROPERTY_STRING, Schema::PROPERTY_INTEGER, Schema::PROPERTY_DATETIME, Schema::PROPERTY_DOUBLE, Schema::PROPERTY_BOOLEAN] as $int_field_type) {
+                foreach([Schema::PROPERTY_STRING, Schema::PROPERTY_INTEGER, Schema::PROPERTY_DATETIME, Schema::PROPERTY_DOUBLE, Schema::PROPERTY_BOOLEAN, Schema::PROPERTY_STRING_LIST] as $int_field_type) {
                     $mix_val = $this->extractPropertyValue($int_field_type, $obj_property);
                     if(NULL !== $mix_val) {
                         return $mix_val;
