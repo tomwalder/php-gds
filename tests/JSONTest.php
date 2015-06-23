@@ -218,4 +218,190 @@ class JSONTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('CiQSHmoJc35waHAtZ2RzchELEgRCb29rGICAgMDIqsQIDBgAIAA=', $obj_store->getCursor());
 
     }
+
+    /**
+     * Put with all supported data types (dynamic Schema)
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
+     */
+    public function testUpsertVariantDataTypes()
+    {
+        $obj_gateway = new GDS\Gateway\GoogleAPIClient($this->setupTestClient(), 'Dataset');
+        $obj_store = new \GDS\Store('Person', $obj_gateway);
+
+        $this->expectRequest(
+            'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/commit',
+            '{"mode":"NON_TRANSACTIONAL","mutation":{"insertAutoId":[{"key":{"path":[{"kind":"Person"}]},"properties":{"name":{"indexed":true,"stringValue":"Tom"},"age":{"indexed":true,"integerValue":36},"dob":{"dateTimeValue":"1979-02-04T08:30:00+00:00","indexed":true},"weight":{"doubleValue":94.5,"indexed":true},"likes_php":{"booleanValue":true,"indexed":true},"friends":{"listValue":[{"indexed":true,"stringValue":"Tom"},{"indexed":true,"stringValue":"Dick"},{"indexed":true,"stringValue":"Harry"}]}}}]}}'
+        );
+
+        $obj_gds_entity = new GDS\Entity();
+        $obj_gds_entity->name = 'Tom';
+        $obj_gds_entity->age = 36;
+        $obj_gds_entity->dob = new DateTime('1979-02-04 08:30:00');
+        $obj_gds_entity->weight = 94.50;
+        $obj_gds_entity->likes_php = TRUE;
+        $obj_gds_entity->friends = ['Tom', 'Dick', 'Harry'];
+        $obj_store->upsert($obj_gds_entity);
+    }
+
+
+    /**
+     * test GQL Request with variant data types
+     */
+    public function testGqlFetchVariantDataResult()
+    {
+        $obj_gateway = new GDS\Gateway\GoogleAPIClient($this->setupTestClient(), 'Dataset');
+        $obj_store = new \GDS\Store('Person', $obj_gateway);
+        $this->expectRequest(
+            'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/runQuery',
+            '{"gqlQuery":{"allowLiteral":true,"queryString":"SELECT * FROM Person LIMIT @intPageSize ","nameArgs":[{"name":"intPageSize","value":{"integerValue":1}}]}}',
+            '{"batch": {"entityResultType": "FULL","entityResults": [{"entity": {"key":{"partitionId": {"datasetId": "Dataset"},"path":[{"kind":"Person","id": "4804129360707584"}]},"properties":{"name":{"indexed":true,"stringValue":"Tom"},"age":{"indexed":true,"integerValue":36},"dob":{"dateTimeValue":"2015-06-23T09:20:06.000Z","indexed":true},"weight":{"doubleValue":94.5,"indexed":true},"likes_php":{"booleanValue":true,"indexed":true},"friends":{"listValue":[{"indexed":true,"stringValue":"Tom"},{"indexed":true,"stringValue":"Dick"},{"indexed":true,"stringValue":"Harry"}]}}}}],"endCursor": "CiQSHmoJc35waHAtZ2RzchELEgRCb29rGICAgMDIqsQIDBgAIAA=","moreResults": "MORE_RESULTS_AFTER_LIMIT","skippedResults": null}}'
+        );
+        $arr_result = $obj_store->query("SELECT * FROM Person")->fetchPage(1);
+
+        $this->assertTrue(is_array($arr_result));
+        $this->assertEquals(1, count($arr_result));
+        $obj_result = $arr_result[0];
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
+        $this->assertEquals('4804129360707584', $obj_result->getKeyId());
+        $this->assertEquals([
+            'name' => 'Tom',
+            'age' => 36,
+            'dob' => '2015-06-23T09:20:06.000Z',
+            'likes_php' => true,
+            'friends' => ['Tom', 'Dick', 'Harry'],
+            'weight' => 94.5
+        ], $obj_result->getData());
+        $this->assertEquals('CiQSHmoJc35waHAtZ2RzchELEgRCb29rGICAgMDIqsQIDBgAIAA=', $obj_store->getCursor());
+
+    }
+
+    /**
+     * test Upsert With Schema
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
+     */
+    public function testUpsertWithSchema()
+    {
+        $obj_gateway = new GDS\Gateway\GoogleAPIClient($this->setupTestClient(), 'Dataset');
+        $obj_schema = (new \GDS\Schema('Person'))
+            ->addString('name')
+            ->addInteger('age', FALSE)
+            ->addDatetime('dob')
+            ->addDatetime('last_seen')
+            ->addFloat('weight')
+            ->addBoolean('likes_php')
+            ->addStringList('friends');
+        $obj_store = new \GDS\Store($obj_schema, $obj_gateway);
+
+        $this->expectRequest(
+            'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/commit',
+            '{"mode":"NON_TRANSACTIONAL","mutation":{"insertAutoId":[{"key":{"path":[{"kind":"Person"}]},"properties":{"name":{"indexed":true,"stringValue":"Tom"},"age":{"indexed":false,"integerValue":36},"dob":{"dateTimeValue":"1979-02-04T08:30:00+00:00","indexed":true},"last_seen":{"dateTimeValue":"2015-02-04T08:30:00+00:00","indexed":true},"weight":{"doubleValue":94.5,"indexed":true},"likes_php":{"booleanValue":true,"indexed":true},"friends":{"listValue":[{"indexed":true,"stringValue":"Tom"},{"indexed":true,"stringValue":"Dick"},{"indexed":true,"stringValue":"Harry"}]}}}]}}'
+        );
+
+        $obj_gds_entity = new GDS\Entity();
+        $obj_gds_entity->name = 'Tom';
+        $obj_gds_entity->age = 36;
+        $obj_gds_entity->dob = new DateTime('1979-02-04 08:30:00');
+        $obj_gds_entity->last_seen = '2015-02-04 08:30:00';
+        $obj_gds_entity->weight = 94.50;
+        $obj_gds_entity->likes_php = TRUE;
+        $obj_gds_entity->friends = ['Tom', 'Dick', 'Harry'];
+        $obj_store->upsert($obj_gds_entity);
+    }
+
+
+    /**
+     * test Fetch With Schema
+     */
+    public function testFetchWithSchema()
+    {
+        $obj_gateway = new GDS\Gateway\GoogleAPIClient($this->setupTestClient(), 'Dataset');
+        $obj_schema = (new \GDS\Schema('Person'))
+            ->addString('name')
+            ->addInteger('age', FALSE)
+            ->addDatetime('dob')
+            ->addDatetime('last_seen')
+            ->addFloat('weight')
+            ->addBoolean('likes_php')
+            ->addStringList('friends');
+        $obj_store = new \GDS\Store($obj_schema, $obj_gateway);
+        $this->expectRequest(
+            'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/runQuery',
+            '{"gqlQuery":{"allowLiteral":true,"queryString":"SELECT * FROM Person LIMIT @intPageSize ","nameArgs":[{"name":"intPageSize","value":{"integerValue":1}}]}}',
+            '{"batch": {"entityResultType": "FULL","entityResults": [{"entity": {"key":{"partitionId": {"datasetId": "Dataset"},"path":[{"kind":"Person","id": "4804129360707584"}]},"properties":{"name":{"indexed":true,"stringValue":"Tom"},"age":{"indexed":true,"integerValue":36},"dob":{"dateTimeValue":"2015-06-23T09:20:06.000Z","indexed":true},"weight":{"doubleValue":94.5,"indexed":true},"likes_php":{"booleanValue":true,"indexed":true},"friends":{"listValue":[{"indexed":true,"stringValue":"Tom"},{"indexed":true,"stringValue":"Dick"},{"indexed":true,"stringValue":"Harry"}]}}}}],"endCursor": "CiQSHmoJc35waHAtZ2RzchELEgRCb29rGICAgMDIqsQIDBgAIAA=","moreResults": "MORE_RESULTS_AFTER_LIMIT","skippedResults": null}}'
+        );
+        $arr_result = $obj_store->query("SELECT * FROM Person")->fetchPage(1);
+
+        $this->assertTrue(is_array($arr_result));
+        $this->assertEquals(1, count($arr_result));
+        $obj_result = $arr_result[0];
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
+        $this->assertEquals('4804129360707584', $obj_result->getKeyId());
+        $this->assertEquals([
+            'name' => 'Tom',
+            'age' => 36,
+            'dob' => '2015-06-23T09:20:06.000Z',
+            'likes_php' => true,
+            'friends' => ['Tom', 'Dick', 'Harry'],
+            'weight' => 94.5
+        ], $obj_result->getData());
+        $this->assertEquals('CiQSHmoJc35waHAtZ2RzchELEgRCb29rGICAgMDIqsQIDBgAIAA=', $obj_store->getCursor());
+    }
+
+    /**
+     * Test Upsert With Ancestors
+     *
+     * @expectedException        Exception
+     * @expectedExceptionMessage Mismatch count of requested & returned Auto IDs
+     */
+    public function testUpsertWithArrayAncestors()
+    {
+        $obj_gateway = new GDS\Gateway\GoogleAPIClient($this->setupTestClient(), 'Dataset');
+        $obj_store = new \GDS\Store('Book', $obj_gateway);
+
+        $this->expectRequest(
+            'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/commit',
+            '{"mode":"NON_TRANSACTIONAL","mutation":{"insertAutoId":[{"key":{"path":[{"kind":"Author","name":"WilliamShakespeare"},{"kind":"Book"}]},"properties":{"nickname":{"indexed":true,"stringValue":"Romeo"}}}]}}'
+        );
+
+        $obj_book = $obj_store->createEntity([
+            'nickname' => 'Romeo'
+        ]);
+        $obj_book->setAncestry([[
+            'kind' => 'Author',
+            'name' => 'WilliamShakespeare'
+        ]]);
+        $obj_store->upsert($obj_book);
+    }
+
+    /**
+     * @todo test Fetch With Ancestors
+     */
+    public function testFetchWithAncestors()
+    {
+        $obj_gateway = new GDS\Gateway\GoogleAPIClient($this->setupTestClient(), 'Dataset');
+        $obj_store = new \GDS\Store('Person', $obj_gateway);
+        $this->expectRequest(
+            'https://www.googleapis.com/datastore/v1beta2/datasets/Dataset/runQuery',
+            '{"gqlQuery":{"allowLiteral":true,"queryString":"SELECT * FROM Person LIMIT @intPageSize ","nameArgs":[{"name":"intPageSize","value":{"integerValue":1}}]}}',
+            '{"batch": {"entityResultType": "FULL","entityResults": [{"entity": {"key":{"partitionId": {"datasetId": "Dataset"},"path":[{"kind":"Person","name":"Johnny"},{"kind":"Person","id": "4804129360707584"}]},"properties":{"name":{"indexed":true,"stringValue":"Tom"},"age":{"indexed":true,"integerValue":36},"dob":{"dateTimeValue":"1979-02-04T08:30:00+00:00","indexed":true},"weight":{"doubleValue":94.5,"indexed":true},"likes_php":{"booleanValue":true,"indexed":true},"friends":{"listValue":[{"indexed":true,"stringValue":"Tom"},{"indexed":true,"stringValue":"Dick"},{"indexed":true,"stringValue":"Harry"}]}}}}],"endCursor": "CiQSHmoJc35waHAtZ2RzchELEgRCb29rGICAgMDIqsQIDBgAIAA=","moreResults": "MORE_RESULTS_AFTER_LIMIT","skippedResults": null}}'
+        );
+        $arr_result = $obj_store->query("SELECT * FROM Person")->fetchPage(1);
+
+        $this->assertTrue(is_array($arr_result));
+        $this->assertEquals(1, count($arr_result));
+        $obj_result = $arr_result[0];
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
+        $this->assertEquals('4804129360707584', $obj_result->getKeyId());
+        $this->assertEquals([[
+            'kind' => 'Person',
+            'id' => null,
+            'name' => 'Johnny'
+        ]], $obj_result->getAncestry());
+        $this->assertEquals('CiQSHmoJc35waHAtZ2RzchELEgRCb29rGICAgMDIqsQIDBgAIAA=', $obj_store->getCursor());
+    }
+
 }
