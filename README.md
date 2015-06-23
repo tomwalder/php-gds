@@ -7,9 +7,9 @@
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
-## Version 2.x ALPHA ##
+## 2.0 BETA ##
 
-**Please note, this 2.0-series branch is in ALPHA and not suitable (yet) for production**
+**Please note, this 2.0-series (dev-master) is in BETA and not suitable (yet) for production**
 
 The documentation is not yet fully representative of 2.x implementation.
 
@@ -122,9 +122,13 @@ If you want to use the JSON API from remote or non-App Engine environments, you 
 
 ### Composer, Dependencies ###
 
-To install using composer, use this require line
+To install using Composer, use this require line, for production
 
-`"tomwalder/php-gds": "2.0.*@dev"`
+`"tomwalder/php-gds": "v1.2.1"`
+
+and for bleeding-edge features, 2.0 dev-master
+
+`"tomwalder/php-gds": "dev-master"`
 
 ## Defining Your Model ##
 
