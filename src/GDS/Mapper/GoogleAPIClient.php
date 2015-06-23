@@ -139,7 +139,7 @@ class GoogleAPIClient extends \GDS\Mapper
     }
 
     /**
-     * Create an Entity Key from a GDS Entity, with a Kind any any existing key data
+     * Create a Google Entity Key from a GDS Entity, with a Kind any any existing key data
      *
      * @param Entity $obj_gds_entity
      * @return \Google_Service_Datastore_Key
@@ -161,7 +161,7 @@ class GoogleAPIClient extends \GDS\Mapper
      * @return array
      * @throws \Exception
      */
-    public function buildKeyPath(Entity $obj_gds_entity, $bol_first_node = TRUE)
+    private function buildKeyPath(Entity $obj_gds_entity, $bol_first_node = TRUE)
     {
         $str_kind = $obj_gds_entity->getKind();
         if(NULL === $str_kind) {
