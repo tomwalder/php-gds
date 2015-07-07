@@ -16,6 +16,7 @@
  */
 namespace GDS\Gateway;
 use GDS\Entity;
+use GDS\Mapper\ProtoBufGQLParser;
 use google\appengine\datastore\v4\BeginTransactionRequest;
 use google\appengine\datastore\v4\BeginTransactionResponse;
 use google\appengine\datastore\v4\CommitRequest;
@@ -24,10 +25,13 @@ use google\appengine\datastore\v4\CommitResponse;
 use google\appengine\datastore\v4\Key;
 use google\appengine\datastore\v4\LookupRequest;
 use google\appengine\datastore\v4\LookupResponse;
+use google\appengine\datastore\v4\PropertyFilter;
 use google\appengine\datastore\v4\QueryResultBatch;
 use google\appengine\datastore\v4\RunQueryRequest;
 use google\appengine\datastore\v4\RunQueryResponse;
+use google\appengine\datastore\v4\Value;
 use google\appengine\runtime\ApiProxy;
+use google\appengine\runtime\ApplicationError;
 use google\net\ProtocolMessage;
 
 /**
@@ -191,20 +195,28 @@ class ProtoBuf extends \GDS\Gateway
      *
      * Use Google's static ApiProxy method
      *
+     * Will attempt to convert GQL queries in local development environments
+     *
      * @param $str_method
      * @param $obj_request
      * @param $obj_response
      * @return mixed
-     * @throws \google\appengine\runtime\ApplicationError
+     * @throws ApplicationError
      * @throws \google\appengine\runtime\CapabilityDisabledError
      * @throws \google\appengine\runtime\FeatureNotEnabledError
      */
     private function execute($str_method, ProtocolMessage $obj_request, ProtocolMessage $obj_response)
     {
-        // echo('Running: ' . print_r($obj_request, TRUE));
-        ApiProxy::makeSyncCall('datastore_v4', $str_method, $obj_request, $obj_response, 60);
-        // echo('Response: ' . print_r($obj_response, TRUE));
-        $this->obj_last_response = $obj_response;
+        try {
+            ApiProxy::makeSyncCall('datastore_v4', $str_method, $obj_request, $obj_response, 60);
+            $this->obj_last_response = $obj_response;
+        } catch (ApplicationError $obj_exception) {
+            if($obj_request instanceof RunQueryRequest && 'GQL not supported.' === $obj_exception->getMessage()) {
+                $this->executeGqlAsBasicQuery($obj_request); // recursive
+            } else {
+                throw $obj_exception;
+            }
+        }
         return $this->obj_last_response;
     }
 
@@ -261,7 +273,7 @@ class ProtoBuf extends \GDS\Gateway
     /**
      * Fetch some Entities, based on the supplied GQL and, optionally, parameters
      *
-     * @todo Introduce local dev GQL interpretation. Low priority.
+     * In local dev environments, we may convert the GQL query later.
      *
      * @param string $str_gql
      * @param array|null $arr_params
@@ -281,6 +293,74 @@ class ProtoBuf extends \GDS\Gateway
         $arr_mapped_results = $this->createMapper()->mapFromResults($obj_gql_response->getBatch()->getEntityResultList());
         $this->obj_schema = NULL; // Consume Schema
         return $arr_mapped_results;
+    }
+
+    /**
+     * Take a GQL RunQuery request and convert to a standard RunQuery request
+     *
+     * Always expected to be called in the stack ->gql()->execute()->runGqlAsBasicQuery()
+     *
+     * @param ProtocolMessage $obj_gql_request
+     * @return null
+     * @throws \GDS\Exception\GQL
+     */
+    private function executeGqlAsBasicQuery(ProtocolMessage $obj_gql_request)
+    {
+        // Set up the new request
+        $obj_query_request = $this->setupRunQuery();
+        $obj_query = $obj_query_request->mutableQuery();
+
+        // Transfer any transaction data to the new request
+        /** @var RunQueryRequest $obj_gql_request */
+        if($obj_gql_request->mutableReadOptions()->hasTransaction()) {
+            $obj_query_request->mutableReadOptions()->setTransaction($obj_gql_request->mutableReadOptions()->getTransaction());
+        }
+
+        // Parse the GQL string
+        $obj_gql_query = $obj_gql_request->getGqlQuery();
+        $obj_parser = new ProtoBufGQLParser();
+        $obj_parser->parse($obj_gql_query->getQueryString(), $obj_gql_query->getNameArgList());
+
+        // Start applying to the new RunQuery request
+        $obj_query->addKind()->setName($obj_parser->getKind());
+        foreach($obj_parser->getOrderBy() as $arr_order_by) {
+            $obj_query->addOrder()->setDirection($arr_order_by['direction'])->mutableProperty()->setName($arr_order_by['property']);
+        }
+
+        // Limits, Offsets, Cursors
+        $obj_parser->getLimit() && $obj_query->setLimit($obj_parser->getLimit());
+        $obj_parser->getOffset() && $obj_query->setOffset($obj_parser->getOffset());
+        $obj_parser->getStartCursor() && $obj_query->setStartCursor($obj_parser->getStartCursor());
+        // @todo @ $obj_query->setEndCursor();
+
+        // Filters
+        $int_filters = count($obj_parser->getFilters());
+        if(1 === $int_filters) {
+            $this->configureFilterFromGql($obj_query->mutableFilter()->mutablePropertyFilter(), $obj_parser->getFilters()[0]);
+        } else if (1 < $int_filters) {
+            $obj_composite_filter = $obj_query->mutableFilter()->mutableCompositeFilter()->setOperator(\google\appengine\datastore\v4\CompositeFilter\Operator::AND_);
+            foreach ($obj_parser->getFilters() as $arr_filter) {
+                $this->configureFilterFromGql($obj_composite_filter->addFilter()->mutablePropertyFilter(), $arr_filter);
+            }
+        }
+
+        return $this->execute('RunQuery', $obj_query_request, new RunQueryResponse());
+    }
+
+    /**
+     * @param PropertyFilter $obj_filter
+     * @param $arr_filter
+     */
+    private function configureFilterFromGql(PropertyFilter $obj_filter, $arr_filter)
+    {
+        $obj_filter->mutableProperty()->setName($arr_filter['lhs']);
+        $mix_value = $arr_filter['rhs'];
+        if($mix_value instanceof Value) {
+            $obj_filter->mutableValue()->mergeFrom($mix_value);
+        } else {
+            $obj_filter->mutableValue()->setStringValue($mix_value); // @todo Improve type detection using Schema
+        }
+        $obj_filter->setOperator($arr_filter['op']);
     }
 
     /**
