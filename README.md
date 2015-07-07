@@ -7,7 +7,7 @@
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
-## 2.0 BETA ##
+## 2.0 BETA 2 ##
 
 **Please note, this 2.0-series (dev-master) is in BETA and not suitable (yet) for production**
 
@@ -92,6 +92,8 @@ New features in 2.0 include
 * **Faster!** Google Protocol Buffer allows faster, low-level access to Datastore
 * **Easier to use** - sensible defaults and auto-detection for AppEngine environments
 * **Less dependencies** - no need for the Google PHP API Client, unless running remote or from non-AppEngine environments
+* **Local development** - Using the Protocol Buffers allows us to access the development server Datastore
+* **Local GQL support** - By default, the local development server does not support GQL. I've included a basic GQL parser that makes this work.
 * Suite of unit tests
 * Optional drop-in JSON API Gateway for remote or non-AppEngine environments (this was the only Gateway in 1.x)
 
@@ -229,6 +231,14 @@ $obj_store->fetchOne();     // Gets the first book
 $obj_store->fetchAll();     // Gets all books
 $obj_store->fetchPage(10);  // Gets the first 10 books
 ```
+
+### GQL on the Local Development Server ###
+
+At the time of writing, the Google App Engine local development server does not support GQL. So, **I have included a basic GQL parser, which is only used in local development environments** and should mean you can run most application scenarios locally as you can on live.
+
+The GQL parser should be considered a "for fun" tool, rather than a production-ready service.
+
+Feedback very much appreciated - if you have GQL queries that fail to run, just raise an issue and I'll see what I can do (or fork & PR!).
 
 ### Pagination ###
 
