@@ -389,6 +389,16 @@ class ProtoBufGQLParser
     }
 
     /**
+     * Get any end cursor
+     *
+     * @return string
+     */
+    public function getEndCursor()
+    {
+        return $this->str_end_cursor;
+    }
+
+    /**
      * Get any order bys
      *
      * @return array
