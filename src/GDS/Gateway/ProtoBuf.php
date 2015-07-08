@@ -55,9 +55,9 @@ class ProtoBuf extends \GDS\Gateway
      * @param null|string $str_namespace
      * @throws \Exception
      */
-    public function __construct($str_dataset = NULL, $str_namespace = NULL)
+    public function __construct($str_dataset = null, $str_namespace = null)
     {
-        if(NULL === $str_dataset) {
+        if(null === $str_dataset) {
             if(isset($_SERVER['APPLICATION_ID'])) {
                 $this->str_dataset_id = $_SERVER['APPLICATION_ID'];
             } else {
@@ -83,7 +83,7 @@ class ProtoBuf extends \GDS\Gateway
         $obj_mutation = $obj_request->mutableDeprecatedMutation();
         $arr_auto_id_required = [];
         foreach($arr_entities as $obj_gds_entity) {
-            if(NULL === $obj_gds_entity->getKeyId() && NULL === $obj_gds_entity->getKeyName()) {
+            if(null === $obj_gds_entity->getKeyId() && null === $obj_gds_entity->getKeyName()) {
                 $obj_entity = $obj_mutation->addInsertAutoId();
                 $arr_auto_id_required[] = $obj_gds_entity; // maintain reference to the array of requested auto-ids
             } else {
@@ -124,7 +124,7 @@ class ProtoBuf extends \GDS\Gateway
     {
         $obj_partition = $obj_target->mutablePartitionId();
         $obj_partition->setDatasetId($this->str_dataset_id);
-        if(NULL !== $this->str_namespace) {
+        if(null !== $this->str_namespace) {
             $obj_partition->setNamespace($this->str_namespace);
         }
         return $obj_target;
@@ -138,9 +138,9 @@ class ProtoBuf extends \GDS\Gateway
      */
     private function applyTransaction($obj)
     {
-        if(NULL !== $this->str_next_transaction) {
+        if(null !== $this->str_next_transaction) {
             $obj->setTransaction($this->str_next_transaction);
-            $this->str_next_transaction = NULL;
+            $this->str_next_transaction = null;
         }
         return $obj;
     }
@@ -181,7 +181,7 @@ class ProtoBuf extends \GDS\Gateway
     private function setupCommit()
     {
         $obj_commit_request = new CommitRequest();
-        if(NULL === $this->str_next_transaction) {
+        if(null === $this->str_next_transaction) {
             $obj_commit_request->setMode(Mode::NON_TRANSACTIONAL);
         } else {
             $obj_commit_request->setMode(Mode::TRANSACTIONAL);
@@ -239,7 +239,7 @@ class ProtoBuf extends \GDS\Gateway
         }
         $this->execute('Lookup', $obj_request, new LookupResponse());
         $arr_mapped_results = $this->createMapper()->mapFromResults($this->obj_last_response->getFoundList());
-        $this->obj_schema = NULL; // Consume Schema
+        $this->obj_schema = null; // Consume Schema
         return $arr_mapped_results;
     }
 
@@ -266,7 +266,7 @@ class ProtoBuf extends \GDS\Gateway
             );
         }
         $this->execute('Commit', $obj_request, new CommitResponse());
-        $this->obj_schema = NULL;
+        $this->obj_schema = null;
         return TRUE; // really?
     }
 
@@ -280,18 +280,18 @@ class ProtoBuf extends \GDS\Gateway
      * @return \GDS\Entity[]|null
      * @throws \Exception
      */
-    public function gql($str_gql, $arr_params = NULL)
+    public function gql($str_gql, $arr_params = null)
     {
         $obj_query_request = $this->setupRunQuery();
         $obj_gql_query = $obj_query_request->mutableGqlQuery();
         $obj_gql_query->setQueryString($str_gql);
         $obj_gql_query->setAllowLiteral(TRUE);
-        if(NULL !== $arr_params) {
+        if(null !== $arr_params) {
             $this->addParamsToQuery($obj_gql_query, $arr_params);
         }
         $obj_gql_response = $this->execute('RunQuery', $obj_query_request, new RunQueryResponse());
         $arr_mapped_results = $this->createMapper()->mapFromResults($obj_gql_response->getBatch()->getEntityResultList());
-        $this->obj_schema = NULL; // Consume Schema
+        $this->obj_schema = null; // Consume Schema
         return $arr_mapped_results;
     }
 
@@ -429,6 +429,6 @@ class ProtoBuf extends \GDS\Gateway
             $obj_request->setCrossGroup(TRUE);
         }
         $obj_response = $this->execute('BeginTransaction', $obj_request, new BeginTransactionResponse());
-        return isset($obj_response->transaction) ? $obj_response->transaction : NULL;
+        return isset($obj_response->transaction) ? $obj_response->transaction : null;
     }
 }

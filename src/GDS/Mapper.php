@@ -29,7 +29,7 @@ abstract class Mapper
      *
      * @var Schema
      */
-    protected $obj_schema = NULL;
+    protected $obj_schema = null;
 
     /**
      * Set the schema
@@ -81,16 +81,16 @@ abstract class Mapper
                 if(method_exists($mix_value, '__toString')) {
                     $mix_value = $mix_value->__toString();
                 } else {
-                    $mix_value = NULL;
+                    $mix_value = null;
                 }
                 break;
 
             case 'resource':
-            case 'NULL':
+            case 'null':
             case 'unknown type':
             default:
                 $int_dynamic_type = Schema::PROPERTY_STRING;
-                $mix_value = NULL;
+                $mix_value = null;
         }
         return [
             'type' => $int_dynamic_type,

@@ -35,35 +35,35 @@ abstract class Gateway
      *
      * @var string|null
      */
-    protected $str_dataset_id = NULL;
+    protected $str_dataset_id = null;
 
     /**
      * Optional namespace (for multi-tenant applications)
      *
      * @var string|null
      */
-    protected $str_namespace = NULL;
+    protected $str_namespace = null;
 
     /**
      * The last response - usually a Commit or Query response
      *
      * @var object|null
      */
-    protected $obj_last_response = NULL;
+    protected $obj_last_response = null;
 
     /**
      * The transaction ID to use on the next commit
      *
      * @var null|string
      */
-    protected $str_next_transaction = NULL;
+    protected $str_next_transaction = null;
 
     /**
      * The current Schema
      *
      * @var Schema|null
      */
-    protected $obj_schema = NULL;
+    protected $obj_schema = null;
 
     /**
      * An array of Mappers, keyed on Entity Kind
@@ -108,7 +108,7 @@ abstract class Gateway
         if(count($arr_results) > 0) {
             return $arr_results[0];
         }
-        return NULL;
+        return null;
     }
 
     /**
@@ -123,7 +123,7 @@ abstract class Gateway
         if(count($arr_results) > 0) {
             return $arr_results[0];
         }
-        return NULL;
+        return null;
     }
 
     /**
@@ -164,7 +164,7 @@ abstract class Gateway
         $this->mapAutoIDs($this->upsert($arr_entities));
 
         // Consume schema, clear kind mapper-map(!)
-        $this->obj_schema = NULL;
+        $this->obj_schema = null;
         $this->arr_kind_mappers = [];
     }
 
@@ -203,7 +203,7 @@ abstract class Gateway
     {
         foreach($arr_entities as $obj_gds_entity) {
             if($obj_gds_entity instanceof Entity) {
-                if (NULL === $obj_gds_entity->getKind()) {
+                if (null === $obj_gds_entity->getKind()) {
                     $obj_gds_entity->setSchema($this->obj_schema);
                 }
             } else {
@@ -291,7 +291,7 @@ abstract class Gateway
      * @param null|array $arr_params
      * @return mixed
      */
-    abstract public function gql($str_gql, $arr_params = NULL);
+    abstract public function gql($str_gql, $arr_params = null);
 
     /**
      * Get the end cursor from the last response

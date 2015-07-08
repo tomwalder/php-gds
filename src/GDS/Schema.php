@@ -42,7 +42,7 @@ class Schema
      *
      * @var string|null
      */
-    private $str_kind = NULL;
+    private $str_kind = null;
 
     /**
      * Known fields

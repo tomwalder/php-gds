@@ -31,42 +31,42 @@ class Store
      *
      * @var Gateway
      */
-    private $obj_gateway = NULL;
+    private $obj_gateway = null;
 
     /**
      * The GDS Schema defining the Entity we're operating with
      *
      * @var Schema
      */
-    private $obj_schema = NULL;
+    private $obj_schema = null;
 
     /**
      * The last GQL query
      *
      * @var string|null
      */
-    private $str_last_query = NULL;
+    private $str_last_query = null;
 
     /**
      * Named parameters for the last query
      *
      * @var array|null
      */
-    private $arr_last_params = NULL;
+    private $arr_last_params = null;
 
     /**
      * The last result cursor
      *
      * @var string|null
      */
-    private $str_last_cursor = NULL;
+    private $str_last_cursor = null;
 
     /**
      * Transaction ID
      *
      * @var null|string
      */
-    private $str_transaction_id = NULL;
+    private $str_transaction_id = null;
 
     /**
      * Gateway and Schema/Kind can be supplied on construction
@@ -75,10 +75,10 @@ class Store
      * @param Gateway $obj_gateway
      * @throws \Exception
      */
-    public function __construct($kind_schema = NULL, Gateway $obj_gateway = NULL)
+    public function __construct($kind_schema = null, Gateway $obj_gateway = null)
     {
         $this->obj_schema = $this->determineSchema($kind_schema);
-        $this->obj_gateway = (NULL === $obj_gateway) ? new \GDS\Gateway\ProtoBuf() : $obj_gateway;
+        $this->obj_gateway = (null === $obj_gateway) ? new \GDS\Gateway\ProtoBuf() : $obj_gateway;
         $this->str_last_query = 'SELECT * FROM `' . $this->obj_schema->getKind() . '` ORDER BY __key__ ASC';
     }
 
@@ -91,7 +91,7 @@ class Store
      */
     private function determineSchema($mix_schema)
     {
-        if(NULL === $mix_schema) {
+        if(null === $mix_schema) {
             $mix_schema = $this->buildSchema();
         }
         if ($mix_schema instanceof Schema) {
@@ -209,11 +209,11 @@ class Store
      * @param array|null $arr_params
      * @return $this
      */
-    public function query($str_query, $arr_params = NULL)
+    public function query($str_query, $arr_params = null)
     {
         $this->str_last_query = $str_query;
         $this->arr_last_params = $arr_params;
-        $this->str_last_cursor = NULL;
+        $this->str_last_cursor = null;
         return $this;
     }
 
@@ -224,16 +224,16 @@ class Store
      * @param array|null $arr_params
      * @return Entity
      */
-    public function fetchOne($str_query = NULL, $arr_params = NULL)
+    public function fetchOne($str_query = null, $arr_params = null)
     {
-        if(NULL !== $str_query) {
+        if(null !== $str_query) {
             $this->query($str_query, $arr_params);
         }
         $arr_results = $this->obj_gateway
             ->withSchema($this->obj_schema)
             ->withTransaction($this->str_transaction_id)
             ->gql($this->str_last_query . ' LIMIT 1', $this->arr_last_params);
-        return count($arr_results) > 0 ? $arr_results[0] : NULL;
+        return count($arr_results) > 0 ? $arr_results[0] : null;
     }
 
     /**
@@ -243,9 +243,9 @@ class Store
      * @param array|null $arr_params
      * @return Entity[]
      */
-    public function fetchAll($str_query = NULL, $arr_params = NULL)
+    public function fetchAll($str_query = null, $arr_params = null)
     {
-        if(NULL !== $str_query) {
+        if(null !== $str_query) {
             $this->query($str_query, $arr_params);
         }
         $arr_results = $this->obj_gateway
@@ -262,12 +262,12 @@ class Store
      * @param null $mix_offset
      * @return Entity[]
      */
-    public function fetchPage($int_page_size, $mix_offset = NULL)
+    public function fetchPage($int_page_size, $mix_offset = null)
     {
         $str_offset = '';
         $arr_params = (array)$this->arr_last_params;
         $arr_params['intPageSize'] = $int_page_size;
-        if(NULL !== $mix_offset) {
+        if(null !== $mix_offset) {
             if(is_int($mix_offset)) {
                 $str_offset = 'OFFSET @intOffset';
                 $arr_params['intOffset'] = $mix_offset;
@@ -335,10 +335,10 @@ class Store
      * @param array|null $arr_data
      * @return Entity
      */
-    public final function createEntity($arr_data = NULL)
+    public final function createEntity($arr_data = null)
     {
         $obj_entity = $this->obj_schema->createEntity();
-        if(NULL !== $arr_data) {
+        if(null !== $arr_data) {
             foreach ($arr_data as $str_property => $mix_value) {
                 $obj_entity->__set($str_property, $mix_value);
             }
@@ -383,7 +383,7 @@ class Store
     private function consumeTransaction()
     {
         $str_transaction_id = $this->str_transaction_id;
-        $this->str_transaction_id = NULL;
+        $this->str_transaction_id = null;
         return $str_transaction_id;
     }
 
@@ -396,7 +396,7 @@ class Store
      */
     protected function buildSchema()
     {
-        return NULL;
+        return null;
     }
 
 }

@@ -106,7 +106,7 @@ class GoogleAPIClient extends \GDS\Mapper
                 break;
 
             case Schema::PROPERTY_STRING_LIST:
-                $obj_property->setIndexed(NULL); // Ensure we only index the values, not the list
+                $obj_property->setIndexed(null); // Ensure we only index the values, not the list
                 $arr_values = [];
                 foreach ((array)$mix_value as $str) {
                     $obj_value = new \Google_Service_Datastore_Value();
@@ -164,7 +164,7 @@ class GoogleAPIClient extends \GDS\Mapper
     private function buildKeyPath(Entity $obj_gds_entity, $bol_first_node = TRUE)
     {
         $str_kind = $obj_gds_entity->getKind();
-        if(NULL === $str_kind) {
+        if(null === $str_kind) {
             if($bol_first_node) {
                 $str_kind = $this->obj_schema->getKind();
             } else {
@@ -319,7 +319,7 @@ class GoogleAPIClient extends \GDS\Mapper
             }
             return $arr;
         }
-        return NULL;
+        return null;
     }
 
     /**
@@ -332,11 +332,11 @@ class GoogleAPIClient extends \GDS\Mapper
     {
         foreach([Schema::PROPERTY_STRING, Schema::PROPERTY_INTEGER, Schema::PROPERTY_DATETIME, Schema::PROPERTY_DOUBLE, Schema::PROPERTY_BOOLEAN, Schema::PROPERTY_STRING_LIST] as $int_field_type) {
             $mix_val = $this->extractPropertyValue($int_field_type, $obj_property); // Recursive detection call
-            if(NULL !== $mix_val) {
+            if(null !== $mix_val) {
                 return $mix_val;
             }
         }
-        return NULL;
+        return null;
     }
 
 }

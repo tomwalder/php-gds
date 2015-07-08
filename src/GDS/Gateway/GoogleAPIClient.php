@@ -29,7 +29,7 @@ class GoogleAPIClient extends \GDS\Gateway
     /**
      * @var \Google_Service_Datastore_Datasets_Resource|null
      */
-    private $obj_datasets = NULL;
+    private $obj_datasets = null;
 
     /**
      * Create a new GDS service
@@ -40,7 +40,7 @@ class GoogleAPIClient extends \GDS\Gateway
      * @param $str_dataset_id
      * @param null $str_namespace
      */
-    public function __construct(\Google_Client $obj_client, $str_dataset_id, $str_namespace = NULL)
+    public function __construct(\Google_Client $obj_client, $str_dataset_id, $str_namespace = null)
     {
         $obj_service = new \Google_Service_Datastore($obj_client);
         $this->obj_datasets = $obj_service->datasets;
@@ -111,7 +111,7 @@ class GoogleAPIClient extends \GDS\Gateway
         foreach($arr_entities as $obj_gds_entity) {
             $obj_google_entity = $this->determineMapper($obj_gds_entity)->mapToGoogle($obj_gds_entity);
             $this->applyNamespace($obj_google_entity->getKey());
-            if(NULL === $obj_gds_entity->getKeyId() && NULL === $obj_gds_entity->getKeyName()) {
+            if(null === $obj_gds_entity->getKeyId() && null === $obj_gds_entity->getKeyName()) {
                 $arr_mutation_auto_id[] = $obj_google_entity;
                 $arr_auto_id_required[] = $obj_gds_entity; // maintain reference to the array of requested auto-ids
             } else {
@@ -154,7 +154,7 @@ class GoogleAPIClient extends \GDS\Gateway
      */
     private function applyNamespace($mix_target)
     {
-        if(NULL !== $this->str_namespace) {
+        if(null !== $this->str_namespace) {
             $obj_partition = new \Google_Service_Datastore_PartitionId();
             $obj_partition->setNamespace($this->str_namespace);
             if(is_array($mix_target)) {
@@ -175,11 +175,11 @@ class GoogleAPIClient extends \GDS\Gateway
      * @return mixed
      */
     private function applyTransaction($obj_request) {
-        if(NULL !== $this->str_next_transaction) {
+        if(null !== $this->str_next_transaction) {
             $obj_read_options = new \Google_Service_Datastore_ReadOptions();
             $obj_read_options->setTransaction($this->str_next_transaction);
             $obj_request->setReadOptions($obj_read_options);
-            $this->str_next_transaction = NULL;
+            $this->str_next_transaction = null;
         }
         return $obj_request;
     }
@@ -193,12 +193,12 @@ class GoogleAPIClient extends \GDS\Gateway
     private function commitMutation(\Google_Service_Datastore_Mutation $obj_mutation)
     {
         $obj_request = new \Google_Service_Datastore_CommitRequest();
-        if(NULL === $this->str_next_transaction) {
+        if(null === $this->str_next_transaction) {
             $obj_request->setMode('NON_TRANSACTIONAL');
         } else {
             $obj_request->setMode('TRANSACTIONAL');
             $obj_request->setTransaction($this->str_next_transaction);
-            $this->str_next_transaction = NULL;
+            $this->str_next_transaction = null;
         }
         $obj_request->setMutation($obj_mutation);
         $this->obj_last_response = $this->obj_datasets->commit($this->str_dataset_id, $obj_request);
@@ -244,7 +244,7 @@ class GoogleAPIClient extends \GDS\Gateway
         $this->obj_last_response = $this->obj_datasets->lookup($this->str_dataset_id, $obj_request);
         $arr_results = $this->obj_last_response->getFound();
         $arr_mapped_results = $this->createMapper()->mapFromResults($arr_results);
-        $this->obj_schema = NULL; // consume Schema
+        $this->obj_schema = null; // consume Schema
         return $arr_mapped_results;
     }
 
@@ -267,7 +267,7 @@ class GoogleAPIClient extends \GDS\Gateway
         }
         $obj_mutation->setDelete($arr_google_keys);
         $this->obj_last_response = $this->commitMutation($obj_mutation);
-        $this->obj_schema = NULL;
+        $this->obj_schema = null;
         return TRUE; // really?
     }
 
@@ -278,16 +278,16 @@ class GoogleAPIClient extends \GDS\Gateway
      * @param array $arr_params
      * @return Entity[]
      */
-    public function gql($str_gql, $arr_params = NULL)
+    public function gql($str_gql, $arr_params = null)
     {
         $obj_query = new \Google_Service_Datastore_GqlQuery();
         $obj_query->setAllowLiteral(TRUE);
         $obj_query->setQueryString($str_gql);
-        if(NULL !== $arr_params) {
+        if(null !== $arr_params) {
             $this->addParamsToQuery($obj_query, $arr_params);
         }
         $arr_mapped_results = $this->createMapper()->mapFromResults($this->executeQuery($obj_query));
-        $this->obj_schema = NULL; // Consume Schema
+        $this->obj_schema = null; // Consume Schema
         return $arr_mapped_results;
     }
 

@@ -32,28 +32,28 @@ class Entity
      *
      * @var string|null
      */
-    private $str_kind = NULL;
+    private $str_kind = null;
 
     /**
      * GDS record Key ID
      *
      * @var string
      */
-    private $str_key_id = NULL;
+    private $str_key_id = null;
 
     /**
      * GDS record Key Name
      *
      * @var string
      */
-    private $str_key_name = NULL;
+    private $str_key_name = null;
 
     /**
      * Entity ancestors
      *
      * @var null|array|Entity
      */
-    private $mix_ancestry = NULL;
+    private $mix_ancestry = null;
 
     /**
      * Field Data
@@ -67,7 +67,7 @@ class Entity
      *
      * @var Schema|null
      */
-    private $obj_schema = NULL;
+    private $obj_schema = null;
 
     /**
      * Get the Entity Kind
@@ -155,7 +155,7 @@ class Entity
         if(isset($this->arr_data[$str_key])) {
             return $this->arr_data[$str_key];
         }
-        return NULL;
+        return null;
     }
 
     /**

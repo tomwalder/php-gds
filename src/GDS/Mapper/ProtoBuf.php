@@ -120,8 +120,8 @@ class ProtoBuf extends \GDS\Mapper
             foreach ($arr_key_path as $obj_kpe) {
                 $arr_anc_path[] = [
                     'kind' => $obj_kpe->getKind(),
-                    'id' => $obj_kpe->hasId() ? $obj_kpe->getId() : NULL,
-                    'name' => $obj_kpe->hasName() ? $obj_kpe->getName() : NULL
+                    'id' => $obj_kpe->hasId() ? $obj_kpe->getId() : null,
+                    'name' => $obj_kpe->hasName() ? $obj_kpe->getName() : null
                 ];
             }
             $obj_gds_entity->setAncestry($arr_anc_path);
@@ -193,8 +193,8 @@ class ProtoBuf extends \GDS\Mapper
         }
         $obj_val->setIndexed($bol_index);
 
-        // NULL checks
-        if(NULL === $mix_value) {
+        // null checks
+        if(null === $mix_value) {
             return;
         }
 
@@ -268,7 +268,7 @@ class ProtoBuf extends \GDS\Mapper
             }
             return $arr;
         }
-        return NULL;
+        return null;
     }
 
     /**
@@ -300,6 +300,6 @@ class ProtoBuf extends \GDS\Mapper
             return $this->extractStringListValue($obj_property);
         }
         // $this->extractPropertyValue($int_field_type, $obj_property); // Recursive detection call
-        return NULL;
+        return null;
     }
 }
