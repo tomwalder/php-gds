@@ -271,7 +271,7 @@ class ProtoBufGQLParser
         $arr_order_bys = explode(',', $arr['order']);
         foreach($arr_order_bys as $str_order_by) {
             $arr_matches = [];
-            preg_match('/\s?(?<field>[^\s]*)\s+(?<dir>ASC|DESC)?/i', $str_order_by, $arr_matches);
+            preg_match('/\s?(?<field>[^\s]*)\s*(?<dir>ASC|DESC)?/i', $str_order_by, $arr_matches);
             if(isset($arr_matches['field'])) {
                 $str_direction = strtoupper(isset($arr_matches['dir']) ? $arr_matches['dir'] : 'ASC');
                 if(isset($this->arr_directions[$str_direction])) {
