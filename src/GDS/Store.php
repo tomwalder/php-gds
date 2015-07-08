@@ -71,8 +71,6 @@ class Store
     /**
      * Gateway and Schema/Kind can be supplied on construction
      *
-     * @todo We'll do our best to use sensible defaults
-     *
      * @param Schema|string|null $kind_schema
      * @param Gateway $obj_gateway
      * @throws \Exception
