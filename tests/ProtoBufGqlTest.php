@@ -52,7 +52,7 @@ class ProtoBufGqlTest extends GDSTest {
         $obj_store = $this->createBasicStore();
         $obj_result = $obj_store->fetchOne($str_gql);
 
-        $this->assertEquals($obj_result, NULL);
+        $this->assertEquals($obj_result, null);
         $this->apiProxyMock->verify();
     }
 
@@ -185,7 +185,7 @@ class ProtoBufGqlTest extends GDSTest {
         $obj_store = $this->createBasicStore();
         $obj_result = $obj_store->fetchOne($str_gql, ['param' => 'test']);
 
-        $this->assertEquals($obj_result, NULL);
+        $this->assertEquals($obj_result, null);
         $this->apiProxyMock->verify();
     }
 
@@ -242,7 +242,7 @@ class ProtoBufGqlTest extends GDSTest {
             'param3' => 'test3'
         ]);
 
-        $this->assertEquals($obj_result, NULL);
+        $this->assertEquals($obj_result, null);
         $this->apiProxyMock->verify();
     }
 
@@ -272,7 +272,7 @@ class ProtoBufGqlTest extends GDSTest {
         $obj_store = $this->createBasicStore();
         $obj_result = $obj_store->fetchOne($str_gql, ['param' => $obj_entity]);
 
-        $this->assertEquals($obj_result, NULL);
+        $this->assertEquals($obj_result, null);
         $this->apiProxyMock->verify();
     }
 
@@ -310,7 +310,7 @@ class ProtoBufGqlTest extends GDSTest {
      */
     public function testNoSchema()
     {
-        $obj_ex = NULL;
+        $obj_ex = null;
         try {
             new \GDS\Store();
         } catch (\Exception $obj_ex) {}

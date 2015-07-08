@@ -11,17 +11,17 @@ class Google_IO_Fake extends Google_IO_Stream
     /**
      * @var string
      */
-    protected $str_request_body_for_testing = NULL;
+    protected $str_request_body_for_testing = null;
 
     /**
      * @var string
      */
-    protected $str_request_url_for_testing = NULL;
+    protected $str_request_url_for_testing = null;
 
     /**
      * @var string
      */
-    protected $str_expected_response = NULL;
+    protected $str_expected_response = null;
 
     /**
      * Replace the execute method, so we can test against the contents

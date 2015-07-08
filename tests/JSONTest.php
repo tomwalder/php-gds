@@ -26,7 +26,7 @@ class JSONTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \Google_IO_Fake
      */
-    private $obj_fake_io = NULL;
+    private $obj_fake_io = null;
 
     /**
      * Setup the Google Cient with our 'monitored' HTTP IO

@@ -77,7 +77,7 @@ class ProtoBufNamepsaceTest extends GDSTest {
         $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $obj_request, new \google\appengine\datastore\v4\LookupResponse());
 
         $obj_result = $this->getBookstoreWithTestNamespace()->fetchByName('PoEAA');
-        $this->assertEquals($obj_result, NULL);
+        $this->assertEquals($obj_result, null);
 
         $this->apiProxyMock->verify();
     }
@@ -123,7 +123,7 @@ class ProtoBufNamepsaceTest extends GDSTest {
 
         $obj_result = $this->getBookstoreWithTestNamespace()->fetchOne($str_gql, ['param' => 'test']);
 
-        $this->assertEquals($obj_result, NULL);
+        $this->assertEquals($obj_result, null);
         $this->apiProxyMock->verify();
     }
 

@@ -126,7 +126,7 @@ class ProtoBufCreateTest extends GDSTest {
         $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
 
         $obj_store = $this->createBasicStore();
-        $obj_ex = NULL;
+        $obj_ex = null;
         $obj_store->upsert(
             $obj_store->createEntity([
                 'nickname' => 'Romeo'

@@ -39,7 +39,7 @@ class ProtoBufFetchTest extends GDSTest {
         $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $obj_request, new \google\appengine\datastore\v4\LookupResponse());
 
         $obj_result = $this->createBasicStore()->fetchByName('Romeo');
-        $this->assertEquals($obj_result, NULL);
+        $this->assertEquals($obj_result, null);
 
         $this->apiProxyMock->verify();
     }
@@ -139,7 +139,7 @@ class ProtoBufFetchTest extends GDSTest {
     {
         $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $this->getBasicBookByIdRequest(), new \google\appengine\datastore\v4\LookupResponse());
         $obj_result = $this->createBasicStore()->fetchById(123456789);
-        $this->assertEquals($obj_result, NULL);
+        $this->assertEquals($obj_result, null);
         $this->apiProxyMock->verify();
     }
 
@@ -207,7 +207,7 @@ class ProtoBufFetchTest extends GDSTest {
         $this->assertEquals($obj_result->title, 'Romeo and Juliet');
         $this->assertEquals($obj_result->getAncestry(), [[
             'kind' => 'Author',
-            'id' => NULL,
+            'id' => null,
             'name' => 'WilliamShakespeare',
         ]]);
 

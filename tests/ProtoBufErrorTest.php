@@ -41,7 +41,7 @@ class ProtoBufErrorTest extends GDSTest {
      */
     public function testDodgyUpsertParams()
     {
-        $this->createBasicStore()->upsert([NULL, FALSE, TRUE, new stdClass()]);
+        $this->createBasicStore()->upsert([null, FALSE, TRUE, new stdClass()]);
     }
 
     /**
@@ -88,7 +88,7 @@ class ProtoBufErrorTest extends GDSTest {
         $obj_store->upsert($obj_store->createEntity([
             'property' => new stdClass(),
             'simple' => new Simple(),
-            'blank' => NULL
+            'blank' => null
         ]));
 
         $this->apiProxyMock->verify();

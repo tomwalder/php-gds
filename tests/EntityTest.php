@@ -62,7 +62,7 @@ class EntityTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(isset($obj_entity->test_property));
         $this->assertFalse(isset($obj_entity->another_property));
         $this->assertEquals($obj_entity->test_property, 'Has value');
-        $this->assertEquals($obj_entity->another_property, NULL);
+        $this->assertEquals($obj_entity->another_property, null);
     }
 
     /**
