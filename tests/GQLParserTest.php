@@ -170,7 +170,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         ]], $obj_parser->getFilters());
     }
 
-    public function testFallback()
+    public function testBasicFallback()
     {
         $obj_deny_proxy = new DenyGQLProxyMock();
         $obj_deny_proxy->init($this);
@@ -186,6 +186,99 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
         $obj_store = new GDS\Store('Book', $obj_gateway);
         $obj_store->fetchAll("SELECT * FROM Book");
+
+        $obj_deny_proxy->verify();
+    }
+
+    public function testLimitFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_query = $obj_request->mutableQuery();
+        $obj_query->addKind()->setName('Book');
+        $obj_query->setLimit(20);
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->query("SELECT * FROM Book")->fetchPage(20);
+
+        $obj_deny_proxy->verify();
+    }
+
+    public function testOrderedLimitFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_query = $obj_request->mutableQuery();
+        $obj_query->addKind()->setName('Book');
+        $obj_query->setLimit(20);
+        $obj_query->addOrder()->setDirection(\google\appengine\datastore\v4\PropertyOrder\Direction::DESCENDING)->mutableProperty()->setName('author');
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->query("SELECT * FROM Book ORDER BY author DESC")->fetchPage(20);
+
+        $obj_deny_proxy->verify();
+    }
+
+    /**
+     * @expectedException        \GDS\Exception\GQL
+     * @expectedExceptionMessage Sorry, only 'SELECT *' (full Entity) queries are currently supported by php-gds
+     */
+    public function testFallbackSelectStartOnly()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_request->mutableQuery()->addKind()->setName('Book');
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll("SELECT name, author FROM Book");
+
+        $obj_deny_proxy->verify();
+    }
+
+    public function testParamFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_query = $obj_request->mutableQuery();
+        $obj_query->addKind()->setName('Book');
+        $obj_prop_filter = $obj_query->mutableFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter->mutableProperty()->setName('author');
+        $obj_prop_filter->mutableValue()->setStringValue('William Shakespeare');
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll("SELECT * FROM Book WHERE author = @author", ['author' => 'William Shakespeare']);
 
         $obj_deny_proxy->verify();
     }
