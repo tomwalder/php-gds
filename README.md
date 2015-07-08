@@ -24,6 +24,7 @@ The documentation is not yet fully representative of 2.x implementation.
 - [Multi-tenant Applications & Data Namespaces](#multi-tenant-applications--data-namespaces)
 - [Entity Groups, Hierarchy & Ancestors](#entity-groups-hierarchy--ancestors)
 - [Transactions](#transactions)
+- [Data Migrations](#data-migrations)
 - [More About Google Cloud Datastore](#more-about-google-cloud-datastore)
 - [Unit Tests](#unit-tests)
 - [Footnotes](#footnotes)
@@ -44,7 +45,15 @@ $obj_store = new GDS\Store('Book');
 $obj_store->upsert($obj_book);
 ```
 
-See below for [Alternative Array Syntax](#alternative-array-syntax) for creating Entities.
+You can also use the [Alternative Array Syntax](#alternative-array-syntax) for creating Entity objects, like this
+
+```php
+$obj_book = $obj_store->createEntity([
+    'title' => 'The Merchant of Venice',
+    'author' => 'William Shakespeare',
+    'isbn' => '1840224312'
+]);
+```
 
 Now let's fetch all the Books from the Datastore and display their titles and ISBN numbers
 
@@ -55,7 +64,7 @@ foreach($obj_store->fetchAll() as $obj_book) {
 }
 ```
 
-### More Examples ###
+### More about the Examples ###
 
 These initial examples assume you are either running a Google AppEngine application or in a local AppEngine dev environment. 
 In both of these cases, we can auto detect the **dataset** and use the default ***Protocol Buffer Gateway*** (new in 2.0).
@@ -89,12 +98,13 @@ Code: https://github.com/tomwalder/php-gds-demo
 ## New in Version 2.0 ##
 
 New features in 2.0 include 
-* **Faster!** Google Protocol Buffer allows faster, low-level access to Datastore
+* **Faster** - use of Google Protocol Buffer allows faster, low-level access to Datastore
 * **Easier to use** - sensible defaults and auto-detection for AppEngine environments
 * **Less dependencies** - no need for the Google PHP API Client, unless running remote or from non-AppEngine environments
 * **Local development** - Using the Protocol Buffers allows us to access the development server Datastore
 * **Local GQL support** - By default, the local development server does not support GQL. I've included a basic GQL parser that makes this work.
-* Suite of unit tests
+* **Data Migrations** - leverage multiple Gateways to ship data between local and live Datastore
+* **Unit tests**
 * Optional drop-in JSON API Gateway for remote or non-AppEngine environments (this was the only Gateway in 1.x)
 
 ### Backwards Compatibility ###
@@ -152,7 +162,7 @@ By default, all fields are indexed. An indexed field can be used in a WHERE clau
 
 If you use a dynamic schema (i.e. do not define on, but just use the Entity name) then all fields will be indexed for that record.
 
-Avaialable Schema configuration methods:
+Available Schema configuration methods:
 - `GDS\Schema::addString`
 - `GDS\Schema::addInteger`
 - `GDS\Schema::addDatetime`
@@ -234,7 +244,7 @@ $obj_store->fetchPage(10);  // Gets the first 10 books
 
 ### GQL on the Local Development Server ###
 
-At the time of writing, the Google App Engine local development server does not support GQL. So, **I have included a basic GQL parser, which is only used in local development environments** and should mean you can run most application scenarios locally as you can on live.
+At the time of writing, the Google App Engine local development server does not support GQL. So, **as of 2.0 I have included a basic GQL parser, which is only used in local development environments** and should mean you can run most application scenarios locally as you can on live.
 
 The GQL parser should be considered a "for fun" tool, rather than a production-ready service.
 
@@ -332,7 +342,7 @@ $obj_store->upsert($obj_entity);
 $obj_store->delete($obj_entity);
 ```
 
-## Custom Entities and Stores ##
+## Custom Entity Classes and Stores ##
 
 Whilst you can use the `GDS\Entity` and `GDS\Store` classes directly, as per the examples above, you may find it useful to extend one or the other.
 
@@ -352,6 +362,38 @@ The `Schema` holds the custom entity class name - this can be set directly, or v
 When you change a field from non-indexed to indexed you will need to "re-index" all your existing entities before they will be returned in queries run against that index by Datastore. This is due to the way Google update their BigTable indexes.
 
 I've included a simple example (paginated) re-index script in the examples folder, `reindex.php`.
+
+## Data Migrations ##
+
+Using multiple Gateway classes, you can move data between namespaces 
+
+```php
+// Name-spaced Gateways
+$obj_gateway_one = new \GDS\Gateway\ProtoBuf('dataset', 'namespace_one');
+$obj_gateway_two = new \GDS\Gateway\ProtoBuf('dataset', 'namespace_two');
+
+// Grab some books from one
+$arr_books = (new \GDS\Store('Book', $obj_gateway_one))->fetchPage(20);
+
+// And insert to two
+(new \GDS\Store('Book', $obj_gateway_two))->upsert($arr_books);
+```
+
+and between local and live environments. 
+
+```php
+// Local and Remote Gateways
+$obj_gateway_local = new \GDS\Gateway\ProtoBuf();
+$obj_gateway_remote = new \GDS\Gateway\GoogleAPIClient($obj_google_client);
+
+// Grab some books from local
+$arr_books = (new \GDS\Store('Book', $obj_gateway_local))->fetchPage(20);
+
+// And insert to remote
+(new \GDS\Store('Book', $obj_gateway_remote))->upsert($arr_books);
+```
+
+*Note: In both of these examples, the entities will be inserted with the same KeyID or KeyName*
 
 ## More About Google Cloud Datastore ##
 
