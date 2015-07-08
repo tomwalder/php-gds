@@ -170,6 +170,25 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         ]], $obj_parser->getFilters());
     }
 
+    public function testFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_request->mutableQuery()->addKind()->setName('Book');
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll("SELECT * FROM Book");
+
+        $obj_deny_proxy->verify();
+    }
 
 }
 /*
