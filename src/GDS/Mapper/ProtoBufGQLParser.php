@@ -161,6 +161,7 @@ class ProtoBufGQLParser
         // Tokenize quoted items ** MUST BE FIRST **
         $str_gql = preg_replace_callback('/(`(?<quoted>.*?)`)/', [$this, 'tokenizeQuoted'], $str_gql);
         $str_gql = preg_replace_callback('/("(?<quoted>.*?)")/', [$this, 'tokenizeQuoted'], $str_gql);
+        $str_gql = preg_replace_callback("/('(?<quoted>.*?)')/", [$this, 'tokenizeQuoted'], $str_gql);
 
         // Kind
         $str_gql = preg_replace_callback('/^SELECT\s+\*\s+FROM\s+(?<kind>[^\s]*)/i', [$this, 'recordKind'], $str_gql, 1);
