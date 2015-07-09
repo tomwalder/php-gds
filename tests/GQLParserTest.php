@@ -283,6 +283,138 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->verify();
     }
 
+    public function testSingleQuotedParamFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_query = $obj_request->mutableQuery();
+        $obj_query->addKind()->setName('Book');
+        $obj_prop_filter = $obj_query->mutableFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter->mutableProperty()->setName('author');
+        $obj_prop_filter->mutableValue()->setStringValue('William Shakespeare');
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll("SELECT * FROM Book WHERE author = 'William Shakespeare'");
+
+        $obj_deny_proxy->verify();
+    }
+
+    public function testDoubleQuotedParamFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_query = $obj_request->mutableQuery();
+        $obj_query->addKind()->setName('Book');
+        $obj_prop_filter = $obj_query->mutableFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter->mutableProperty()->setName('author');
+        $obj_prop_filter->mutableValue()->setStringValue('William Shakespeare');
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll('SELECT * FROM Book WHERE author = "William Shakespeare"');
+
+        $obj_deny_proxy->verify();
+    }
+
+    public function testBacktickQuotedParamFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_query = $obj_request->mutableQuery();
+        $obj_query->addKind()->setName('Book');
+        $obj_prop_filter = $obj_query->mutableFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter->mutableProperty()->setName('author');
+        $obj_prop_filter->mutableValue()->setStringValue('William Shakespeare');
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll('SELECT * FROM Book WHERE author = `William Shakespeare`');
+
+        $obj_deny_proxy->verify();
+    }
+
+    public function testMixedQuotedParamFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_query = $obj_request->mutableQuery();
+        $obj_query->addKind()->setName('Book and stuff');
+        $obj_comp_filter = $obj_query->mutableFilter()->mutableCompositeFilter()->setOperator(\google\appengine\datastore\v4\CompositeFilter\Operator::AND_);
+
+        $obj_prop_filter1 = $obj_comp_filter->addFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter1->mutableProperty()->setName('author');
+        $obj_prop_filter1->mutableValue()->setStringValue('William Shakespeare');
+
+        $obj_prop_filter2 = $obj_comp_filter->addFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter2->mutableProperty()->setName('isbn');
+        $obj_prop_filter2->mutableValue()->setStringValue('123456789');
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll('SELECT * FROM `Book and stuff` WHERE author = \'William Shakespeare\' AND isbn = "123456789"');
+
+        $obj_deny_proxy->verify();
+    }
+
+    public function testMixedOverlappingQuotedParamFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_query = $obj_request->mutableQuery();
+        $obj_query->addKind()->setName('Book and "stuff"');
+        $obj_comp_filter = $obj_query->mutableFilter()->mutableCompositeFilter()->setOperator(\google\appengine\datastore\v4\CompositeFilter\Operator::AND_);
+
+        $obj_prop_filter1 = $obj_comp_filter->addFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter1->mutableProperty()->setName('author');
+        $obj_prop_filter1->mutableValue()->setStringValue('William "Will" Shakespeare');
+
+        $obj_prop_filter2 = $obj_comp_filter->addFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter2->mutableProperty()->setName('isbn');
+        $obj_prop_filter2->mutableValue()->setStringValue("1234'5'6789");
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll('SELECT * FROM `Book and "stuff"` WHERE author = \'William "Will" Shakespeare\' AND isbn = "1234\'5\'6789"');
+
+        $obj_deny_proxy->verify();
+    }
+
 }
 /*
 SELECT * FROM myKind WHERE myProp >= 100 AND myProp < 200
