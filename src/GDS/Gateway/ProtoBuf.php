@@ -343,7 +343,6 @@ class ProtoBuf extends \GDS\Gateway
                 $this->configureFilterFromGql($obj_composite_filter->addFilter()->mutablePropertyFilter(), $arr_filter);
             }
         }
-
         return $this->execute('RunQuery', $obj_query_request, new RunQueryResponse());
     }
 
@@ -366,6 +365,8 @@ class ProtoBuf extends \GDS\Gateway
     /**
      * Add Parameters to a GQL Query object
      *
+     * @todo validate a wider range of probable parameter types/upgrade? see Mapper::determineDynamicType()
+     *
      * @param \google\appengine\datastore\v4\GqlQuery $obj_query
      * @param array $arr_params
      * @throws \Exception
@@ -384,8 +385,10 @@ class ProtoBuf extends \GDS\Gateway
                         // @todo review re-use of Mapper
                         $obj_key = $obj_val->mutableKeyValue();
                         $this->createMapper()->configureGoogleKey($obj_key, $mix_value);
-                    } elseif($mix_value instanceof \DateTime) {
+                    } elseif ($mix_value instanceof \DateTime) {
                         $obj_val->setTimestampMicrosecondsValue($mix_value->format('Uu'));
+                    } elseif (is_bool($mix_value)) {
+                        $obj_val->setBooleanValue($mix_value);
                     } elseif (is_int($mix_value)) {
                         $obj_val->setIntegerValue($mix_value);
                     } else {
