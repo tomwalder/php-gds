@@ -332,7 +332,7 @@ class GoogleAPIClient extends \GDS\Gateway
         } elseif (method_exists($mix_value, '__toString')) {
             $obj_val->setStringValue($mix_value->__toString());
         } else {
-            throw new \InvalidArgumentException('Unexpected, non-string-able object parameter: ' . $str_type);
+            throw new \InvalidArgumentException('Unexpected, non-string-able object parameter: ' . get_class($mix_value));
         }
     }
 
