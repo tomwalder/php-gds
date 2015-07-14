@@ -283,6 +283,50 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->verify();
     }
 
+    public function testComplexParamFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_query = $obj_request->mutableQuery();
+        $obj_query->addKind()->setName('Book');
+
+        $obj_comp_filter = $obj_query->mutableFilter()->mutableCompositeFilter()->setOperator(\google\appengine\datastore\v4\CompositeFilter\Operator::AND_);
+
+        $obj_prop_filter1 = $obj_comp_filter->addFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter1->mutableProperty()->setName('author');
+        $obj_prop_filter1->mutableValue()->setStringValue('William Shakespeare');
+
+        $obj_prop_filter2 = $obj_comp_filter->addFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter2->mutableProperty()->setName('lent');
+        $obj_prop_filter2->mutableValue()->setBooleanValue(true);
+
+        $obj_prop_filter3 = $obj_comp_filter->addFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::GREATER_THAN);
+        $obj_prop_filter3->mutableProperty()->setName('age');
+        $obj_prop_filter3->mutableValue()->setIntegerValue(72);
+
+        $obj_prop_filter3 = $obj_comp_filter->addFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter3->mutableProperty()->setName('gigawatts');
+        $obj_prop_filter3->mutableValue()->setDoubleValue(1.21);
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll("SELECT * FROM Book WHERE author = @author AND lent = @lent AND age > @age AND gigawatts = @gw", [
+            'author' => 'William Shakespeare',
+            'lent' => true,
+            'age' => 72,
+            'gw' => 1.21
+        ]);
+
+        $obj_deny_proxy->verify();
+    }
+
     public function testSingleQuotedParamFallback()
     {
         $obj_deny_proxy = new DenyGQLProxyMock();
