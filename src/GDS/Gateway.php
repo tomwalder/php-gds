@@ -251,6 +251,62 @@ abstract class Gateway
     }
 
     /**
+     * Part of our "add parameters to query" sequence.
+     *
+     * Shared between multiple Gateway implementations.
+     *
+     * @param $obj_val
+     * @param $mix_value
+     * @return $obj_val
+     */
+    protected function configureValueParamForQuery($obj_val, $mix_value)
+    {
+        $str_type = gettype($mix_value);
+        switch($str_type) {
+            case 'boolean':
+                $obj_val->setBooleanValue($mix_value);
+                break;
+
+            case 'integer':
+                $obj_val->setIntegerValue($mix_value);
+                break;
+
+            case 'double':
+                $obj_val->setDoubleValue($mix_value);
+                break;
+
+            case 'string':
+                $obj_val->setStringValue($mix_value);
+                break;
+
+            case 'array':
+                throw new \InvalidArgumentException('Unexpected array parameter');
+
+            case 'object':
+                $this->configureObjectValueParamForQuery($obj_val, $mix_value);
+                break;
+
+            case 'null':
+                $obj_val->setStringValue(null);
+                break;
+
+            case 'resource':
+            case 'unknown type':
+            default:
+                throw new \InvalidArgumentException('Unsupported parameter type: ' . $str_type);
+        }
+        return $obj_val;
+    }
+
+    /**
+     * Configure a Value parameter, based on the supplied object-type value
+     *
+     * @param object $obj_val
+     * @param object $mix_value
+     */
+    abstract protected function configureObjectValueParamForQuery($obj_val, $mix_value);
+
+    /**
      * Put an array of Entities into the Datastore. Return any that need AutoIDs
      *
      * @param \GDS\Entity[] $arr_entities

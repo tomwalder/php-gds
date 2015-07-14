@@ -365,11 +365,8 @@ class ProtoBuf extends \GDS\Gateway
     /**
      * Add Parameters to a GQL Query object
      *
-     * @todo validate a wider range of probable parameter types/upgrade? see Mapper::determineDynamicType()
-     *
      * @param \google\appengine\datastore\v4\GqlQuery $obj_query
      * @param array $arr_params
-     * @throws \Exception
      */
     private function addParamsToQuery(\google\appengine\datastore\v4\GqlQuery $obj_query, array $arr_params)
     {
@@ -380,22 +377,30 @@ class ProtoBuf extends \GDS\Gateway
                 if ('startCursor' == $str_name) {
                     $obj_arg->setCursor($mix_value);
                 } else {
-                    $obj_val = $obj_arg->mutableValue();
-                    if($mix_value instanceof Entity) {
-                        // @todo review re-use of Mapper
-                        $obj_key = $obj_val->mutableKeyValue();
-                        $this->createMapper()->configureGoogleKey($obj_key, $mix_value);
-                    } elseif ($mix_value instanceof \DateTime) {
-                        $obj_val->setTimestampMicrosecondsValue($mix_value->format('Uu'));
-                    } elseif (is_bool($mix_value)) {
-                        $obj_val->setBooleanValue($mix_value);
-                    } elseif (is_int($mix_value)) {
-                        $obj_val->setIntegerValue($mix_value);
-                    } else {
-                        $obj_val->setStringValue($mix_value);
-                    }
+                    $this->configureValueParamForQuery($obj_arg->mutableValue(), $mix_value);
                 }
             }
+        }
+    }
+
+    /**
+     * Configure a Value parameter, based on the supplied object-type value
+     *
+     * @todo Re-use one Mapper instance
+     *
+     * @param \google\appengine\datastore\v4\Value $obj_val
+     * @param object $mix_value
+     */
+    protected function configureObjectValueParamForQuery($obj_val, $mix_value)
+    {
+        if($mix_value instanceof Entity) {
+            $this->createMapper()->configureGoogleKey($obj_val->mutableKeyValue(), $mix_value);
+        } elseif ($mix_value instanceof \DateTime) {
+            $obj_val->setTimestampMicrosecondsValue($mix_value->format('Uu'));
+        } elseif (method_exists($mix_value, '__toString')) {
+            $obj_val->setStringValue($mix_value->__toString());
+        } else {
+            throw new \InvalidArgumentException('Unexpected, non-string-able object parameter: ' . $str_type);
         }
     }
 

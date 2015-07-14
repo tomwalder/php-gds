@@ -307,18 +307,7 @@ class GoogleAPIClient extends \GDS\Gateway
                 if ('startCursor' == $str_name) {
                     $obj_arg->setCursor($mix_value);
                 } else {
-                    $obj_val = new \Google_Service_Datastore_Value();
-                    if($mix_value instanceof Entity) {
-                        // @todo review re-use of Mapper
-                        $obj_val->setKeyValue($this->createMapper()->createKey($mix_value));
-                    } elseif($mix_value instanceof \DateTime) {
-                        $obj_val->setDateTimeValue($mix_value->format(\DateTime::ATOM));
-                    } elseif (is_int($mix_value)) {
-                        $obj_val->setIntegerValue($mix_value);
-                    } else {
-                        $obj_val->setStringValue($mix_value);
-                    }
-                    $obj_arg->setValue($obj_val);
+                    $obj_arg->setValue($this->configureValueParamForQuery(new \Google_Service_Datastore_Value(), $mix_value));
                 }
                 $arr_args[] = $obj_arg;
             }
@@ -327,9 +316,28 @@ class GoogleAPIClient extends \GDS\Gateway
     }
 
     /**
-     * Execute the given query and return the results.
+     * Configure a Value parameter, based on the supplied object-type value
      *
-     * @todo FIXME, mapper
+     * @todo Re-use one Mapper instance
+     *
+     * @param \Google_Service_Datastore_Value $obj_val
+     * @param object $mix_value
+     */
+    protected function configureObjectValueParamForQuery($obj_val, $mix_value)
+    {
+        if($mix_value instanceof Entity) {
+            $obj_val->setKeyValue($this->createMapper()->createKey($mix_value));
+        } elseif ($mix_value instanceof \DateTime) {
+            $obj_val->setDateTimeValue($mix_value->format(\DateTime::ATOM));
+        } elseif (method_exists($mix_value, '__toString')) {
+            $obj_val->setStringValue($mix_value->__toString());
+        } else {
+            throw new \InvalidArgumentException('Unexpected, non-string-able object parameter: ' . $str_type);
+        }
+    }
+
+    /**
+     * Execute the given query and return the results.
      *
      * @param \Google_Collection $obj_query
      * @return array
