@@ -259,7 +259,46 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->verify();
     }
 
-    public function testParamFallback()
+    /**
+     * @expectedException       \InvalidArgumentException
+     * @expectedExceptionMessage Unexpected array parameter
+     */
+    public function testUnsupportedArrayParamFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll("SELECT * FROM Book WHERE author = @author", ['author' => ['tom', 'dick', 'harry']]);
+    }
+
+    /**
+     * @expectedException       \InvalidArgumentException
+     * @expectedExceptionMessage Unexpected, non-string-able object parameter:
+     */
+    public function testUnstringableObjectParamFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll("SELECT * FROM Book WHERE author = @author", ['author' => new \stdClass()]);
+    }
+
+    /**
+     * @expectedException       \InvalidArgumentException
+     * @expectedExceptionMessage Unsupported parameter type: resource
+     */
+    public function testUnsuportedResourceParamFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll("SELECT * FROM Book WHERE author = @author", ['author' => fopen('php://input', 'r')]);
+    }
+
+    public function testStringParamFallback()
     {
         $obj_deny_proxy = new DenyGQLProxyMock();
         $obj_deny_proxy->init($this);
@@ -279,6 +318,30 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
         $obj_store = new GDS\Store('Book', $obj_gateway);
         $obj_store->fetchAll("SELECT * FROM Book WHERE author = @author", ['author' => 'William Shakespeare']);
+
+        $obj_deny_proxy->verify();
+    }
+
+    public function testStringifyParamFallback()
+    {
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_query = $obj_request->mutableQuery();
+        $obj_query->addKind()->setName('Book');
+        $obj_prop_filter = $obj_query->mutableFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter->mutableProperty()->setName('author');
+        $obj_prop_filter->mutableValue()->setStringValue('success!');
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store('Book', $obj_gateway);
+        $obj_store->fetchAll("SELECT * FROM Book WHERE author = @author", ['author' => new Simple()]);
 
         $obj_deny_proxy->verify();
     }
@@ -313,15 +376,20 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_prop_filter3->mutableProperty()->setName('gigawatts');
         $obj_prop_filter3->mutableValue()->setDoubleValue(1.21);
 
+        $obj_prop_filter4 = $obj_comp_filter->addFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::LESS_THAN);
+        $obj_prop_filter4->mutableProperty()->setName('when');
+        $obj_prop_filter4->mutableValue()->setTimestampMicrosecondsValue(286965000000000);
+
         $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
 
         $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
         $obj_store = new GDS\Store('Book', $obj_gateway);
-        $obj_store->fetchAll("SELECT * FROM Book WHERE author = @author AND lent = @lent AND age > @age AND gigawatts = @gw", [
+        $obj_store->fetchAll("SELECT * FROM Book WHERE author = @author AND lent = @lent AND age > @age AND gigawatts = @gw AND when < @then", [
             'author' => 'William Shakespeare',
             'lent' => true,
             'age' => 72,
-            'gw' => 1.21
+            'gw' => 1.21,
+            'then' => new \DateTime('1979-02-04 08:30:00')
         ]);
 
         $obj_deny_proxy->verify();
