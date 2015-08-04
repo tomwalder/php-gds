@@ -16,6 +16,7 @@
  */
 namespace GDS\Gateway;
 use GDS\Entity;
+use GDS\Exception\Contention;
 
 /**
  * GoogleAPIClient Datastore Gateway
@@ -189,6 +190,8 @@ class GoogleAPIClient extends \GDS\Gateway
      *
      * @param \Google_Service_Datastore_Mutation $obj_mutation
      * @return \Google_Service_Datastore_CommitResponse
+     * @throws Contention
+     * @throws \Google_Service_Exception
      */
     private function commitMutation(\Google_Service_Datastore_Mutation $obj_mutation)
     {
@@ -198,11 +201,19 @@ class GoogleAPIClient extends \GDS\Gateway
         } else {
             $obj_request->setMode('TRANSACTIONAL');
             $obj_request->setTransaction($this->str_next_transaction);
-            $this->str_next_transaction = null;
+            $this->str_next_transaction = NULL;
         }
         $obj_request->setMutation($obj_mutation);
-        $this->obj_last_response = $this->obj_datasets->commit($this->str_dataset_id, $obj_request);
-        return $this->obj_last_response;
+        try {
+            $this->obj_last_response = $this->obj_datasets->commit($this->str_dataset_id, $obj_request);
+        } catch (\Google_Service_Exception $obj_exception) {
+            $this->obj_last_response = NULL;
+            if(409 == $obj_exception->getCode()) {
+                throw new Contention('Datastore contention', 409, $obj_exception);
+            } else {
+                throw $obj_exception;
+            }
+        }
     }
 
     /**
@@ -266,7 +277,7 @@ class GoogleAPIClient extends \GDS\Gateway
             $this->applyNamespace($obj_key);
         }
         $obj_mutation->setDelete($arr_google_keys);
-        $this->obj_last_response = $this->commitMutation($obj_mutation);
+        $this->commitMutation($obj_mutation);
         $this->obj_schema = null;
         return TRUE; // really?
     }
