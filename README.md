@@ -7,12 +7,6 @@
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
-## 2.0 BETA 2 ##
-
-**Please note, this 2.0-series (dev-master) is in BETA and not suitable (yet) for production**
-
-The documentation is not yet fully representative of 2.x implementation.
-
 ## Table of Contents ##
 
 - [Examples](#examples)
@@ -104,6 +98,7 @@ New features in 2.0 include
 * **Local development** - Using the Protocol Buffers allows us to access the development server Datastore
 * **Local GQL support** - By default, the local development server does not support GQL. I've included a basic GQL parser that makes this work.
 * **Data Migrations** - leverage multiple Gateways to ship data between local and live Datastore
+* **Contention Exceptions** - standardised Exception for handling Datastore transaction contention`
 * **Unit tests**
 * Optional drop-in JSON API Gateway for remote or non-AppEngine environments (this was the only Gateway in 1.x)
 
@@ -136,9 +131,13 @@ If you want to use the JSON API from remote or non-App Engine environments, you 
 
 To install using Composer, use this require line, for production
 
+`"tomwalder/php-gds": "v2.0.0"`
+
+For older, version 1 series
+
 `"tomwalder/php-gds": "v1.2.1"`
 
-and for bleeding-edge features, 2.0 dev-master
+and for bleeding-edge features, dev-master
 
 `"tomwalder/php-gds": "dev-master"`
 
@@ -341,6 +340,8 @@ $obj_store->upsert($obj_entity);
 // Not transactional
 $obj_store->delete($obj_entity);
 ```
+
+Watch out for `GDS\Exception\Contention` exceptions - they should be thrown by the library if you manage to hit Datastore contention locally in development or through the live Gateways.
 
 ## Custom Entity Classes and Stores ##
 
