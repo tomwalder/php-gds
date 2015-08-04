@@ -16,6 +16,7 @@
  */
 namespace GDS\Gateway;
 use GDS\Entity;
+use GDS\Exception\Contention;
 use GDS\Mapper\ProtoBufGQLParser;
 use google\appengine\datastore\v4\BeginTransactionRequest;
 use google\appengine\datastore\v4\BeginTransactionResponse;
@@ -198,12 +199,13 @@ class ProtoBuf extends \GDS\Gateway
      * Will attempt to convert GQL queries in local development environments
      *
      * @param $str_method
-     * @param $obj_request
-     * @param $obj_response
+     * @param ProtocolMessage $obj_request
+     * @param ProtocolMessage $obj_response
      * @return mixed
      * @throws ApplicationError
      * @throws \google\appengine\runtime\CapabilityDisabledError
      * @throws \google\appengine\runtime\FeatureNotEnabledError
+     * @throws Contention
      */
     private function execute($str_method, ProtocolMessage $obj_request, ProtocolMessage $obj_response)
     {
@@ -211,8 +213,12 @@ class ProtoBuf extends \GDS\Gateway
             ApiProxy::makeSyncCall('datastore_v4', $str_method, $obj_request, $obj_response, 60);
             $this->obj_last_response = $obj_response;
         } catch (ApplicationError $obj_exception) {
+            $this->obj_last_response = NULL;
             if($obj_request instanceof RunQueryRequest && 'GQL not supported.' === $obj_exception->getMessage()) {
                 $this->executeGqlAsBasicQuery($obj_request); // recursive
+            } elseif (FALSE !== strpos($obj_exception->getMessage(), 'too much contention') || FALSE !== strpos($obj_exception->getMessage(), 'Concurrency')) {
+                // LIVE: "too much contention on these datastore entities. please try again." LOCAL : "Concurrency exception."
+                throw new Contention('Datastore contention', 409, $obj_exception);
             } else {
                 throw $obj_exception;
             }
@@ -289,6 +295,7 @@ class ProtoBuf extends \GDS\Gateway
         if(null !== $arr_params) {
             $this->addParamsToQuery($obj_gql_query, $arr_params);
         }
+        //print_r($obj_query_request);
         $obj_gql_response = $this->execute('RunQuery', $obj_query_request, new RunQueryResponse());
         $arr_mapped_results = $this->createMapper()->mapFromResults($obj_gql_response->getBatch()->getEntityResultList());
         $this->obj_schema = null; // Consume Schema
@@ -394,7 +401,9 @@ class ProtoBuf extends \GDS\Gateway
     protected function configureObjectValueParamForQuery($obj_val, $mix_value)
     {
         if($mix_value instanceof Entity) {
-            $this->createMapper()->configureGoogleKey($obj_val->mutableKeyValue(), $mix_value);
+            $obj_key_value = $obj_val->mutableKeyValue();
+            $this->createMapper()->configureGoogleKey($obj_key_value, $mix_value);
+            $this->applyNamespace($obj_key_value);
         } elseif ($mix_value instanceof \DateTime) {
             $obj_val->setTimestampMicrosecondsValue($mix_value->format('Uu'));
         } elseif (method_exists($mix_value, '__toString')) {
