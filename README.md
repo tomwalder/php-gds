@@ -241,6 +241,14 @@ $obj_store->fetchAll();     // Gets all books
 $obj_store->fetchPage(10);  // Gets the first 10 books
 ```
 
+### 1000 Result Batch Limit ###
+
+By default, this library will include a 1,000 record "batch size".
+
+This means calling `fetchAll()` will only return 1,000 records.
+
+I suggest paging your results if you need more than 1,000 records using `fetchPage()`.
+
 ### GQL on the Local Development Server ###
 
 At the time of writing, the Google App Engine local development server does not support GQL. So, **as of 2.0 I have included a basic GQL parser, which is only used in local development environments** and should mean you can run most application scenarios locally as you can on live.
