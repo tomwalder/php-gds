@@ -45,6 +45,11 @@ class ProtoBuf extends \GDS\Gateway
 {
 
     /**
+     * Batch size for un-limited queries
+     */
+    const BATCH_SIZE = 1000;
+
+    /**
      * Set up the dataset and optional namespace
      *
      * @todo Review use of $_SERVER.
@@ -150,12 +155,14 @@ class ProtoBuf extends \GDS\Gateway
      * Set up a RunQueryRequest
      *
      * @todo setReadConsistency
+     * @todo Be more intelligent about when we set the suggested batch size (e.g. on LIMITed queries)
      *
      * @return RunQueryRequest
      */
     private function setupRunQuery()
     {
         $obj_request = ($this->applyNamespace(new RunQueryRequest()));
+        $obj_request->setSuggestedBatchSize(self::BATCH_SIZE); // Avoid having to run multiple batches
         $this->applyTransaction($obj_request->mutableReadOptions()); // ->setReadConsistency('some-val');
         return $obj_request;
     }
@@ -281,6 +288,8 @@ class ProtoBuf extends \GDS\Gateway
      *
      * In local dev environments, we may convert the GQL query later.
      *
+     * @todo Consider automatically handling multiple response batches?
+     *
      * @param string $str_gql
      * @param array|null $arr_params
      * @return \GDS\Entity[]|null
@@ -295,7 +304,6 @@ class ProtoBuf extends \GDS\Gateway
         if(null !== $arr_params) {
             $this->addParamsToQuery($obj_gql_query, $arr_params);
         }
-        //print_r($obj_query_request);
         $obj_gql_response = $this->execute('RunQuery', $obj_query_request, new RunQueryResponse());
         $arr_mapped_results = $this->createMapper()->mapFromResults($obj_gql_response->getBatch()->getEntityResultList());
         $this->obj_schema = null; // Consume Schema
