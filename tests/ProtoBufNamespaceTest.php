@@ -111,6 +111,7 @@ class ProtoBufNamepsaceTest extends GDSTest {
         $str_gql = "SELECT * FROM Kind WHERE property = @param";
         
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_request->mutablePartitionId()->setDatasetId('Dataset')->setNamespace('Test');
 

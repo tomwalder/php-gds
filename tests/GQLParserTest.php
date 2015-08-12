@@ -176,6 +176,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
@@ -196,6 +197,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
@@ -218,6 +220,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
@@ -245,6 +248,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
@@ -304,6 +308,8 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
@@ -328,6 +334,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
@@ -352,6 +359,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
@@ -401,6 +409,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
@@ -425,6 +434,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
@@ -449,6 +459,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
@@ -473,6 +484,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
@@ -503,6 +515,7 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->init($this);
 
         $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
         $obj_request->mutableReadOptions();
         $obj_partition = $obj_request->mutablePartitionId();
         $obj_partition->setDatasetId('Dataset');
