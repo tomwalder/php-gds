@@ -433,3 +433,7 @@ I am certainly more familiar with SQL and relational data models so I think that
 Thanks to @sjlangley for any and all input - especially around unit tests for Protocol Buffers.
 
 Whilst I am using this library in production, it is my hope that other people find it of use. Feedback appreciated.
+
+# Other App Engine Software #
+
+If you've enjoyed this, you might be interested in my [Full Text Search Library for PHP on Google App Engine](https://github.com/tomwalder/php-appengine-search)
