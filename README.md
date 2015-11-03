@@ -3,6 +3,8 @@
 
 # Google Cloud Datastore Library for PHP #
 
+[![Join the chat at https://gitter.im/tomwalder/php-gds](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/tomwalder/php-gds?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 [Google Cloud Datastore](https://cloud.google.com/datastore/) is a great NoSQL solution (hosted, scalable, free up to a point), but it can be tricky (i.e. there's lots of code glue needed) to get even the "Hello World" of data persistence up and running in PHP.
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
