@@ -98,7 +98,7 @@ New features in 2.0 include
 * **Local development** - Using the Protocol Buffers allows us to access the development server Datastore
 * **Local GQL support** - By default, the local development server does not support GQL. I've included a basic GQL parser that makes this work.
 * **Data Migrations** - leverage multiple Gateways to ship data between local and live Datastore
-* **Contention Exceptions** - standardised Exception for handling Datastore transaction contention`
+* **Contention Exceptions** - standardised Exception for handling Datastore transaction contention
 * **Unit tests**
 * Optional drop-in JSON API Gateway for remote or non-AppEngine environments (this was the only Gateway in 1.x)
 
@@ -114,11 +114,11 @@ instead of
 
 `GDS\Store::__construct(<Gateway>, <Kind or Schema>)`
 
-This is because the Gateway is now optional, an has a sensible, automated, default - the new Protocol Buffer implementation.
+This is because the Gateway is now optional, and has a sensible, automated, default - the new Protocol Buffer implementation.
 
 ## Getting Started ##
 
-Are you sitting comfortably? before we begin, you will need: 
+Are you sitting comfortably? Before we begin, you will need: 
 - a Google Account (doh), usually for running AppEngine - but not always
 - a Project to work on with the "Google Cloud Datastore API" turned ON [Google Developer Console](https://console.developers.google.com/)
 
@@ -153,7 +153,7 @@ $obj_schema = (new GDS\Schema('Book'))
    ->addString('author')
    ->addString('isbn');
    
-// The Store accepts a Schema object or Kind name as it's first parameter
+// The Store accepts a Schema object or Kind name as its first parameter
 $obj_book_store = new GDS\Store($obj_schema);
 ```
 
@@ -175,7 +175,7 @@ Take a look at the `examples` folder for a fully operational set of code.
 
 ### Alternative Array Syntax ###
 
-There is an alternative to directly constructing a new `GDS\Entity` and setting it's member data, which is to use the `GDS\Store::createEntity` factory method as follows.
+There is an alternative to directly constructing a new `GDS\Entity` and setting its member data, which is to use the `GDS\Store::createEntity` factory method as follows.
 
 ```php
 $obj_book = $obj_book_store->createEntity([
@@ -198,7 +198,7 @@ $obj_book = $obj_book_store->createEntity([
 
 ## Queries, GQL & The Default Query ##
 
-At the time of writing, the `GDS\Store` object uses Datastore GQL as it's query language. Here is an example:
+At the time of writing, the `GDS\Store` object uses Datastore GQL as its query language. Here is an example:
 
 ```php
 $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = '1853260304'");
