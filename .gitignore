@@ -5,3 +5,4 @@ build/
 _examples/
 app.yaml
 index.yaml
+composer.lock
