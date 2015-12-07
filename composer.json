@@ -20,6 +20,11 @@
     "require-dev": {
         "google/appengine-php-sdk": ">=1.9.22",
         "phpunit/phpunit": "~4.0",
+        "symfony/config": "^2.0",
+        "symfony/console": "^2.1",
+        "symfony/stopwatch": "^2.2",
+        "symfony/yaml": "^2.1",
+        "symfony/filesystem": "~2.3",
         "satooshi/php-coveralls": "dev-master",
         "google/apiclient": "1.1.6"
     },
