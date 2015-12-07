@@ -540,6 +540,27 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->verify();
     }
 
+    /**
+     * Test that when second condition property names start with "IN" we don't barf.
+     */
+    public function testMultiWhereWithInPrefix()
+    {
+        $obj_parser = new \GDS\Mapper\ProtoBufGQLParser();
+        $obj_parser->parse('SELECT * FROM Person WHERE Test = "Thing" AND InstructionSet = "abc"');
+        $this->assertEquals('Person', $obj_parser->getKind());
+        $this->assertEquals([[
+            'lhs' => 'Test',
+            'op' => google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL,
+            'comp' => '=',
+            'rhs' => 'Thing'
+        ],[
+            'lhs' => 'InstructionSet',
+            'op' => google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL,
+            'comp' => '=',
+            'rhs' => 'abc'
+        ]], $obj_parser->getFilters());
+    }
+
 }
 /*
 SELECT * FROM myKind WHERE myProp >= 100 AND myProp < 200

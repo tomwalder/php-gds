@@ -300,7 +300,7 @@ class ProtoBufGQLParser
         $str_regex = '/(?<lhs>[^\s<>=]*)\s*(?<comp>=|<|<=|>|>=|IN|CONTAINS|HAS ANCESTOR|HAS DESCENDANT)\s*(?<rhs>[^\s<>=]+)/i';
         foreach($arr_conditions as $str_condition) {
             $arr_matches = [];
-            if(preg_match($str_regex, $str_condition, $arr_matches)) {
+            if(preg_match($str_regex, trim($str_condition), $arr_matches)) {
                 $str_comp = strtoupper($arr_matches['comp']);
                 if(isset($this->arr_operators[$str_comp])) {
                     $int_operator = $this->arr_operators[$str_comp];
