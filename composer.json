@@ -15,7 +15,7 @@
         "php": ">=5.4.0"
     },
     "suggest": {
-        "google/apiclient": "Allows you to use the JSON API Gateway/Datastore endpoints. Tested with 1.1.3"
+        "google/apiclient": "Allows you to use the JSON API Gateway/Datastore endpoints. Tested with 1.1.6"
     },
     "require-dev": {
         "google/appengine-php-sdk": ">=1.9.22",
