@@ -35,6 +35,7 @@ class Schema
     const PROPERTY_FLOAT = 4; // FLOAT === DOUBLE
     const PROPERTY_BOOLEAN = 10; // 10 types of people...
     const PROPERTY_STRING_LIST = 20;
+    const PROPERTY_ENTITY = 30;
     const PROPERTY_DETECT = 99; // used for auto-detection
 
     /**
@@ -155,6 +156,19 @@ class Schema
     public function addStringList($str_name, $bol_index = true)
     {
         return $this->addProperty($str_name, self::PROPERTY_STRING_LIST, $bol_index);
+    }
+
+    /**
+     * Add an entity field to the schema.
+     *
+     * Entity properties cannot be indexed
+     *
+     * @param $str_name
+     * @return Schema
+     */
+    public function addEntity($str_name)
+    {
+        return $this->addProperty($str_name, self::PROPERTY_ENTITY, false);
     }
 
     /**

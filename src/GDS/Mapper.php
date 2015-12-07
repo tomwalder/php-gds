@@ -145,6 +145,9 @@ abstract class Mapper
             case Schema::PROPERTY_STRING_LIST:
                 return $this->extractStringListValue($obj_property);
 
+            case Schema::PROPERTY_ENTITY:
+                return $this->extractEntityValue($obj_property);
+
             case Schema::PROPERTY_DETECT:
                 return $this->extractAutoDetectValue($obj_property);
 

@@ -233,6 +233,14 @@ class ProtoBuf extends \GDS\Mapper
                 }
                 break;
 
+            case Schema::PROPERTY_ENTITY:
+                $obj_val->setIndexed(false);
+                $obj_entity = $obj_val->mutableEntityValue();
+                foreach($mix_value as $str_field_name => $mix_field_value) {
+                    $obj_entity->addProperty()->setName($str_field_name)->mutableValue()->setStringValue($mix_field_value);
+                }
+                break;
+
             default:
                 throw new \RuntimeException('Unable to process field type: ' . $arr_field_def['type']);
         }
@@ -269,6 +277,26 @@ class ProtoBuf extends \GDS\Mapper
             return $arr;
         }
         return null;
+    }
+
+    /**
+     * Extract an Entity property
+     *
+     * @todo expand auto detect types
+     *
+     * @param Value $obj_property
+     * @return mixed
+     */
+    protected function extractEntityValue($obj_property)
+    {
+        $obj_response = (object)[];
+        if($obj_property->hasEntityValue()) {
+            $obj_google_entity = $obj_property->getEntityValue();
+            foreach($obj_google_entity->getPropertyList() as $obj_property) {
+                $obj_response->{$obj_property->getName()} = $this->extractAutoDetectValue($obj_property->getValue());
+            }
+        }
+        return $obj_response;
     }
 
     /**
