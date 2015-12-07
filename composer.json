@@ -21,7 +21,7 @@
         "google/appengine-php-sdk": ">=1.9.22",
         "phpunit/phpunit": "~4.0",
         "satooshi/php-coveralls": "dev-master",
-        "google/apiclient": "1.1.4"
+        "google/apiclient": "1.1.6"
     },
     "autoload": {
         "classmap": [
