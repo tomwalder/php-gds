@@ -33,8 +33,12 @@ class Schema
     const PROPERTY_DATETIME = 3;
     const PROPERTY_DOUBLE = 4;
     const PROPERTY_FLOAT = 4; // FLOAT === DOUBLE
+    const PROPERTY_BLOB = 5;
     const PROPERTY_BOOLEAN = 10; // 10 types of people...
     const PROPERTY_STRING_LIST = 20;
+    const PROPERTY_INTEGER_LIST = 21;
+    const PROPERTY_ENTITY = 30;
+    const PROPERTY_KEY = 40;
     const PROPERTY_DETECT = 99; // used for auto-detection
 
     /**
