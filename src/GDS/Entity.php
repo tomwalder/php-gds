@@ -17,43 +17,13 @@
 namespace GDS;
 
 /**
- * GDS Model
- *
- * @todo Consider providing a __construct('Kind')
+ * GDS Entity
  *
  * @author Tom Walder <tom@docnet.nu>
  * @package GDS
  */
-class Entity
+class Entity extends Key implements KeyInterface
 {
-
-    /**
-     * Datastore entity Kind
-     *
-     * @var string|null
-     */
-    private $str_kind = null;
-
-    /**
-     * GDS record Key ID
-     *
-     * @var string
-     */
-    private $str_key_id = null;
-
-    /**
-     * GDS record Key Name
-     *
-     * @var string
-     */
-    private $str_key_name = null;
-
-    /**
-     * Entity ancestors
-     *
-     * @var null|array|Entity
-     */
-    private $mix_ancestry = null;
 
     /**
      * Field Data
@@ -68,70 +38,6 @@ class Entity
      * @var Schema|null
      */
     private $obj_schema = null;
-
-    /**
-     * Get the Entity Kind
-     *
-     * @return null
-     */
-    public function getKind()
-    {
-        return $this->str_kind;
-    }
-
-    /**
-     * Get the key ID
-     *
-     * @return string
-     */
-    public function getKeyId()
-    {
-        return $this->str_key_id;
-    }
-
-    /**
-     * Get the key name
-     *
-     * @return string
-     */
-    public function getKeyName()
-    {
-        return $this->str_key_name;
-    }
-
-    /**
-     * @param $str_kind
-     * @return $this
-     */
-    public function setKind($str_kind)
-    {
-        $this->str_kind = $str_kind;
-        return $this;
-    }
-
-    /**
-     * Set the key ID
-     *
-     * @param $str_key_id
-     * @return $this
-     */
-    public function setKeyId($str_key_id)
-    {
-        $this->str_key_id = $str_key_id;
-        return $this;
-    }
-
-    /**
-     * Set the key name
-     *
-     * @param $str_key_name
-     * @return $this
-     */
-    public function setKeyName($str_key_name)
-    {
-        $this->str_key_name = $str_key_name;
-        return $this;
-    }
 
     /**
      * Magic setter.. sorry
@@ -177,28 +83,6 @@ class Entity
     public function getData()
     {
         return $this->arr_data;
-    }
-
-    /**
-     * Set the Entity's ancestry. This either an array of paths OR another Entity
-     *
-     * @param $mix_path
-     * @return $this
-     */
-    public function setAncestry($mix_path)
-    {
-        $this->mix_ancestry = $mix_path;
-        return $this;
-    }
-
-    /**
-     * Get the ancestry of the entity
-     *
-     * @return null|array
-     */
-    public function getAncestry()
-    {
-        return $this->mix_ancestry;
     }
 
     /**
