@@ -129,6 +129,8 @@ class Key implements KeyInterface
     /**
      * Set the Entity's ancestry. This either an array of paths OR another KeyInterface
      *
+     * @todo Add validation for supported types of ancestry
+     *
      * @param $mix_path
      * @return $this
      */
