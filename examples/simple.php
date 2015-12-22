@@ -14,7 +14,7 @@ $obj_client = GDS\Gateway\GoogleAPIClient::createGoogleClient(GDS_APP_NAME, GDS_
 $obj_gateway = new GDS\Gateway\GoogleAPIClient($obj_client, GDS_DATASET_ID);
 
 // Store requires a Gateway and Kind
-$obj_book_store = new GDS\Store($obj_gateway, 'Book');
+$obj_book_store = new GDS\Store('Book', $obj_gateway);
 
 // Fetch a record
 $obj_book = $obj_book_store->fetchOne();

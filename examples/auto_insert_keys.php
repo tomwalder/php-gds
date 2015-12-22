@@ -6,7 +6,7 @@
  */
 require_once('boilerplate.php');
 
-$obj_store = new GDS\Store($obj_gateway, 'Temperatures');
+$obj_store = new GDS\Store('Temperatures', $obj_gateway);
 
 // Delete ALL
 // $obj_store->delete($obj_store->fetchAll());

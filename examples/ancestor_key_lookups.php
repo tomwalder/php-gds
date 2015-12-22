@@ -8,7 +8,7 @@ require_once('boilerplate.php');
 
 $obj_person_schema = (new GDS\Schema('Person'))->addString('name')->addString('description');
 
-$obj_store = new GDS\Store($obj_gateway, $obj_person_schema);
+$obj_store = new GDS\Store($obj_person_schema, $obj_gateway);
 
 // Load the parent (run 'ancestor_keys.php' if needed to create it)
 $obj_stored_parent = $obj_store->fetchOne("SELECT * FROM Person WHERE __key__ = KEY(Person, 'parent@example.com')");

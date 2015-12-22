@@ -12,7 +12,7 @@ $obj_task_schema = (new GDS\Schema('Task'))
     ->addDatetime('due', TRUE);
 
 // Store requires a Gateway and Schema
-$obj_task_store = new GDS\Store($obj_gateway, $obj_task_schema);
+$obj_task_store = new GDS\Store($obj_task_schema, $obj_gateway);
 
 // Insert some data, with datetime binding
 $obj_task_1 = $obj_task_store->createEntity([
