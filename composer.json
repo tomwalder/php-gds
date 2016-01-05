@@ -20,7 +20,7 @@
     "require-dev": {
         "google/appengine-php-sdk": ">=1.9.22",
         "phpunit/phpunit": "~4.8",
-        "satooshi/php-coveralls": "dev-master",
+        "satooshi/php-coveralls": "1.0.0",
         "google/apiclient": "1.1.6"
     },
     "autoload": {
