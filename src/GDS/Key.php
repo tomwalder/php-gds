@@ -129,15 +129,16 @@ class Key implements KeyInterface
     /**
      * Set the Entity's ancestry. This either an array of paths OR another KeyInterface
      *
-     * @todo Add validation for supported types of ancestry
-     *
      * @param $mix_path
      * @return $this
      */
     public function setAncestry($mix_path)
     {
-        $this->mix_ancestry = $mix_path;
-        return $this;
+        if(is_array($mix_path) || $mix_path instanceof KeyInterface) {
+            $this->mix_ancestry = $mix_path;
+            return $this;
+        }
+        throw new \InvalidArgumentException("Supplied ancestry must be an Array or instance of KeyInterface. Supplied: " . gettype($mix_path));
     }
 
     /**
