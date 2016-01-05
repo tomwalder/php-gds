@@ -49,7 +49,7 @@ interface KeyInterface
     /**
      * Get the ancestry of the entity
      *
-     * @return null|array|KeyInterface
+     * @return null|array|KeyInterface|KeyInterface[]
      */
     public function getAncestry();
 
