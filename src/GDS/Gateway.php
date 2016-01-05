@@ -287,6 +287,7 @@ abstract class Gateway
                 break;
 
             case 'null':
+            case 'NULL':
                 $obj_val->setStringValue(null);
                 break;
 

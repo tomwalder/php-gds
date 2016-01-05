@@ -191,6 +191,30 @@ class ProtoBufGqlTest extends GDSTest {
     }
 
     /**
+     * GQL Fetch ONE with one string parameter
+     */
+    public function testFetchOneNullParam()
+    {
+        $str_gql = "SELECT * FROM Kind WHERE property = @param";
+        $obj_request = $this->getBasicFetchRequest();
+
+        $obj_gql_query = $obj_request->mutableGqlQuery();
+        $obj_gql_query->setAllowLiteral(TRUE);
+        $obj_gql_query->setQueryString($str_gql . " LIMIT 1");
+        $obj_arg = $obj_gql_query->addNameArg();
+        $obj_arg->setName('param');
+        $obj_arg->mutableValue()->setStringValue(null);
+
+        $this->apiProxyMock->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_store = $this->createBasicStore();
+        $obj_result = $obj_store->fetchOne($str_gql, ['param' => null]);
+
+        $this->assertEquals($obj_result, null);
+        $this->apiProxyMock->verify();
+    }
+
+    /**
      * Fetch all
      */
     public function testFetchAllNoParams()

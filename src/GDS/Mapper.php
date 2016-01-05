@@ -87,6 +87,7 @@ abstract class Mapper
 
             case 'resource':
             case 'null':
+            case 'NULL':
             case 'unknown type':
             default:
                 $int_dynamic_type = Schema::PROPERTY_STRING;
