@@ -204,12 +204,17 @@ class ProtoBufFetchTest extends GDSTest {
         $this->assertEquals(1, count($obj_result->getData()));
         $this->assertEquals('Book', $obj_result->getKind());
         $this->assertEquals(123456789, $obj_result->getKeyId());
-        $this->assertEquals($obj_result->title, 'Romeo and Juliet');
-        $this->assertEquals($obj_result->getAncestry(), [[
-            'kind' => 'Author',
-            'id' => null,
-            'name' => 'WilliamShakespeare',
-        ]]);
+        $this->assertEquals('Romeo and Juliet', $obj_result->title);
+
+        // v2
+        // $this->assertEquals([[
+        //    'kind' => 'Author',
+        //    'id' => null,
+        //    'name' => 'WilliamShakespeare',
+        // ]], $obj_result->getAncestry());
+
+        // v3, using Key objects
+        $this->assertEquals([(new \GDS\Key())->setKind('Author')->setKeyName('WilliamShakespeare')], $obj_result->getAncestry());
 
         $this->apiProxyMock->verify();
     }
