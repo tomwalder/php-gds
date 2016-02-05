@@ -14,11 +14,11 @@ class BookStore extends GDS\Store
      */
     protected function buildSchema()
     {
-        $this->setEntityClass('\\Book');
         return (new GDS\Schema('Book'))
             ->addString('title')
             ->addString('author')
-            ->addString('isbn', TRUE);
+            ->addString('isbn', TRUE)
+            ->setEntityClass('\\Book');
     }
 
 }
