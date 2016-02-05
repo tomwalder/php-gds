@@ -290,16 +290,16 @@ class Store
     /**
      * Fetch all of the entities in a particular group
      *
-     * @param Entity $obj_entity
+     * @param KeyInterface $obj_keyed
      * @return Entity[]
      */
-    public function fetchEntityGroup(Entity $obj_entity)
+    public function fetchEntityGroup(KeyInterface $obj_keyed)
     {
         $arr_results = $this->obj_gateway
             ->withSchema($this->obj_schema)
             ->withTransaction($this->str_transaction_id)
             ->gql("SELECT * FROM `" . $this->obj_schema->getKind() . "` WHERE __key__ HAS ANCESTOR @ancestorKey", [
-                'ancestorKey' => $obj_entity
+                'ancestorKey' => $obj_keyed
             ]);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
         return $arr_results;
