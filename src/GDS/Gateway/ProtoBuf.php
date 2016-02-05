@@ -17,6 +17,7 @@
 namespace GDS\Gateway;
 use GDS\Entity;
 use GDS\Exception\Contention;
+use GDS\KeyInterface;
 use GDS\Mapper\ProtoBufGQLParser;
 use google\appengine\datastore\v4\BeginTransactionRequest;
 use google\appengine\datastore\v4\BeginTransactionResponse;
@@ -408,7 +409,7 @@ class ProtoBuf extends \GDS\Gateway
      */
     protected function configureObjectValueParamForQuery($obj_val, $mix_value)
     {
-        if($mix_value instanceof Entity) {
+        if($mix_value instanceof KeyInterface) {
             $obj_key_value = $obj_val->mutableKeyValue();
             $this->createMapper()->configureGoogleKey($obj_key_value, $mix_value);
             $this->applyNamespace($obj_key_value);
