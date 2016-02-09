@@ -371,4 +371,20 @@ abstract class Gateway
      */
     abstract public function beginTransaction($bol_cross_group = FALSE);
 
+    /**
+     * Allocate (and retrieve) number of Entity IDs for future manual use
+     *
+     * @param integer $int_ids
+     * @return mixed
+     */
+    abstract public function allocateIds($int_ids);
+
+    /**
+     * Allocate a set of pre-defined Entity IDs for future manual use
+     *
+     * @param array $arr_ids
+     * @return mixed
+     */
+    abstract public function reserveIds(array $arr_ids);
+
 }
