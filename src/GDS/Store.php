@@ -399,4 +399,28 @@ class Store
         return null;
     }
 
+    /**
+     * Allocate (and retrieve) number of Entity IDs for future manual use
+     *
+     * @param integer $int_ids
+     */
+    public function allocateIds($int_ids)
+    {
+        $this->obj_gateway
+            ->withSchema($this->obj_schema)
+            ->allocateIds($int_ids);
+    }
+
+    /**
+     * Allocate a set of pre-defined Entity IDs for future manual use
+     *
+     * @param array $arr_ids
+     */
+    public function reserveIds(array $arr_ids)
+    {
+        $this->obj_gateway
+            ->withSchema($this->obj_schema)
+            ->reserveIds($arr_ids);
+    }
+
 }
