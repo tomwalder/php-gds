@@ -402,11 +402,12 @@ class Store
     /**
      * Allocate (and retrieve) number of Entity IDs for future manual use
      *
-     * @param integer $int_ids
+     * @param $int_ids
+     * @return array
      */
     public function allocateIds($int_ids)
     {
-        $this->obj_gateway
+        return $this->obj_gateway
             ->withSchema($this->obj_schema)
             ->allocateIds($int_ids);
     }
@@ -415,10 +416,11 @@ class Store
      * Allocate a set of pre-defined Entity IDs for future manual use
      *
      * @param array $arr_ids
+     * @return mixed
      */
     public function reserveIds(array $arr_ids)
     {
-        $this->obj_gateway
+        return $this->obj_gateway
             ->withSchema($this->obj_schema)
             ->reserveIds($arr_ids);
     }
