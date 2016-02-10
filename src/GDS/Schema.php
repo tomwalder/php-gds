@@ -34,6 +34,7 @@ class Schema
     const PROPERTY_DOUBLE = 4;
     const PROPERTY_FLOAT = 4; // FLOAT === DOUBLE
     const PROPERTY_BLOB = 5;
+    const PROPERTY_GEOPOINT = 6;
     const PROPERTY_BOOLEAN = 10; // 10 types of people...
     const PROPERTY_STRING_LIST = 20;
     const PROPERTY_INTEGER_LIST = 21;
@@ -147,6 +148,18 @@ class Schema
     public function addBoolean($str_name, $bol_index = TRUE)
     {
         return $this->addProperty($str_name, self::PROPERTY_BOOLEAN, $bol_index);
+    }
+
+    /**
+     * Add a geopoint field to the schema
+     *
+     * @param $str_name
+     * @param bool $bol_index
+     * @return Schema
+     */
+    public function addGeopoint($str_name, $bol_index = TRUE)
+    {
+        return $this->addProperty($str_name, self::PROPERTY_GEOPOINT, $bol_index);
     }
 
     /**
