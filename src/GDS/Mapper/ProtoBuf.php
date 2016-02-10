@@ -16,6 +16,7 @@
  */
 namespace GDS\Mapper;
 use GDS\Entity;
+use GDS\Property\Geopoint;
 use GDS\Schema;
 use google\appengine\datastore\v4\EntityResult;
 use google\appengine\datastore\v4\Key;
@@ -226,6 +227,10 @@ class ProtoBuf extends \GDS\Mapper
                 $obj_val->setBooleanValue((bool)$mix_value);
                 break;
 
+            case Schema::PROPERTY_GEOPOINT:
+                $obj_val->mutableGeoPointValue()->setLatitude($mix_value[0])->setLongitude($mix_value[1]);
+                break;
+
             case Schema::PROPERTY_STRING_LIST:
                 $obj_val->clearIndexed(); // Ensure we only index the values, not the list
                 foreach ((array)$mix_value as $str) {
@@ -272,6 +277,18 @@ class ProtoBuf extends \GDS\Mapper
     }
 
     /**
+     * Extract a Geopoint value (lat/lon pair)
+     *
+     * @param \google\appengine\datastore\v4\Value $obj_property
+     * @return Geopoint
+     */
+    protected function extractGeopointValue($obj_property)
+    {
+        $obj_gp_value = $obj_property->getGeoPointValue();
+        return new Geopoint($obj_gp_value->getLatitude(), $obj_gp_value->getLongitude());
+    }
+
+    /**
      * Auto detect & extract a value
      *
      * @todo expand auto detect types
@@ -295,6 +312,9 @@ class ProtoBuf extends \GDS\Mapper
         }
         if($obj_property->hasBooleanValue()) {
             return $obj_property->getBooleanValue();
+        }
+        if($obj_property->hasGeoPointValue()) {
+            return $this->extractGeopointValue($obj_property);
         }
         if($obj_property->getListValueSize() > 0) {
             return $this->extractStringListValue($obj_property);
