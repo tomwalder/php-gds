@@ -18,6 +18,8 @@ namespace GDS\Gateway;
 use GDS\Entity;
 use GDS\Exception\Contention;
 use GDS\Mapper\ProtoBufGQLParser;
+use google\appengine\datastore\v4\AllocateIdsRequest;
+use google\appengine\datastore\v4\AllocateIdsResponse;
 use google\appengine\datastore\v4\BeginTransactionRequest;
 use google\appengine\datastore\v4\BeginTransactionResponse;
 use google\appengine\datastore\v4\CommitRequest;
@@ -208,7 +210,7 @@ class ProtoBuf extends \GDS\Gateway
      * @param $str_method
      * @param ProtocolMessage $obj_request
      * @param ProtocolMessage $obj_response
-     * @return mixed
+     * @return ProtocolMessage
      * @throws ApplicationError
      * @throws \google\appengine\runtime\CapabilityDisabledError
      * @throws \google\appengine\runtime\FeatureNotEnabledError
@@ -455,5 +457,57 @@ class ProtoBuf extends \GDS\Gateway
         }
         $obj_response = $this->execute('BeginTransaction', $obj_request, new BeginTransactionResponse());
         return isset($obj_response->transaction) ? $obj_response->transaction : null;
+    }
+
+    /**
+     * Allocate Key IDs for future manual use
+     *
+     * @param array $int_ids_required
+     * @return array
+     * @throws ApplicationError
+     * @throws Contention
+     */
+    public function allocateIds($int_ids_required)
+    {
+        $obj_request = new AllocateIdsRequest();
+        for($int_alloc = 1; $int_alloc <= $int_ids_required; $int_alloc++){
+            /** @var \google\appengine\datastore\v4\Key $obj_key */
+            $obj_key = $this->applyNamespace($obj_request->addAllocate());
+            $obj_key->addPathElement()->setKind($this->obj_schema->getKind());
+        }
+        $this->execute('AllocateIds', $obj_request, new AllocateIdsResponse());
+
+        // @todo Move to Mapper / Key responses
+        $arr_ids = [];
+        foreach($this->obj_last_response->getAllocatedList() as $obj_key) {
+            $arr_ids[] = $obj_key->getPathElement(0)->getId();
+        }
+        $this->obj_schema = null; // Consume Schema
+        return $arr_ids;
+    }
+
+    /**
+     * Reserve Key IDs for future manual use
+     *
+     * @param array $arr_ids
+     * @return mixed
+     */
+    public function reserveIds(array $arr_ids)
+    {
+        $obj_request = new AllocateIdsRequest();
+        foreach($arr_ids as $str_id){
+            /** @var \google\appengine\datastore\v4\Key $obj_key */
+            $obj_key = $this->applyNamespace($obj_request->addReserve());
+            $obj_key->addPathElement()
+                ->setKind($this->obj_schema->getKind())
+                ->setId($str_id) // This fails if we do not populate the ID
+            ;
+        }
+        $obj_response = $this->execute('AllocateIds', $obj_request, new AllocateIdsResponse());
+        /** @var AllocateIdsResponse $obj_response */
+
+        // @todo Process response
+        return $obj_response;
+        // return (count($arr_ids) === $obj_response->getAllocatedSize());
     }
 }
