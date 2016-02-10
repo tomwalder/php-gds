@@ -409,4 +409,51 @@ class GoogleAPIClient extends \GDS\Gateway
         $obj_response = $this->obj_datasets->beginTransaction($this->str_dataset_id, $obj_request);
         return $obj_response->getTransaction();
     }
+
+    /**
+     * Allocate Key IDs for future manual use
+     *
+     * @param int $int_ids_required
+     * @return bool
+     */
+    public function allocateIds($int_ids_required)
+    {
+        $obj_request = new \Google_Service_Datastore_AllocateIdsRequest();
+        $arr_keys = [];
+        for($int_alloc = 1; $int_alloc <= $int_ids_required; $int_alloc++){
+            $obj_element = new \Google_Service_Datastore_KeyPathElement();
+            $obj_element->setKind($this->obj_schema->getKind());
+            $obj_key = new \Google_Service_Datastore_Key();
+            $obj_key->setPath([$obj_element]);
+            $arr_keys[] = $obj_key;
+        }
+        $obj_request->setKeys($arr_keys);
+        /** @var \Google_Service_Datastore_AllocateIdsResponse $obj_response */
+        $obj_response = $this->obj_datasets->allocateIds($this->str_dataset_id, $obj_request);
+
+        // @todo Move to Mapper / Key responses
+        $arr_ids = [];
+        foreach($obj_response->getKeys() as $obj_key) {
+            /** @var \Google_Service_Datastore_Key $obj_key */
+            $arr_key_path = $obj_key->getPath();
+            $arr_path_end = end($arr_key_path);
+            $arr_ids[] = $arr_path_end['id'];
+        }
+        $this->obj_schema = null; // Consume Schema
+        return $arr_ids;
+    }
+
+    /**
+     * ID reservation not supported over JSON API
+     *
+     * @param array $arr_ids
+     * @throws \Exception
+     * @return mixed
+     */
+    public function reserveIds(array $arr_ids)
+    {
+        throw new \Exception("Reserving Key IDs not supported over JSON API");
+    }
+
+
 }
