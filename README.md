@@ -132,7 +132,7 @@ If you want to use the JSON API from remote or non-App Engine environments, you 
 
 To install using Composer, use this require line, for production
 
-`"tomwalder/php-gds": "v2.0.1"`
+`"tomwalder/php-gds": "v2.1.0"`
 
 For older, version 1 series
 
