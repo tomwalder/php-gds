@@ -95,10 +95,12 @@ class Geopoint implements \ArrayAccess
     public function offsetSet($offset, $value)
     {
         if(0 === $offset) {
-            return $this->setLatitude($value);
+            $this->setLatitude($value);
+            return;
         }
         if(1 === $offset) {
-            return $this->setLongitude($value);
+            $this->setLongitude($value);
+            return;
         }
         throw new \UnexpectedValueException("Cannot set Geopoint data with offset [{$offset}]");
     }
@@ -112,9 +114,11 @@ class Geopoint implements \ArrayAccess
     {
         if(0 === $offset) {
             $this->setLatitude(0.0);
+            return;
         }
         if(1 === $offset) {
             $this->setLongitude(0.0);
+            return;
         }
         throw new \UnexpectedValueException("Cannot unset Geopoint data with offset [{$offset}]");
     }
