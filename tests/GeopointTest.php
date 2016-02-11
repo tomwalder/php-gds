@@ -77,4 +77,39 @@ class GeopointTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(3.4, $obj_gp->getLongitude());
     }
 
+    public function testIsset()
+    {
+        $obj_gp = new \GDS\Property\Geopoint();
+        $this->assertTrue(isset($obj_gp[0]));
+        $this->assertTrue(isset($obj_gp[1]));
+        $this->assertFalse(isset($obj_gp[2]));
+    }
+
+    public function testUnset()
+    {
+        $obj_gp = new \GDS\Property\Geopoint(1.2, 3.4);
+        $this->assertEquals(1.2, $obj_gp->getLatitude());
+        $this->assertEquals(3.4, $obj_gp->getLongitude());
+        unset($obj_gp[0]);
+        $this->assertEquals(0.0, $obj_gp->getLatitude());
+        $this->assertEquals(3.4, $obj_gp->getLongitude());
+        unset($obj_gp[1]);
+        $this->assertEquals(0.0, $obj_gp->getLatitude());
+        $this->assertEquals(0.0, $obj_gp->getLongitude());
+    }
+
+    public function testFailSet()
+    {
+        $obj_gp = new \GDS\Property\Geopoint();
+        $this->setExpectedException('UnexpectedValueException');
+        $obj_gp[2] = 1.21;
+    }
+
+    public function testFailGet()
+    {
+        $obj_gp = new \GDS\Property\Geopoint();
+        $this->setExpectedException('UnexpectedValueException');
+        $int_tmp = $obj_gp[2];
+    }
+
 }
