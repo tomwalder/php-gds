@@ -36,6 +36,7 @@ class SchemaTest extends \PHPUnit_Framework_TestCase {
             ->addStringList('nicknames')
             ->addProperty('surname', \GDS\Schema::PROPERTY_STRING)
             ->addInteger('friends', FALSE)
+            ->addGeopoint('location')
         ;
         $this->assertEquals($obj_schema->getKind(), 'Person');
         $this->assertEquals($obj_schema->getProperties(), [
@@ -70,6 +71,10 @@ class SchemaTest extends \PHPUnit_Framework_TestCase {
             'friends' => [
                 'type' => \GDS\Schema::PROPERTY_INTEGER,
                 'index' => FALSE
+            ],
+            'location' => [
+                'type' => \GDS\Schema::PROPERTY_GEOPOINT,
+                'index' => TRUE
             ]
         ]);
     }

@@ -16,6 +16,7 @@
  */
 namespace GDS\Mapper;
 use GDS\Entity;
+use GDS\Property\Geopoint;
 use GDS\Schema;
 
 /**
@@ -103,6 +104,10 @@ class GoogleAPIClient extends \GDS\Mapper
 
             case Schema::PROPERTY_BOOLEAN:
                 $obj_property->setBooleanValue((bool)$mix_value);
+                break;
+
+            case Schema::PROPERTY_GEOPOINT:
+                throw new \RuntimeException('Geopoint properties not supported over JSON API');
                 break;
 
             case Schema::PROPERTY_STRING_LIST:
@@ -320,6 +325,18 @@ class GoogleAPIClient extends \GDS\Mapper
             return $arr;
         }
         return null;
+    }
+
+    /**
+     * Extract a Geopoint value (lat/lon pair)
+     *
+     * @param $obj_property
+     * @return Geopoint
+     * @throws \Exception
+     */
+    protected function extractGeopointValue($obj_property)
+    {
+        throw new \Exception("Geopoint data not supported with JSON API");
     }
 
     /**

@@ -18,7 +18,7 @@ $obj_contact_schema = (new GDS\Schema('Contact'))
     ->addStringList('tags', TRUE);
 
 // Configure the Store
-$obj_store = new GDS\Store($obj_gateway, $obj_contact_schema);
+$obj_store = new GDS\Store($obj_contact_schema, $obj_gateway);
 
 // Create 1
 $obj_contact1 = $obj_store->createEntity([

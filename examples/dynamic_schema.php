@@ -6,7 +6,7 @@
  */
 require_once('boilerplate.php');
 
-$obj_store = new GDS\Store($obj_gateway, 'Friend');
+$obj_store = new GDS\Store('Friend', $obj_gateway);
 
 // So now create a simple Model object
 $obj_charlie = new GDS\Entity();

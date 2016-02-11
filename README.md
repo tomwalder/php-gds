@@ -14,6 +14,7 @@ This library is intended to make it easier for you to get started with and to us
 - [Getting Started](#getting-started)
 - [Defining Your Model](#defining-your-model)
 - [Creating Records](#creating-records)
+- [Geopoint Support](#geopoint)
 - [Queries, GQL & The Default Query](#queries-gql--the-default-query)
 - [Multi-tenant Applications & Data Namespaces](#multi-tenant-applications--data-namespaces)
 - [Entity Groups, Hierarchy & Ancestors](#entity-groups-hierarchy--ancestors)
@@ -131,7 +132,7 @@ If you want to use the JSON API from remote or non-App Engine environments, you 
 
 To install using Composer, use this require line, for production
 
-`"tomwalder/php-gds": "v2.0.1"`
+`"tomwalder/php-gds": "v2.1.0"`
 
 For older, version 1 series
 
@@ -168,6 +169,7 @@ Available Schema configuration methods:
 - `GDS\Schema::addFloat`
 - `GDS\Schema::addBoolean`
 - `GDS\Schema::addStringList`
+- `GDS\Schema::addGeopoint` *(not supported over JSON API)*
 
 Take a look at the `examples` folder for a fully operational set of code.
 
@@ -185,6 +187,12 @@ $obj_book = $obj_book_store->createEntity([
 ]);
 ```
 
+## Special Properties ##
+
+Other than scalar values, there are two "object" data types supported:
+
+### DateTime ###
+
 Support for DateTime object binding (also see query parameter binding below)
 
 ```php
@@ -195,6 +203,31 @@ $obj_book = $obj_book_store->createEntity([
     'published' => new DateTime('-5 years')
 ]);
 ```
+
+### Geopoint ###
+
+The library has recently had support added for Geopoint properties.
+
+```php
+$obj_schema->addGeopoint('location');
+```
+
+Then when setting data, use the `Geopoint` object
+
+```php
+$obj_person->location = new GDS\Property\Geopoint(53.4723272, -2.2936314);
+```
+
+And when pulling geopoint data out of a result:
+
+```php
+echo $obj_persion->location->getLatitude();
+echo $obj_persion->location->getLongitude();
+```
+
+**It is not currently possible to query Geopoint fields, although this feature is in Alpha with Google**
+
+**Geopoint data is only supported using the native Protocol Buffer API. It will work well on App Engine and in development, but not via the JSON API**
 
 ## Queries, GQL & The Default Query ##
 

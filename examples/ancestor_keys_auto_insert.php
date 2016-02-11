@@ -8,7 +8,7 @@ require_once('boilerplate.php');
 
 $obj_person_schema = (new GDS\Schema('Person'))->addString('name')->addString('description');
 
-$obj_store = new GDS\Store($obj_gateway, $obj_person_schema);
+$obj_store = new GDS\Store($obj_person_schema, $obj_gateway);
 
 // Create the parent
 $obj_john = $obj_store->createEntity();

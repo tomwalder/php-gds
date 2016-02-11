@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 namespace GDS;
+use GDS\Property\Geopoint;
 
 /**
  * Map between Google Entity and GDS Entity data/objects
@@ -75,6 +76,10 @@ abstract class Mapper
             case 'object':
                 if($mix_value instanceof \DateTime) {
                     $int_dynamic_type = Schema::PROPERTY_DATETIME;
+                    break;
+                }
+                if($mix_value instanceof Geopoint) {
+                    $int_dynamic_type = Schema::PROPERTY_GEOPOINT;
                     break;
                 }
                 $int_dynamic_type = Schema::PROPERTY_STRING;
@@ -143,6 +148,9 @@ abstract class Mapper
             case Schema::PROPERTY_BOOLEAN:
                 return $obj_property->getBooleanValue();
 
+            case Schema::PROPERTY_GEOPOINT:
+                return $this->extractGeopointValue($obj_property);
+
             case Schema::PROPERTY_STRING_LIST:
                 return $this->extractStringListValue($obj_property);
 
@@ -176,6 +184,14 @@ abstract class Mapper
      * @return mixed
      */
     abstract protected function extractStringListValue($obj_property);
+
+    /**
+     * Extract a Geopoint value
+     *
+     * @param $obj_property
+     * @return Geopoint
+     */
+    abstract protected function extractGeopointValue($obj_property);
 
     /**
      * Map a single result out of the Raw response data array FROM Google TO a GDS Entity
