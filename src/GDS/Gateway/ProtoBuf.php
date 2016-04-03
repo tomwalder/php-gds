@@ -333,7 +333,7 @@ class ProtoBuf extends \GDS\Gateway
 
         // Parse the GQL string
         $obj_gql_query = $obj_gql_request->getGqlQuery();
-        $obj_parser = new ProtoBufGQLParser();
+        $obj_parser = new ProtoBufGQLParser($this->obj_schema);
         $obj_parser->parse($obj_gql_query->getQueryString(), $obj_gql_query->getNameArgList());
 
         // Start applying to the new RunQuery request
