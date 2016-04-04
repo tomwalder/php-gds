@@ -332,7 +332,9 @@ class ProtoBufGQLParser
                     // Check left hand side's type
                     $obj_properties = $this->obj_schema->getProperties();
                     if(!isset($obj_properties[$arr_matches['lhs']])){
-                        throw new GQL("Property doesn't exist: [{$arr_matches['lhs']}]");
+                        // We can never be sure if the property exists by the schema
+                        // Because Google Cloud Datastore is schemaless
+                        //throw new GQL("Property doesn't exist: [{$arr_matches['lhs']}]");
                     } else {
                         $int_current_type = $obj_properties[$arr_matches['lhs']]['type'];
                         switch($int_current_type) {

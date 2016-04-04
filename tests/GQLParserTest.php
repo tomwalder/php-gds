@@ -172,8 +172,9 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-      * @expectedException              \GDS\Exception\GQL
-      * @expectedExceptionMessageRegExp /Property doesn't exist: .+/
+      * Nonexistent properties should run fine because datastore is schemaless
+      * #expectedException              \GDS\Exception\GQL
+      * #expectedExceptionMessageRegExp /Property doesn't exist: .+/
       */
     public function testWhereNonexistentProperties()
     {
