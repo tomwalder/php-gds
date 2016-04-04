@@ -191,6 +191,18 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         ]], $obj_parser->getFilters());
     }
 
+    /**
+     * Ensure that we can only supply a Schema (optionally) to the GQL parser
+     */
+    public function testNonSchemaTypeCheck()
+    {
+        $obj_reflection = new \ReflectionClass('\\GDS\\Mapper\\ProtoBufGQLParser');
+        $obj_constructor = $obj_reflection->getConstructor();
+        $arr_params = $obj_constructor->getParameters();
+        $this->assertEquals(\GDS\Schema::class, $arr_params[0]->getClass()->getName());
+        $this->assertTrue($arr_params[0]->isOptional());
+    }
+
     public function testMultiWhere()
     {
         $obj_parser = new \GDS\Mapper\ProtoBufGQLParser();

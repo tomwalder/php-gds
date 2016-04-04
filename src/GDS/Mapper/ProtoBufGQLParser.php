@@ -16,6 +16,7 @@
  */
 namespace GDS\Mapper;
 use GDS\Exception\GQL;
+use GDS\Schema;
 use google\appengine\datastore\v4\PropertyFilter\Operator;
 use google\appengine\datastore\v4\PropertyOrder\Direction;
 use google\appengine\datastore\v4\Value;
@@ -30,7 +31,7 @@ class ProtoBufGQLParser
 
     /**
      * The schema is used to check if property's type is valid.
-     * But because Google Datastore is schemaless, this cannot be ensured to exist.
+     * This is optional, because Google Datastore is schemaless.
      *  
      * @var Schema|null
      */
@@ -140,11 +141,11 @@ class ProtoBufGQLParser
     ];
 
     /**
-     * Give reference to the schema to check type validity
+     * Optionally, reference to the Entity schema to check type validity
      *
      * @param null|Schema $obj_schema
      */
-    public function __construct($obj_schema = null)
+    public function __construct(Schema $obj_schema = null)
     {
         $this->obj_schema = $obj_schema;
     }
@@ -330,13 +331,9 @@ class ProtoBufGQLParser
                 // If schema is set and its properties is not empty, then we use it to test the validity
                 if(isset($this->obj_schema) && !empty($this->obj_schema->getProperties())){
                     // Check left hand side's type
-                    $obj_properties = $this->obj_schema->getProperties();
-                    if(!isset($obj_properties[$arr_matches['lhs']])){
-                        // We can never be sure if the property exists by the schema
-                        // Because Google Cloud Datastore is schemaless
-                        //throw new GQL("Property doesn't exist: [{$arr_matches['lhs']}]");
-                    } else {
-                        $int_current_type = $obj_properties[$arr_matches['lhs']]['type'];
+                    $arr_properties = $this->obj_schema->getProperties();
+                    if(isset($arr_properties[$arr_matches['lhs']])){
+                        $int_current_type = $arr_properties[$arr_matches['lhs']]['type'];
                         switch($int_current_type) {
                             case \GDS\Schema::PROPERTY_STRING: 
                                 if(substr($arr_matches['rhs'], 0, strlen(self::TOKEN_PREFIX))
@@ -345,8 +342,11 @@ class ProtoBufGQLParser
                                     throw new GQL("Invalid string representation in: [{$str_condition}]");
                                 }
                                 break;
-                            //Todo: check other type's validity here
+                            // @todo Add support for other type's validity here
                         }
+                    } else {
+                        // We have a Schema, but it does not contain a definition for this property.
+                        // So, skip validation checks (we must support onl-the-fly Schemas)
                     }
                 }
 
