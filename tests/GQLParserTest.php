@@ -152,6 +152,45 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         ]], $obj_parser->getFilters());
     }
 
+    /**
+      * @expectedException              \GDS\Exception\GQL
+      * @expectedExceptionMessageRegExp /Invalid string representation in: .+/
+      */
+    public function testWhereStringQuotesMissing()
+    {
+        $obj_schema = (new GDS\Schema('Person'))
+            ->addString('some_property');
+        $obj_parser = new \GDS\Mapper\ProtoBufGQLParser($obj_schema);
+        $obj_parser->parse('SELECT * FROM Person WHERE some_property = grey');
+        $this->assertEquals('Person', $obj_parser->getKind());
+        $this->assertEquals([[
+            'lhs' => 'some_property',
+            'op' => google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL,
+            'comp' => '=',
+            'rhs' => 'grey'
+        ]], $obj_parser->getFilters());
+    }
+
+    /**
+      * Nonexistent properties should run fine because datastore is schemaless
+      * #expectedException              \GDS\Exception\GQL
+      * #expectedExceptionMessageRegExp /Property doesn't exist: .+/
+      */
+    public function testWhereNonexistentProperties()
+    {
+        $obj_schema = (new GDS\Schema('Person'))
+            ->addString('some_property');
+        $obj_parser = new \GDS\Mapper\ProtoBufGQLParser($obj_schema);
+        $obj_parser->parse('SELECT * FROM Person WHERE other_property = 10');
+        $this->assertEquals('Person', $obj_parser->getKind());
+        $this->assertEquals([[
+            'lhs' => 'other_property',
+            'op' => google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL,
+            'comp' => '=',
+            'rhs' => 10
+        ]], $obj_parser->getFilters());
+    }
+
     public function testMultiWhere()
     {
         $obj_parser = new \GDS\Mapper\ProtoBufGQLParser();
