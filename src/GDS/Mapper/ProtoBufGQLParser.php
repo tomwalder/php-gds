@@ -29,8 +29,9 @@ class ProtoBufGQLParser
 {
 
     /**
-     * The schema is used to check if property's type is valid
-     *
+     * The schema is used to check if property's type is valid.
+     * But because Google Datastore is schemaless, this cannot be ensured to exist.
+     *  
      * @var Schema|null
      */
     protected $obj_schema = null;
@@ -141,9 +142,9 @@ class ProtoBufGQLParser
     /**
      * Give reference to the schema to check type validity
      *
-     * @param Schema $obj_schema
+     * @param null|Schema $obj_schema
      */
-    public function __construct($obj_schema)
+    public function __construct($obj_schema = null)
     {
         $this->obj_schema = $obj_schema;
     }
@@ -326,21 +327,24 @@ class ProtoBufGQLParser
                     throw new GQL("Unsupported operator in condition: [{$arr_matches['comp']}] [{$str_condition}]");
                 }
 
-                // Check left hand side's type
-                $obj_properties = $this->obj_schema->getProperties();
-                if(!isset($obj_properties[$arr_matches['lhs']])){
-                    throw new GQL("Property doesn't exist: [{$arr_matches['lhs']}]");
-                } else {
-                    $int_current_type = $obj_properties[$arr_matches['lhs']]['type'];
-                    switch($int_current_type) {
-                        case \GDS\Schema::PROPERTY_STRING: 
-                            if(substr($arr_matches['rhs'], 0, strlen(self::TOKEN_PREFIX))
-                                != self::TOKEN_PREFIX){
-                                // If the right hand side has not been tokenized
-                                throw new GQL("Invalid string representation in: [{$str_condition}]");
-                            }
-                            break;
-                        //Todo: check other type's validity here
+                // If schema is set and its properties is not empty, then we use it to test the validity
+                if(isset($this->obj_schema) && !empty($this->obj_schema->getProperties())){
+                    // Check left hand side's type
+                    $obj_properties = $this->obj_schema->getProperties();
+                    if(!isset($obj_properties[$arr_matches['lhs']])){
+                        throw new GQL("Property doesn't exist: [{$arr_matches['lhs']}]");
+                    } else {
+                        $int_current_type = $obj_properties[$arr_matches['lhs']]['type'];
+                        switch($int_current_type) {
+                            case \GDS\Schema::PROPERTY_STRING: 
+                                if(substr($arr_matches['rhs'], 0, strlen(self::TOKEN_PREFIX))
+                                    != self::TOKEN_PREFIX){
+                                    // If the right hand side has not been tokenized
+                                    throw new GQL("Invalid string representation in: [{$str_condition}]");
+                                }
+                                break;
+                            //Todo: check other type's validity here
+                        }
                     }
                 }
 
