@@ -55,6 +55,13 @@ class ProtoBufGQLParser
     private $str_kind = null;
 
     /**
+     * Select properties (* or __key__ supported)
+     *
+     * @var string
+     */
+    private $str_property_list = null;
+
+    /**
      * Any integer offset
      *
      * @var int
@@ -154,15 +161,16 @@ class ProtoBufGQLParser
         $str_gql = trim($str_gql);
 
         // Ensure it's a 'SELECT *' query
-        if(!preg_match('/^SELECT\s+\*\s+FROM\s+(.*)/i', $str_gql)) {
+        // @todo Key Properties - allow "keys only" queries here
+        if(!preg_match('/^SELECT\s+(\*|__key__)\s+FROM\s+(.*)/i', $str_gql)) {
             throw new GQL("Sorry, only 'SELECT *' (full Entity) queries are currently supported by php-gds");
         }
 
         // Tokenize quoted items ** MUST BE FIRST **
         $str_gql = preg_replace_callback("/([`\"'])(?<quoted>.*?)(\\1)/", [$this, 'tokenizeQuoted'], $str_gql);
 
-        // Kind
-        $str_gql = preg_replace_callback('/^SELECT\s+\*\s+FROM\s+(?<kind>[^\s]*)/i', [$this, 'recordKind'], $str_gql, 1);
+        // Kind + Query Type
+        $str_gql = preg_replace_callback('/^SELECT\s+(?<type>\*|__key__)\s+FROM\s+(?<kind>[^\s]*)/i', [$this, 'recordKindAndQueryType'], $str_gql, 1);
 
         // Offset
         $str_gql = preg_replace_callback('/OFFSET\s+(?<offset>[^\s]*)/i', [$this, 'recordOffset'], $str_gql, 1);
@@ -202,9 +210,10 @@ class ProtoBufGQLParser
      * @param $arr
      * @return string
      */
-    private function recordKind($arr)
+    private function recordKindAndQueryType($arr)
     {
         $this->str_kind = $this->lookupToken($arr['kind']);
+        $this->str_property_list = $arr['type'];
         return '';
     }
 
@@ -417,5 +426,14 @@ class ProtoBufGQLParser
         return $this->arr_conditions;
     }
 
+    /**
+     * Get the requested property list
+     *
+     * @return string
+     */
+    public function getPropertyList()
+    {
+        return $this->str_property_list;
+    }
 
 }
