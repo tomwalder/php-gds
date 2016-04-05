@@ -18,12 +18,14 @@ namespace GDS\Gateway;
 use GDS\Entity;
 use GDS\Exception\Contention;
 use GDS\KeyInterface;
+use GDS\Mapper;
 use GDS\Mapper\ProtoBufGQLParser;
 use google\appengine\datastore\v4\BeginTransactionRequest;
 use google\appengine\datastore\v4\BeginTransactionResponse;
 use google\appengine\datastore\v4\CommitRequest;
 use google\appengine\datastore\v4\CommitRequest\Mode;
 use google\appengine\datastore\v4\CommitResponse;
+use google\appengine\datastore\v4\EntityResult\ResultType;
 use google\appengine\datastore\v4\Key;
 use google\appengine\datastore\v4\LookupRequest;
 use google\appengine\datastore\v4\LookupResponse;
@@ -127,7 +129,7 @@ class ProtoBuf extends \GDS\Gateway
      * @param object $obj_target
      * @return mixed
      */
-    private function applyNamespace($obj_target)
+    public function applyNamespace($obj_target)
     {
         $obj_partition = $obj_target->mutablePartitionId();
         $obj_partition->setDatasetId($this->str_dataset_id);
@@ -305,8 +307,14 @@ class ProtoBuf extends \GDS\Gateway
         if(null !== $arr_params) {
             $this->addParamsToQuery($obj_gql_query, $arr_params);
         }
+        /** @var RunQueryResponse $obj_gql_response */
         $obj_gql_response = $this->execute('RunQuery', $obj_query_request, new RunQueryResponse());
-        $arr_mapped_results = $this->createMapper()->mapFromResults($obj_gql_response->getBatch()->getEntityResultList());
+        $obj_mapper = $this->createMapper();
+        if(ResultType::KEY_ONLY === $obj_gql_response->getBatch()->getEntityResultType()) {
+            $obj_mapper->setMapping(Mapper::MAP_KEY_ONLY);
+        }
+        $arr_mapped_results = $obj_mapper->mapFromResults($obj_gql_response->getBatch()->getEntityResultList());
+        $obj_mapper->resetMapping();
         $this->obj_schema = null; // Consume Schema
         return $arr_mapped_results;
     }
@@ -337,6 +345,16 @@ class ProtoBuf extends \GDS\Gateway
         $obj_parser = new ProtoBufGQLParser();
         $obj_parser->parse($obj_gql_query->getQueryString(), $obj_gql_query->getNameArgList());
 
+        // Set property list (* or __key__) - attempted support for "KEY_ONLY" queries in development server
+        // In the local development server, there does not seem to be a way to configure "key_only" queries using
+        // the Protocol Buffers. Instead we have to set a projection query for the __key__ field.
+        // On AppEngine, this works fine, and we get a batch result type back as "KEY_ONLY"
+        $bol_key_only_required = false;
+        if('__key__' === $obj_parser->getPropertyList()) {
+            $bol_key_only_required = true;
+            $obj_query->addProjection()->mutableProperty()->setName('__key__');
+        }
+
         // Start applying to the new RunQuery request
         $obj_query->addKind()->setName($obj_parser->getKind());
         foreach($obj_parser->getOrderBy() as $arr_order_by) {
@@ -359,7 +377,16 @@ class ProtoBuf extends \GDS\Gateway
                 $this->configureFilterFromGql($obj_composite_filter->addFilter()->mutablePropertyFilter(), $arr_filter);
             }
         }
-        return $this->execute('RunQuery', $obj_query_request, new RunQueryResponse());
+        /** @var RunQueryResponse $obj_response */
+        $obj_response = $this->execute('RunQuery', $obj_query_request, new RunQueryResponse());
+
+        // In the local development server, there does not seem to be a way to configure "key_only" queries
+        // So force the response here
+        if($bol_key_only_required) {
+            $obj_response->getBatch()->setEntityResultType(ResultType::KEY_ONLY);
+        }
+
+        return $obj_response;
     }
 
     /**
@@ -437,7 +464,7 @@ class ProtoBuf extends \GDS\Gateway
      */
     protected function createMapper()
     {
-        return (new \GDS\Mapper\ProtoBuf())->setSchema($this->obj_schema);
+        return (new \GDS\Mapper\ProtoBuf())->setSchema($this->obj_schema)->setGateway($this);
     }
 
     /**
