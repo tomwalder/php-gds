@@ -32,6 +32,22 @@ class ProtoBuf extends \GDS\Mapper
 {
 
     /**
+     * @var \GDS\Gateway\ProtoBuf
+     */
+    private $obj_gateway = null;
+
+    /**
+     * @param \GDS\Gateway\ProtoBuf $obj_gateway
+     * @param \GDS\Gateway\ProtoBuf $obj_gateway
+     * @return $this
+     */
+    public function setGateway(\GDS\Gateway\ProtoBuf $obj_gateway)
+    {
+        $this->obj_gateway = $obj_gateway;
+        return $this;
+    }
+
+    /**
      * Map from GDS to Google Protocol Buffer
      *
      * @param Entity $obj_gds_entity
@@ -71,6 +87,11 @@ class ProtoBuf extends \GDS\Mapper
         /** @var $obj_gds_entity Entity */
         list($obj_gds_entity, $bol_schema_match) = $this->createEntityWithKey($obj_result);
 
+        // Key only? Exit early
+        if(self::MAP_KEY_ONLY === $this->int_map_type) {
+            return $obj_gds_entity;
+        }
+
         // Properties
         $arr_property_definitions = $this->obj_schema->getProperties();
         foreach($obj_result->getEntity()->getPropertyList() as $obj_property) {
@@ -106,7 +127,11 @@ class ProtoBuf extends \GDS\Mapper
             $obj_gds_entity = $this->obj_schema->createEntity();
         } else {
             $bol_schema_match = FALSE;
-            $obj_gds_entity = (new \GDS\Entity())->setKind($obj_path_end->getKind());
+            if(self::MAP_KEY_ONLY === $this->int_map_type) {
+                $obj_gds_entity = (new \GDS\Key())->setKind($obj_path_end->getKind());
+            } else {
+                $obj_gds_entity = (new \GDS\Entity())->setKind($obj_path_end->getKind());
+            }
         }
 
         // Set ID or Name (will always have one or the other)
@@ -243,6 +268,12 @@ class ProtoBuf extends \GDS\Mapper
                 foreach ((array)$mix_value as $str) {
                     $obj_val->addListValue()->setStringValue($str)->setIndexed($bol_index);
                 }
+                break;
+
+            case Schema::PROPERTY_KEY:
+                $this->obj_gateway->applyNamespace(
+                    $this->configureGoogleKey($obj_val->mutableKeyValue(), $mix_value)
+                );
                 break;
 
             default:
