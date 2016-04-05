@@ -24,7 +24,7 @@ namespace GDS;
  *
  * Key > Key > Key : This is a "Key chain" /fnar
  *
- * @todo Consider partition (dataset + namespace)
+ * With regards to partition (dataset + namespace), these are normalised by the Gateway when needed, and not stored here
  *
  * @author Tom Walder <tom@docnet.nu>
  * @package GDS
