@@ -175,6 +175,18 @@ class Schema
     }
 
     /**
+     * Add a Key field to the schema
+     *
+     * @param $str_name
+     * @param bool $bol_index
+     * @return Schema
+     */
+    public function addKey($str_name, $bol_index = TRUE)
+    {
+        return $this->addProperty($str_name, self::PROPERTY_KEY, $bol_index);
+    }
+
+    /**
      * Get the Kind
      *
      * @return string
