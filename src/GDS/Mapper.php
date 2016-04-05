@@ -26,11 +26,48 @@ abstract class Mapper
 {
 
     /**
+     * Mapping method
+     */
+    const MAP_ENTITY = 1;
+    const MAP_KEY_ONLY = 2;
+    const MAP_PROJECTION = 3;
+
+    /**
      * Current Schema
      *
      * @var Schema
      */
     protected $obj_schema = null;
+
+    /**
+     * Mapping method (full/key/projection)
+     *
+     * @var int
+     */
+    protected $int_map_type = self::MAP_ENTITY;
+
+    /**
+     * Set a specific mapping method
+     *
+     * @param $int_map_type
+     * @return $this
+     */
+    public function setMapping($int_map_type)
+    {
+        $this->int_map_type = $int_map_type;
+        return $this;
+    }
+
+    /**
+     * Reset the mapping method
+     *
+     * @return $this
+     */
+    public function resetMapping()
+    {
+        $this->int_map_type = self::MAP_ENTITY;
+        return $this;
+    }
 
     /**
      * Set the schema
