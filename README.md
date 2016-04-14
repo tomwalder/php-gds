@@ -439,7 +439,7 @@ $arr_books = (new \GDS\Store('Book', $obj_gateway_local))->fetchPage(20);
 
 ## More About Google Cloud Datastore ##
 
-What Google say:
+What Google says:
 
 > "Use a managed, NoSQL, schemaless database for storing non-relational data. Cloud Datastore automatically scales as you need it and supports transactions as well as robust, SQL-like queries."
 
