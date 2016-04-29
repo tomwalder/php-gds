@@ -221,8 +221,8 @@ $obj_person->location = new GDS\Property\Geopoint(53.4723272, -2.2936314);
 And when pulling geopoint data out of a result:
 
 ```php
-echo $obj_persion->location->getLatitude();
-echo $obj_persion->location->getLongitude();
+echo $obj_person->location->getLatitude();
+echo $obj_person->location->getLongitude();
 ```
 
 **It is not currently possible to query Geopoint fields, although this feature is in Alpha with Google**
