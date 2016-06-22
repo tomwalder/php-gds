@@ -77,10 +77,12 @@ A little more configuration is required if you want or need to use the JSON API 
 The Store needs a `GDS\Gateway` to talk to Google and the gateway needs a `Google_Client` for authentication.
 
 ```php
-$obj_client = GDS\Gateway\GoogleAPIClient::createGoogleClient(APP_NAME, ACCOUNT_NAME, KEY_FILE);
+$obj_client = GDS\Gateway\GoogleAPIClient::createClientFromJson('/path/to/your/service.json');
 $obj_gateway = new GDS\Gateway\GoogleAPIClient($obj_client, DATASET_ID);
 $obj_book_store = new GDS\Store('Book', $obj_gateway);
 ```
+
+You can download a service account JSON file from the Google Cloud Console `API Manager > Credentials`.
 
 ### Demo Application ###
 
