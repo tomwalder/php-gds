@@ -341,7 +341,7 @@ This library supports namespaces, and they are be configured per `Gateway` insta
 
 ```php
 // Create a store for a particular customer or 'application namespace'
-$obj_client = GDS\Gateway::createGoogleClient(APP_NAME, ACCOUNT_NAME, KEY_FILE);
+$obj_client = GDS\Gateway\GoogleAPIClient::createClientFromJson('/path/to/your/service.json');
 $obj_namespaced_gateway = new GDS\Gateway($obj_client, PROJECT_ID, 'customer-namespace');
 $obj_namespaced_book_store = new BookStore($obj_namespaced_gateway);
 ```
