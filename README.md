@@ -74,13 +74,16 @@ Check out the [examples](examples/) folder for many more and fuller code samples
 
 A little more configuration is required if you want or need to use the JSON API instead of Protocol Buffers.
 
-The Store needs a `GDS\Gateway` to talk to Google and the gateway needs a `Google_Client` for authentication.
+The Store needs a `GDS\Gateway` to talk to Google and the gateway needs a `Google_Client` for authentication. You will need to include the [Google Client LIbrary for PHP](https://developers.google.com/api-client-library/php/) as well as create credentials for a service account in order to build the `Google_Client` properly.
+
 
 ```php
-$obj_client = GDS\Gateway\GoogleAPIClient::createGoogleClient(APP_NAME, ACCOUNT_NAME, KEY_FILE);
-$obj_gateway = new GDS\Gateway\GoogleAPIClient($obj_client, DATASET_ID);
+$obj_client = GDS\Gateway\GoogleAPIClient::createClientFromJson('/path/to/your/service.json');
+$obj_gateway = new GDS\Gateway\GoogleAPIClient($obj_client, PROJECT_ID);
 $obj_book_store = new GDS\Store('Book', $obj_gateway);
 ```
+
+You can download a service account JSON file from the Google Cloud Console `API Manager > Credentials`.
 
 ### Demo Application ###
 
@@ -221,8 +224,8 @@ $obj_person->location = new GDS\Property\Geopoint(53.4723272, -2.2936314);
 And when pulling geopoint data out of a result:
 
 ```php
-echo $obj_persion->location->getLatitude();
-echo $obj_persion->location->getLongitude();
+echo $obj_person->location->getLatitude();
+echo $obj_person->location->getLongitude();
 ```
 
 **It is not currently possible to query Geopoint fields, although this feature is in Alpha with Google**
@@ -338,8 +341,8 @@ This library supports namespaces, and they are be configured per `Gateway` insta
 
 ```php
 // Create a store for a particular customer or 'application namespace'
-$obj_client = GDS\Gateway::createGoogleClient(APP_NAME, ACCOUNT_NAME, KEY_FILE);
-$obj_namespaced_gateway = new GDS\Gateway($obj_client, DATASET_ID, 'customer-namespace');
+$obj_client = GDS\Gateway\GoogleAPIClient::createClientFromJson('/path/to/your/service.json');
+$obj_namespaced_gateway = new GDS\Gateway($obj_client, PROJECT_ID, 'customer-namespace');
 $obj_namespaced_book_store = new BookStore($obj_namespaced_gateway);
 ```
 
