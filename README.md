@@ -73,20 +73,17 @@ These examples use the generic `GDS\Entity` class with a dynamic Schema. See [De
 
 Check out the [examples](examples/) folder for many more and fuller code samples.
 
-### Using the Google PHP API and the JSON Datastore API ###
+### Using the Google PHP API and the REST Datastore API v1 ###
 
 A little more configuration is required if you want or need to use the JSON API instead of Protocol Buffers.
 
-The Store needs a `GDS\Gateway` to talk to Google and the gateway needs a `Google_Client` for authentication. You will need to include the [Google Client LIbrary for PHP](https://developers.google.com/api-client-library/php/) as well as create credentials for a service account in order to build the `Google_Client` properly.
-
+The Store needs a `GDS\Gateway` to talk to Google - and assuming use of your Application Default Credentials, it looks like this...
 
 ```php
-$obj_client = GDS\Gateway\GoogleAPIClient::createClientFromJson('/path/to/your/service.json');
-$obj_gateway = new GDS\Gateway\GoogleAPIClient($obj_client, PROJECT_ID);
-$obj_book_store = new GDS\Store('Book', $obj_gateway);
+$obj_book_store = new GDS\Store('Book', new \GDS\Gateway\RESTv1(PROJECT_ID));
 ```
 
-You can download a service account JSON file from the Google Cloud Console `API Manager > Credentials`.
+Or, if needed, you can download a service account JSON file from the Google Cloud Console `API Manager > Credentials`.
 
 ### Demo Application ###
 
@@ -134,9 +131,8 @@ Are you sitting comfortably? Before we begin, you will need:
 - a Project to work on with the "Google Cloud Datastore API" turned ON [Google Developer Console](https://console.developers.google.com/)
 
 If you want to use the JSON API from remote or non-App Engine environments, you will also need
-- a "Service account" and **either** 
- - **(recommended, simpler)** the JSON service key file, downloadable from the Developer Console
- - or a P12 key file for that service account [Service Accounts](https://developers.google.com/accounts/docs/OAuth2#serviceaccount) along with the service account name
+- Application default credentials **OR**
+- a "Service account" and the JSON service key file, downloadable from the Developer Console
 
 ### Composer, Dependencies ###
 
