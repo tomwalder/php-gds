@@ -344,9 +344,8 @@ This library supports namespaces, and they are be configured per `Gateway` insta
 
 ```php
 // Create a store for a particular customer or 'application namespace'
-$obj_client = GDS\Gateway\GoogleAPIClient::createClientFromJson('/path/to/your/service.json');
-$obj_namespaced_gateway = new GDS\Gateway($obj_client, PROJECT_ID, 'customer-namespace');
-$obj_namespaced_book_store = new BookStore($obj_namespaced_gateway);
+$obj_gateway = new \GDS\Gateway\RESTv1('project-id', 'namespace');
+$obj_store = new \GDS\Store('Book', $obj_gateway);
 ```
 
 Further examples are included in the examples folder.
@@ -432,7 +431,7 @@ and between local and live environments.
 ```php
 // Local and Remote Gateways
 $obj_gateway_local = new \GDS\Gateway\ProtoBuf();
-$obj_gateway_remote = new \GDS\Gateway\GoogleAPIClient($obj_google_client);
+$obj_gateway_remote = new \GDS\Gateway\RESTv1('project-name');
 
 // Grab some books from local
 $arr_books = (new \GDS\Store('Book', $obj_gateway_local))->fetchPage(20);

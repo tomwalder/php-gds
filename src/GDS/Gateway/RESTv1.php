@@ -38,9 +38,10 @@ class RESTv1 extends \GDS\Gateway
      *
      * @param $str_project_id
      */
-    public function __construct($str_project_id)
+    public function __construct($str_project_id, $str_namespace = null)
     {
         $this->str_dataset_id = $str_project_id;
+        $this->str_namespace = $str_namespace;
 
         // Middleware
         $obj_stack = HandlerStack::create();
