@@ -16,13 +16,17 @@ use GuzzleHttp\HandlerStack;
 class RESTv1 extends \GDS\Gateway
 {
 
+    /**
+     * REST API Base Endpoint
+     */
     const BASE_URL = 'https://datastore.googleapis.com';
 
-    //    allocateIds	POST /v1/projects/{projectId}:allocateIds
-    //    commit	    POST /v1/projects/{projectId}:commit
-    //    lookup	    POST /v1/projects/{projectId}:lookup
-    //    rollback	    POST /v1/projects/{projectId}:rollback
-    //    runQuery	    POST /v1/projects/{projectId}:runQuery
+    /**
+     * Modes
+     */
+    const MODE_TRANSACTIONAL = 'TRANSACTIONAL';
+    const MODE_NON_TRANSACTIONAL = 'NON_TRANSACTIONAL';
+    const MODE_UNSPECIFIED = 'UNSPECIFIED';
 
     /**
      * @var \GuzzleHttp\Client
@@ -70,17 +74,152 @@ class RESTv1 extends \GDS\Gateway
      */
     protected function upsert(array $arr_entities)
     {
-        // TODO: Implement upsert() method.
+        /* @var $arr_auto_id_required \GDS\Entity[] */
+        $arr_auto_id_required = [];
+
+        // Keep arrays of mutation types, so we can be more comfortable later with the ID mapping sequence
+        $arr_inserts = [];
+        $arr_upserts = [];
+
+        foreach($arr_entities as $obj_gds_entity) {
+
+            // Build a REST object, apply current partition
+            $obj_rest_entity = $this->createMapper()->mapToGoogle($obj_gds_entity);
+            $this->applyPartition($obj_rest_entity->key);
+
+            if(null === $obj_gds_entity->getKeyId() && null === $obj_gds_entity->getKeyName()) {
+                $arr_inserts[] = ['insert' => $obj_rest_entity];
+                $arr_auto_id_required[] = $obj_gds_entity; // maintain reference to the array of requested auto-ids
+            } else {
+                $arr_upserts[] = ['upsert' => $obj_rest_entity];
+            }
+        }
+
+        // Build the base request, add the prepared mutations
+        $obj_request = $this->buildCommitRequest();
+        $obj_request->mutations = array_merge($arr_inserts, $arr_upserts);
+
+        // Run
+        $this->executePostRequest('commit', $obj_request);
+
+        return $arr_auto_id_required;
+    }
+
+    /**
+     * Execute a POST request against the API
+     *
+     * @param $str_action
+     * @param null $obj_request_body
+     */
+    private function executePostRequest($str_action, $obj_request_body = null)
+    {
+        $arr_options = [];
+        if(null !== $obj_request_body) {
+            $arr_options['json'] = $obj_request_body;
+        }
+        $obj_response = $this->obj_http_client->post($this->actionUrl($str_action), $arr_options);
+        $this->obj_last_response = json_decode((string)$obj_response->getBody());
+    }
+
+    /**
+     * Build a basic commit request (used by upsert, delete)
+     *
+     * @return object
+     */
+    private function buildCommitRequest()
+    {
+        $obj_request = (object)['mutations' => []];
+
+        // Transaction at root level, so do not use applyTransaction()
+        if(null !== $this->str_next_transaction) {
+            $obj_request->transaction = $this->str_next_transaction;
+            $obj_request->mode = self::MODE_TRANSACTIONAL;
+            $this->str_next_transaction = null;
+        } else {
+            $obj_request->mode = self::MODE_NON_TRANSACTIONAL;
+        }
+        return $obj_request;
     }
 
     /**
      * Extract Auto Insert IDs from the last response
      *
+     * https://cloud.google.com/datastore/reference/rest/v1/projects/commit#MutationResult
+     *
      * @return array
      */
     protected function extractAutoIDs()
     {
-        // TODO: Implement extractAutoIDs() method.
+        $arr_ids = [];
+        if(isset($this->obj_last_response->mutationResults) && is_array($this->obj_last_response->mutationResults)) {
+            foreach ($this->obj_last_response->mutationResults as $obj_mutation_result) {
+                if(isset($obj_mutation_result->key)) {
+                    $obj_path_end = end($obj_mutation_result->key->path);
+                    $arr_ids[] = $obj_path_end->id;
+                }
+            }
+        }
+        return $arr_ids;
+    }
+
+    /**
+     * Delete 1-many entities
+     *
+     * @param array $arr_entities
+     * @return mixed
+     */
+    public function deleteMulti(array $arr_entities)
+    {
+
+        // Build the base request
+        $obj_request = $this->buildCommitRequest();
+
+        // Create JSON keys for each delete mutation
+        foreach($arr_entities as $obj_gds_entity) {
+            $obj_rest_key = (object)['path' => $this->createMapper()->buildKeyPath($obj_gds_entity)];
+            $this->applyPartition($obj_rest_key);
+            $obj_request->mutations[] = (object)['delete' => $obj_rest_key];
+        }
+
+        // Run
+        $this->executePostRequest('commit', $obj_request);
+
+        return true; // Still not sure about this...
+    }
+
+    /**
+     * Fetch some Entities, based on the supplied GQL and, optionally, parameters
+     *
+     * POST /v1/projects/{projectId}:runQuery
+     *
+     * @param string $str_gql
+     * @param null|array $arr_params
+     * @return mixed
+     */
+    public function gql($str_gql, $arr_params = null)
+    {
+
+        // Build the query
+        $obj_request = (object)[
+            'gqlQuery' => (object)[
+                'allowLiterals' => true,
+                'queryString' => $str_gql
+            ]
+        ];
+        $this->applyPartition($obj_request);
+        $this->applyTransaction($obj_request);
+        if(is_array($arr_params)) {
+            $this->addParamsToQuery($obj_request->gqlQuery, $arr_params);
+        }
+
+        // Run
+        $this->executePostRequest('runQuery', $obj_request);
+
+        // Extract results
+        $arr_mapped_results = $this->createMapper()->mapFromResults($this->obj_last_response->batch->entityResults);
+        $this->obj_schema = null; // Consume Schema
+        return $arr_mapped_results;
+
     }
 
     /**
@@ -94,30 +233,136 @@ class RESTv1 extends \GDS\Gateway
      */
     protected function fetchByKeyPart(array $arr_key_parts, $str_setter)
     {
-        // TODO: Implement fetchByKeyPart() method.
+
+        // Build the query
+        $obj_request = (object)[
+            'keys' => []
+        ];
+        $this->applyTransaction($obj_request);
+
+        // Add keys
+        foreach($arr_key_parts as $str_key_part) {
+            $obj_element = (object)['kind' => $this->obj_schema->getKind()];
+            if('setId' === $str_setter) {
+                $obj_element->id = $str_key_part;
+            } elseif ('setName' === $str_setter) {
+                $obj_element->name = $str_key_part;
+            }
+            $obj_key = (object)['path' => [$obj_element]];
+            $this->applyPartition($obj_key);
+            $obj_request->keys[] = $obj_key;
+        }
+
+        // Run
+        $this->executePostRequest('lookup', $obj_request);
+
+        // Extract results
+        $arr_mapped_results = [];
+        if(isset($this->obj_last_response->found) && is_array($this->obj_last_response->found)) {
+            $arr_mapped_results = $this->createMapper()->mapFromResults($this->obj_last_response->found);
+        }
+        $this->obj_schema = null; // Consume Schema
+        return $arr_mapped_results;
     }
 
     /**
-     * Delete 1-many entities
+     * Apply project and namespace to a query
      *
-     * @param array $arr_entities
-     * @return mixed
+     * @param \stdClass $obj_request
+     * @return \stdClass
      */
-    public function deleteMulti(array $arr_entities)
-    {
-        // TODO: Implement deleteMulti() method.
+    private function applyPartition(\stdClass $obj_request) {
+        $obj_request->partitionId = (object)[
+            'projectId' => $this->str_dataset_id
+        ];
+        if(null !== $this->str_namespace) {
+            $obj_request->partitionId->namespaceId = $this->str_namespace;
+        }
     }
 
     /**
-     * Fetch some Entities, based on the supplied GQL and, optionally, parameters
+     * If we are in a transaction, apply it to the request object
      *
-     * @param string $str_gql
-     * @param null|array $arr_params
+     * @todo Deal with read consistency
+     *
+     * @param $obj_request
      * @return mixed
      */
-    public function gql($str_gql, $arr_params = null)
+    private function applyTransaction(\stdClass $obj_request) {
+        if(null !== $this->str_next_transaction) {
+            $obj_request->readOptions = (object)[
+                // 'readConsistency' => $options->getReadConsistency(),
+                "transaction" => $this->str_next_transaction
+            ];
+            $this->str_next_transaction = null;
+        }
+    }
+
+    /**
+     * Add Parameters to a GQL Query object
+     *
+     * @todo Review support for endCursor
+     *
+     * @param \stdClass $obj_query
+     * @param array $arr_params
+     */
+    private function addParamsToQuery(\stdClass $obj_query, array $arr_params)
     {
-        // TODO: Implement gql() method.
+        if(count($arr_params) > 0) {
+            $obj_bindings = new \stdClass();
+            foreach ($arr_params as $str_name => $mix_value) {
+                $obj_bindings->{$str_name} = (object)['value' => $this->buildQueryParamValue($mix_value)];
+            }
+            $obj_query->namedBindings = $obj_bindings;
+        }
+    }
+
+    /**
+     * Build a JSON representation of a value
+     *
+     * @todo Handle arrays, objects (like Datetime)
+     *
+     * @param $mix_value
+     * @return \stdClass
+     */
+    private function buildQueryParamValue($mix_value)
+    {
+        $obj_val = new \stdClass();
+        $str_type = gettype($mix_value);
+        switch($str_type) {
+            case 'boolean':
+                $obj_val->booleanValue = $mix_value;
+                break;
+
+            case 'integer':
+                $obj_val->integerValue = $mix_value;
+                break;
+
+            case 'double':
+                $obj_val->doubleValue = $mix_value;
+                break;
+
+            case 'string':
+                $obj_val->stringValue = $mix_value;
+                break;
+
+            case 'array':
+                throw new \InvalidArgumentException('Unexpected array parameter');
+
+            case 'object':
+                $this->configureObjectValueParamForQuery($obj_val, $mix_value);
+                break;
+
+            case 'null':
+                $obj_val->nullValue = null;
+                break;
+
+            case 'resource':
+            case 'unknown type':
+            default:
+                throw new \InvalidArgumentException('Unsupported parameter type: ' . $str_type);
+        }
+        return $obj_val;
     }
 
     /**
@@ -127,17 +372,17 @@ class RESTv1 extends \GDS\Gateway
      */
     public function getEndCursor()
     {
-        // TODO: Implement getEndCursor() method.
+        return $this->obj_last_response->batch->endCursor;
     }
 
     /**
      * Create a mapper that's right for this Gateway
      *
-     * @return Mapper
+     * @return \GDS\Mapper\RESTv1
      */
     protected function createMapper()
     {
-        // TODO: Implement createMapper() method.
+        return (new \GDS\Mapper\RESTv1())->setSchema($this->obj_schema);
     }
 
     /**
@@ -154,10 +399,9 @@ class RESTv1 extends \GDS\Gateway
         if($bol_cross_group) {
             throw new \Exception("Cross group transactions not supported over REST API v1");
         }
-        $obj_response = $this->obj_http_client->post($this->actionUrl('beginTransaction'));
-        $obj_response_data = json_decode((string) $obj_response->getBody());
-        if($obj_response_data && isset($obj_response_data->transaction)) {
-            return $obj_response_data->transaction;
+        $this->executePostRequest('beginTransaction');
+        if(isset($this->obj_last_response->transaction)) {
+            return $this->obj_last_response->transaction;
         }
         return null;
     }
