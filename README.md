@@ -13,7 +13,8 @@ This library is intended to make it easier for you to get started with and to us
 
 - [Examples](#examples)
 - [New in 3.0](#new-in-version-20)
-- [New in 2.0](#new-in-version-20)
+- [Datastore REST API v1 (Sep 2016)](#using-the-datastore-rest-api-v1-sep-2016)
+- [Changes in 2.0](#changes-in-version-20)
 - [Getting Started](#getting-started)
 - [Defining Your Model](#defining-your-model)
 - [Creating Records](#creating-records)
@@ -73,18 +74,6 @@ These examples use the generic `GDS\Entity` class with a dynamic Schema. See [De
 
 Check out the [examples](examples/) folder for many more and fuller code samples.
 
-### Using the Google PHP API and the REST Datastore API v1 ###
-
-A little more configuration is required if you want or need to use the JSON API instead of Protocol Buffers.
-
-The Store needs a `GDS\Gateway` to talk to Google - and assuming use of your Application Default Credentials, it looks like this...
-
-```php
-$obj_book_store = new GDS\Store('Book', new \GDS\Gateway\RESTv1(PROJECT_ID));
-```
-
-Or, if needed, you can download a service account JSON file from the Google Cloud Console `API Manager > Credentials`.
-
 ### Demo Application ###
 
 A simple guest book application
@@ -97,7 +86,29 @@ Code: https://github.com/tomwalder/php-gds-demo
 
 * Support for the new Datastore API, v1 - via REST
 
-## New in Version 2.0 ##
+### Using the Datastore REST API v1 (Sep 2016) ###
+
+The Datastore REST API v1 went Generally Available (GA) in 2016. The previous REST API will be deprecated after September 2016.
+
+If you are running PHP-GDS from somewhere other than App Engine, you need to use the REST API v1.
+
+You just have to pass an instance of the RESTv1 gateway into your Store objects on construction, like this:
+
+```php
+$obj_book_store = new GDS\Store('Book', new \GDS\Gateway\RESTv1(PROJECT_ID));
+```
+
+You might need to set an environment variable with the path to your JSON credentials file first, like this:
+
+```php
+putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+```
+
+You can find out more about the auth system here: [Google Auth Library for PHP](https://github.com/google/google-auth-library-php)
+
+You can download a service account JSON file from the Google Cloud Console `API Manager > Credentials`.
+
+## Changes in Version 2.0 ##
 
 New features in 2.0 include 
 * **Faster** - use of Google Protocol Buffer allows faster, low-level access to Datastore
