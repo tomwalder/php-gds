@@ -84,7 +84,8 @@ Code: https://github.com/tomwalder/php-gds-demo
 
 ## New in Version 3.0 ##
 
-* Support for the new Datastore API, v1 - via REST
+Just one major upgrade in 3.0
+* Support for the new Datastore API, v1 - via REST (gRPC to come)
 
 ### Using the Datastore REST API v1 (Sep 2016) ###
 
@@ -92,16 +93,15 @@ The Datastore REST API v1 went Generally Available (GA) in 2016. The previous RE
 
 If you are running PHP-GDS from somewhere other than App Engine, you need to use the REST API v1.
 
-You just have to pass an instance of the RESTv1 gateway into your Store objects on construction, like this:
+You just have to pass an instance of the RESTv1 gateway into your Store objects on construction.
 
-```php
-$obj_book_store = new GDS\Store('Book', new \GDS\Gateway\RESTv1(PROJECT_ID));
-```
-
-You might need to set an environment variable with the path to your JSON credentials file first, like this:
+You might need to set an environment variable with the path to your JSON credentials file first.
 
 ```php
 putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+
+// A regular Store, but with a custom Gateway
+$obj_book_store = new GDS\Store('Book', new \GDS\Gateway\RESTv1(PROJECT_ID));
 ```
 
 You can find out more about the auth system here: [Google Auth Library for PHP](https://github.com/google/google-auth-library-php)
@@ -110,7 +110,7 @@ You can download a service account JSON file from the Google Cloud Console `API 
 
 ## Changes in Version 2.0 ##
 
-New features in 2.0 include 
+Features in 2.0 included 
 * **Faster** - use of Google Protocol Buffer allows faster, low-level access to Datastore
 * **Easier to use** - sensible defaults and auto-detection for AppEngine environments
 * **Less dependencies** - no need for the Google PHP API Client, unless running remote or from non-AppEngine environments
