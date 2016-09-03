@@ -1,7 +1,6 @@
 <?php namespace GDS\Gateway;
 
-use GDS\Mapper;
-
+use GDS\Entity;
 use Google\Auth\ApplicationDefaultCredentials;
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
@@ -54,17 +53,6 @@ class RESTv1 extends \GDS\Gateway
             'auth' => 'google_auth'  // authorize all requests
         ]);
 
-    }
-
-    /**
-     * Configure a Value parameter, based on the supplied object-type value
-     *
-     * @param object $obj_val
-     * @param object $mix_value
-     */
-    protected function configureObjectValueParamForQuery($obj_val, $mix_value)
-    {
-        // TODO: Implement configureObjectValueParamForQuery() method.
     }
 
     /**
@@ -279,6 +267,7 @@ class RESTv1 extends \GDS\Gateway
         if(null !== $this->str_namespace) {
             $obj_request->partitionId->namespaceId = $this->str_namespace;
         }
+        return $obj_request;
     }
 
     /**
@@ -297,6 +286,7 @@ class RESTv1 extends \GDS\Gateway
             ];
             $this->str_next_transaction = null;
         }
+        return $obj_request;
     }
 
     /**
@@ -312,6 +302,7 @@ class RESTv1 extends \GDS\Gateway
         if(count($arr_params) > 0) {
             $obj_bindings = new \stdClass();
             foreach ($arr_params as $str_name => $mix_value) {
+                // @todo special case for endCursor?
                 $obj_bindings->{$str_name} = (object)['value' => $this->buildQueryParamValue($mix_value)];
             }
             $obj_query->namedBindings = $obj_bindings;
@@ -320,8 +311,6 @@ class RESTv1 extends \GDS\Gateway
 
     /**
      * Build a JSON representation of a value
-     *
-     * @todo Handle arrays, objects (like Datetime)
      *
      * @param $mix_value
      * @return \stdClass
@@ -364,6 +353,26 @@ class RESTv1 extends \GDS\Gateway
                 throw new \InvalidArgumentException('Unsupported parameter type: ' . $str_type);
         }
         return $obj_val;
+    }
+
+    /**
+     * Configure a Value parameter, based on the supplied object-type value
+     *
+     * @param object $obj_val
+     * @param object $mix_value
+     */
+    protected function configureObjectValueParamForQuery($obj_val, $mix_value)
+    {
+        if($mix_value instanceof Entity) {
+            /** @var Entity $mix_value */
+            $obj_val->keyValue = $this->applyPartition((object)['path' => $this->createMapper()->buildKeyPath($mix_value)]);
+        } elseif ($mix_value instanceof \DateTime) {
+            $obj_val->timestampValue = $mix_value->format(\GDS\Mapper\RESTv1::DATETIME_FORMAT);
+        } elseif (method_exists($mix_value, '__toString')) {
+            $obj_val->stringValue = $mix_value->__toString();
+        } else {
+            throw new \InvalidArgumentException('Unexpected, non-string-able object parameter: ' . get_class($mix_value));
+        }
     }
 
     /**

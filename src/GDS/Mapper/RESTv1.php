@@ -24,6 +24,14 @@ use GDS\Schema;
  */
 class RESTv1 extends \GDS\Mapper
 {
+
+    /**
+     * This is the DateTime::format string required to support Datastore timestamps
+     *
+     * A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
+     */
+    const DATETIME_FORMAT = 'Y-m-d\TH:i:s.u\Z';
+
     /**
      * Auto detect & extract a value
      *
@@ -62,8 +70,6 @@ class RESTv1 extends \GDS\Mapper
 
     /**
      * Extract a datetime value
-     *
-     * A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
      *
      * We will lose accuracy past microseconds (down from nanoseconds) when extracting
      *
@@ -335,9 +341,7 @@ class RESTv1 extends \GDS\Mapper
     /**
      * Create a property object
      *
-     * @todo Support other value types: date, Geo, Array/list
-     *
-     * @todo Compare with paraemter value from REST Gateway
+     * @todo Compare with parameter value method from REST Gateway
      *
      * @param array $arr_field_def
      * @param $mix_value
@@ -363,15 +367,16 @@ class RESTv1 extends \GDS\Mapper
                 $obj_property_value->integerValue = $mix_value;
                 break;
 
-//            case Schema::PROPERTY_DATETIME:
-//                if($mix_value instanceof \DateTime) {
-//                    $obj_dtm = $mix_value;
-//                } else {
-//                    $obj_dtm = new \DateTime($mix_value);
-//                }
-//                $obj_property_value->setDateTimeValue($obj_dtm->format(\DateTime::ATOM));
-//                break;
-//
+            case Schema::PROPERTY_DATETIME:
+                if($mix_value instanceof \DateTime) {
+                    $obj_dtm = $mix_value;
+                } else {
+                    $obj_dtm = new \DateTime($mix_value);
+                }
+                // A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
+                $obj_property_value->timestampValue = $obj_dtm->format(self::DATETIME_FORMAT);
+                break;
+
             case Schema::PROPERTY_DOUBLE:
             case Schema::PROPERTY_FLOAT:
                 $obj_property_value->doubleValue = floatval($mix_value);
@@ -380,22 +385,34 @@ class RESTv1 extends \GDS\Mapper
             case Schema::PROPERTY_BOOLEAN:
                 $obj_property_value->booleanValue = (bool)$mix_value;
                 break;
-//
-//            case Schema::PROPERTY_GEOPOINT:
-//                throw new \RuntimeException('Geopoint properties not supported over JSON API');
-//                break;
-//
-//            case Schema::PROPERTY_STRING_LIST:
-//                $obj_property_value->setIndexed(null); // Ensure we only index the values, not the list
-//                $arr_values = [];
-//                foreach ((array)$mix_value as $str) {
-//                    $obj_value = new \Google_Service_Datastore_Value();
-//                    $obj_value->setStringValue($str);
-//                    $obj_value->setIndexed($bol_index);
-//                    $arr_values[] = $obj_value;
-//                }
-//                $obj_property_value->setListValue($arr_values);
-//                break;
+
+            case Schema::PROPERTY_GEOPOINT:
+                if($mix_value instanceof Geopoint) {
+                    /** @var Geopoint $mix_value */
+                    $obj_property_value->geoPointValue = (object)[
+                        "latitude" => $mix_value->getLatitude(),
+                        "longitude" => $mix_value->getLongitude()
+                    ];
+                } elseif (is_array($mix_value)) {
+                    $obj_property_value->geoPointValue = (object)[
+                        "latitude" => $mix_value[0],
+                        "longitude" => $mix_value[1]
+                    ];
+                } else {
+                    throw new \RuntimeException('Geopoint property data not supported: ' . gettype($mix_value));
+                }
+                break;
+
+            case Schema::PROPERTY_STRING_LIST:
+                // @todo Determine if we need to set excludeFromIndexes on the property
+                $arr_values = [];
+                foreach ((array)$mix_value as $str) {
+                    $obj_value = (object)['stringValue' => $str];
+                    $obj_value->excludeFromIndexes = !$bol_index;
+                    $arr_values[] = $obj_value;
+                }
+                $obj_property_value->arrayValue = (object)['values' => $arr_values];
+                break;
 
             default:
                 throw new \RuntimeException('Unable to process field type: ' . $arr_field_def['type']);
