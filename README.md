@@ -7,6 +7,15 @@
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
+## Datastore API Turn Down, Aug-Sep 2016 ##
+
+Google are turning down the older versions of the REST API. Version v1beta2 and v1beta3 are being turned off on 30th September 2016.
+
+* If you are using this library on App Engine, and using the default `Protobuf` gateway then NO CHANGES ARE NEEDED.
+* If you are using this library anywhere else, like Compute Engine, and you are using the `GoogleAPIClient` gateway, then you will need to upgrade to version 3.0
+
+**FOR [DATASTORE API V1](https://cloud.google.com/datastore/release-notes) SUPPORT, SEE THE [3.0 ALPHA BRANCH HERE](https://github.com/tomwalder/php-gds/tree/datastore-api-v1)** 
+
 ## Table of Contents ##
 
 - [Examples](#examples)
@@ -80,7 +89,7 @@ The Store needs a `GDS\Gateway` to talk to Google and the gateway needs a `Googl
 ```php
 $obj_client = GDS\Gateway\GoogleAPIClient::createClientFromJson('/path/to/your/service.json');
 $obj_gateway = new GDS\Gateway\GoogleAPIClient($obj_client, PROJECT_ID);
-$obj_book_store = new GDS\Store('Book', $obj_gateway);
+$obj_book_store = new GDS\Store('sBook', $obj_gateway);
 ```
 
 You can download a service account JSON file from the Google Cloud Console `API Manager > Credentials`.
