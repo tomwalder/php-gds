@@ -12,10 +12,9 @@ This library is intended to make it easier for you to get started with and to us
 ## Table of Contents ##
 
 - [Examples](#examples)
-- [New in 3.0](#new-in-version-20)
-- [Datastore REST API v1 (Sep 2016)](#using-the-datastore-rest-api-v1-sep-2016)
-- [Changes in 2.0](#changes-in-version-20)
-- [Getting Started](#getting-started)
+- [New in version 3.0](#new-in-version-20): [Datastore REST API v1 (Sep 2016)](#using-the-datastore-rest-api-v1-sep-2016)
+- [Earlier Changes in version 2.0](#changes-in-version-20)
+- [Getting Started](#getting-started) including installation with Composer
 - [Defining Your Model](#defining-your-model)
 - [Creating Records](#creating-records)
 - [Geopoint Support](#geopoint)
