@@ -292,8 +292,6 @@ class RESTv1 extends \GDS\Gateway
     /**
      * Add Parameters to a GQL Query object
      *
-     * @todo Review support for endCursor
-     *
      * @param \stdClass $obj_query
      * @param array $arr_params
      */
@@ -302,8 +300,11 @@ class RESTv1 extends \GDS\Gateway
         if(count($arr_params) > 0) {
             $obj_bindings = new \stdClass();
             foreach ($arr_params as $str_name => $mix_value) {
-                // @todo special case for endCursor?
-                $obj_bindings->{$str_name} = (object)['value' => $this->buildQueryParamValue($mix_value)];
+                if('startCursor' == $str_name || 'endCursor' == $str_name) {
+                    $obj_bindings->{$str_name} = (object)['cursor' => (string)$mix_value];
+                } else {
+                    $obj_bindings->{$str_name} = (object)['value' => $this->buildQueryParamValue($mix_value)];
+                }
             }
             $obj_query->namedBindings = $obj_bindings;
         }
