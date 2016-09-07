@@ -3,6 +3,7 @@
 use GDS\Entity;
 use Google\Auth\ApplicationDefaultCredentials;
 use GuzzleHttp\Client;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\HandlerStack;
 
 /**
@@ -28,7 +29,7 @@ class RESTv1 extends \GDS\Gateway
     const MODE_UNSPECIFIED = 'UNSPECIFIED';
 
     /**
-     * @var \GuzzleHttp\Client
+     * @var ClientInterface
      */
     private $obj_http_client = null;
 
@@ -42,18 +43,39 @@ class RESTv1 extends \GDS\Gateway
     {
         $this->str_dataset_id = $str_project_id;
         $this->str_namespace = $str_namespace;
+        $this->obj_http_client = $this->initHttpClient();
+    }
+
+    /**
+     * Use a pre-configured HTTP Client
+     *
+     * @param ClientInterface $obj_client
+     * @return $this
+     */
+    public function setHttpClient(ClientInterface $obj_client)
+    {
+        $this->obj_http_client = $obj_client;
+        return $this;
+    }
+
+    /**
+     * Configure HTTP Client
+     *
+     * @return ClientInterface
+     */
+    protected function initHttpClient()
+    {
 
         // Middleware
         $obj_stack = HandlerStack::create();
         $obj_stack->push(ApplicationDefaultCredentials::getMiddleware(['https://www.googleapis.com/auth/datastore']));
 
         // Create the HTTP client
-        $this->obj_http_client = new Client([
+        return new Client([
             'handler' => $obj_stack,
             'base_url' => self::BASE_URL,
             'auth' => 'google_auth'  // authorize all requests
         ]);
-
     }
 
     /**
