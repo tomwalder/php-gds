@@ -1,6 +1,5 @@
 [![Build Status](https://api.travis-ci.org/tomwalder/php-gds.svg)](https://travis-ci.org/tomwalder/php-gds)
-[![Coverage Status](https://coveralls.io/repos/tomwalder/php-gds/badge.svg)](https://coveralls.io/r/tomwalder/php-gds)
-
+[![Coverage Status](https://coveralls.io/repos/github/tomwalder/php-gds/badge.svg?branch=datastore-api-v1)](https://coveralls.io/github/tomwalder/php-gds?branch=datastore-api-v1)
 # Google Cloud Datastore Library for PHP #
 
 [Google Cloud Datastore](https://cloud.google.com/datastore/) is a great NoSQL solution (hosted, scalable, free up to a point), but it can be tricky (i.e. there's lots of code glue needed) to get even the "Hello World" of data persistence up and running in PHP.
