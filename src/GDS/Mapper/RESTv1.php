@@ -71,7 +71,11 @@ class RESTv1 extends \GDS\Mapper
     /**
      * Extract a datetime value
      *
-     * We will lose accuracy past microseconds (down from nanoseconds) when extracting
+     * We will lose accuracy
+     * - past seconds in version 3.0
+     * - past microseconds (down from nanoseconds) in version 4.0
+     *
+     * @todo In version 4.0 we will start returning DateTime objects. Here we maintain compatibility with version 2.x
      *
      * @param $obj_property
      * @return mixed
@@ -81,10 +85,11 @@ class RESTv1 extends \GDS\Mapper
         if(isset($obj_property->timestampValue)) {
             $arr_matches = [];
             if(preg_match('/(.{19})\.?(\d{0,6}).*Z/', $obj_property->timestampValue, $arr_matches) > 0) {
-                return new \DateTime($arr_matches[1] . '.' . $arr_matches[2] . 'Z');
+                $obj_dtm = new \DateTime($arr_matches[1] . '.' . $arr_matches[2] . 'Z');
             } else {
-                return new \DateTime($obj_property->timestampValue);
+                $obj_dtm = new \DateTime($obj_property->timestampValue);
             }
+            return $obj_dtm->format(self::DATETIME_FORMAT_V2);
         }
         return null;
     }

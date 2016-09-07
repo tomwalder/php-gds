@@ -253,7 +253,7 @@ class ProtoBuf extends \GDS\Mapper
      */
     protected function extractDatetimeValue($obj_property)
     {
-        return date('Y-m-d H:i:s', $obj_property->getTimestampMicrosecondsValue() / 1000000);
+        return date(self::DATETIME_FORMAT_V2, $obj_property->getTimestampMicrosecondsValue() / 1000000);
     }
 
     /**

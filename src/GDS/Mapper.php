@@ -26,6 +26,11 @@ abstract class Mapper
 {
 
     /**
+     * Datetime format for backwards compatibility
+     */
+    const DATETIME_FORMAT_V2 = 'Y-m-d H:i:s';
+
+    /**
      * Current Schema
      *
      * @var Schema
