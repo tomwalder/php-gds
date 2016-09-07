@@ -16,7 +16,7 @@
  */
 
 /**
- * Tests for Protocol Buffer Fetching
+ * Tests for REST API v1 Mapper
  *
  * @author Tom Walder <tom@docnet.nu>
  */
