@@ -36,6 +36,7 @@ class RESTv1 extends \GDS\Gateway
      * Create the auth middleware and set up the HTTP Client
      *
      * @param $str_project_id
+     * @param null $str_namespace
      */
     public function __construct($str_project_id, $str_namespace = null)
     {
