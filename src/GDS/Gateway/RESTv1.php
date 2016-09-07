@@ -388,7 +388,10 @@ class RESTv1 extends \GDS\Gateway
      */
     public function getEndCursor()
     {
-        return $this->obj_last_response->batch->endCursor;
+        if(isset($this->obj_last_response->batch) && isset($this->obj_last_response->batch->endCursor)) {
+            return $this->obj_last_response->batch->endCursor;
+        }
+        return null;
     }
 
     /**
