@@ -215,7 +215,7 @@ class RESTv1 extends \GDS\Mapper
      *
      * @param $int_type
      * @param object $obj_property
-     * @return array
+     * @return mixed
      * @throws \Exception
      */
     protected function extractPropertyValue($int_type, $obj_property)
@@ -268,7 +268,7 @@ class RESTv1 extends \GDS\Mapper
         ];
 
         // Properties
-        $arr_field_defs = $this->obj_schema->getProperties();
+        $arr_field_defs = $this->bestEffortFieldDefs($obj_gds_entity);
         foreach($obj_gds_entity->getData() as $str_field_name => $mix_value) {
             if(isset($arr_field_defs[$str_field_name])) {
                 $obj_rest_entity->properties->{$str_field_name} = $this->createPropertyValue($arr_field_defs[$str_field_name], $mix_value);
@@ -279,6 +279,23 @@ class RESTv1 extends \GDS\Mapper
         }
 
         return $obj_rest_entity;
+    }
+
+    /**
+     * Find and return the field definitions (if any) for the Entity
+     *
+     * @param Entity $obj_gds_entity
+     * @return array
+     */
+    private function bestEffortFieldDefs(Entity $obj_gds_entity)
+    {
+        if($obj_gds_entity->getSchema() instanceof Schema) {
+            return $obj_gds_entity->getSchema()->getProperties();
+        }
+        if($this->obj_schema instanceof Schema) {
+            return $this->obj_schema->getProperties();
+        }
+        return [];
     }
 
     /**
@@ -296,7 +313,11 @@ class RESTv1 extends \GDS\Mapper
         $str_kind = $obj_gds_entity->getKind();
         if(null === $str_kind) {
             if($bol_first_node) {
-                $str_kind = $this->obj_schema->getKind();
+                if($this->obj_schema instanceof Schema) {
+                    $str_kind = $this->obj_schema->getKind();
+                } else {
+                    throw new \Exception('Could not build full key path, no Schema set on Mapper and no Kind set on Entity');
+                }
             } else {
                 throw new \Exception('Could not build full key path, no Kind set on (nth node) GDS Entity');
             }
