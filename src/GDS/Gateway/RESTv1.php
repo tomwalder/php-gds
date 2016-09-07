@@ -181,6 +181,8 @@ class RESTv1 extends \GDS\Gateway
      *
      * POST /v1/projects/{projectId}:runQuery
      *
+     * @todo Look into using this to avoid unwanted further "fetch" at the end of paginated result: $this->obj_last_response->batch->moreResults == NO_MORE_RESULTS
+     *
      * @param string $str_gql
      * @param null|array $arr_params
      * @return mixed
@@ -205,7 +207,10 @@ class RESTv1 extends \GDS\Gateway
         $this->executePostRequest('runQuery', $obj_request);
 
         // Extract results
-        $arr_mapped_results = $this->createMapper()->mapFromResults($this->obj_last_response->batch->entityResults);
+        $arr_mapped_results = [];
+        if(isset($this->obj_last_response->batch->entityResults) && is_array($this->obj_last_response->batch->entityResults)) {
+            $arr_mapped_results = $this->createMapper()->mapFromResults($this->obj_last_response->batch->entityResults);
+        }
         $this->obj_schema = null; // Consume Schema
         return $arr_mapped_results;
 
