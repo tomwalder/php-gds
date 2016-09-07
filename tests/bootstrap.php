@@ -16,3 +16,4 @@ require_once(dirname(__FILE__) . '/base/GDSTest.php');
 require_once(dirname(__FILE__) . '/base/Simple.php');
 require_once(dirname(__FILE__) . '/base/Book.php');
 require_once(dirname(__FILE__) . '/base/DenyGQLProxyMock.php');
+require_once(dirname(__FILE__) . '/base/FakeGuzzleClient.php');
