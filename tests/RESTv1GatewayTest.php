@@ -23,10 +23,13 @@
 class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
 {
 
-    private $str_expected_url;
-    private $arr_expected_payload;
+    const TEST_PROJECT = 'DatasetTest';
 
-    private function initTestHttpClient($str_expected_url, $arr_expected_payload)
+    private $str_expected_url = null;
+
+    private $arr_expected_payload = null;
+
+    private function initTestHttpClient($str_expected_url, $arr_expected_payload = null)
     {
         $this->str_expected_url = $str_expected_url;
         $this->arr_expected_payload = $arr_expected_payload;
@@ -35,20 +38,25 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
 
     private function initTestGateway()
     {
-        return $this->getMockBuilder('\\GDS\\Gateway\\RESTv1')->setMethods(['initHttpClient'])->setConstructorArgs(['DatasetTest'])->getMock();
+        return $this->getMockBuilder('\\GDS\\Gateway\\RESTv1')->setMethods(['initHttpClient'])->setConstructorArgs([self::TEST_PROJECT])->getMock();
     }
 
     /**
-     * @todo Validate the payloads
+     * Validate URL and Payload
      *
      * @param FakeGuzzleClient $obj_http
      */
     private function validateHttpClient(\FakeGuzzleClient $obj_http)
     {
         $this->assertEquals($this->str_expected_url, $obj_http->getPostedUrl());
-        // $this->assertEquals($this->arr_expected_payload, $obj_http->getPostedParams());
+        if(null !== $this->arr_expected_payload) {
+           $this->assertEquals($this->arr_expected_payload, $obj_http->getPostedParams());
+        }
     }
 
+    /**
+     * Test begin transaction
+     */
     public function testTransaction()
     {
         $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:beginTransaction', []);
@@ -59,14 +67,32 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         $this->validateHttpClient($obj_http);
     }
 
-
+    /**
+     * Test basic entity delete
+     */
     public function testDelete()
     {
-        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:commit', ['json' => (object)[]]);
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:commit', ['json' => (object)[
+            'mode' => 'NON_TRANSACTIONAL',
+            'mutations' => [
+                (object)[
+                    'delete' => (object)[
+                        'path' => [
+                            (object)[
+                                'kind' => 'Test',
+                                'id' => '123456789'
+                            ]
+                        ],
+                        'partitionId' => (object)[
+                            'projectId' => self::TEST_PROJECT
+                        ]
+                    ]
+                ]
+            ]
+        ]]);
         $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
 
         $obj_store = new \GDS\Store('Test', $obj_gateway);
-
         $obj_entity = (new GDS\Entity())->setKeyId('123456789');
         $obj_store->delete([$obj_entity]);
 

@@ -35,6 +35,7 @@ class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
         $obj_gds_entity->lives = new \GDS\Property\Geopoint(1.23, 4.56);
         $obj_gds_entity->simple = new \Simple();
         $obj_gds_entity->cares = true;
+        $obj_gds_entity->likes = ['beer', 'cycling', 'php'];
 
         $obj_rest_entity = $obj_mapper->mapToGoogle($obj_gds_entity);
 
@@ -71,6 +72,17 @@ class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
         $this->assertObjectHasAttribute('booleanValue', $obj_rest_entity->properties->cares);
         $this->assertTrue($obj_rest_entity->properties->cares->booleanValue);
 
+        $this->assertObjectHasAttribute('likes', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('arrayValue', $obj_rest_entity->properties->likes);
+        $this->assertInstanceOf('\\stdClass', $obj_rest_entity->properties->likes->arrayValue);
+        $this->assertObjectHasAttribute('values', $obj_rest_entity->properties->likes->arrayValue);
+        $this->assertTrue(is_array($obj_rest_entity->properties->likes->arrayValue->values));
+        $arr_string_values = $obj_rest_entity->properties->likes->arrayValue->values;
+        $this->assertEquals(3, count($arr_string_values));
+        foreach($arr_string_values as $obj_string_value) {
+            $this->assertInstanceOf('\\stdClass', $obj_string_value);
+            $this->assertObjectHasAttribute('stringValue', $obj_string_value);
+        }
     }
 
 
