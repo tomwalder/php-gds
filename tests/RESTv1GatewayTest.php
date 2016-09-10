@@ -18,6 +18,8 @@
 /**
  * Tests for REST API v1 Gateway
  *
+ * @todo Consider storing the request and response payloads as JSON files
+ *
  * @author Tom Walder <tom@docnet.nu>
  */
 class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
@@ -29,6 +31,14 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
 
     private $arr_expected_payload = null;
 
+    /**
+     * Prepare and return a fake Guzzle HTTP client, so that we can test and simulate requests/responses
+     *
+     * @param $str_expected_url
+     * @param null $arr_expected_payload
+     * @param null $obj_response
+     * @return FakeGuzzleClient
+     */
     private function initTestHttpClient($str_expected_url, $arr_expected_payload = null, $obj_response = null)
     {
         $this->str_expected_url = $str_expected_url;
@@ -258,5 +268,63 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         $this->validateHttpClient($obj_http);
 
         $this->assertEquals($int_new_id, $obj_entity->getKeyId());
+    }
+
+
+    /**
+     * Test fetch by single ID
+     */
+    public function testFetchById()
+    {
+        $str_id = '1263751723';
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:lookup', ['json' => (object)[
+            'keys' => [
+                (object)[
+                    'path' => [
+                        (object)[
+                            'kind' => 'Test',
+                            'id' => $str_id
+                        ]
+                    ],
+                    'partitionId' => (object)[
+                        'projectId' => self::TEST_PROJECT
+                    ]
+                ]
+            ]
+        ]], [
+            'found' => [
+                (object)[
+                    'entity' => (object)[
+                        'key' => (object)[
+                            'path' => [
+                                (object)[
+                                    'kind' => 'Test',
+                                    'id' => $str_id
+                                ]
+                            ]
+                        ],
+                        'properties' => (object)[
+                            'name' => (object)[
+                                'excludeFromIndexes' => false,
+                                'stringValue' => 'Tom'
+                            ]
+                        ]
+                    ],
+                    'version' => '123',
+                    'cursor' => 'gfuh37f86gyu23'
+
+                ]
+            ]
+        ]);
+        $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
+
+        $obj_store = new \GDS\Store('Test', $obj_gateway);
+        $obj_entity = $obj_store->fetchById($str_id);
+
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_entity);
+        $this->assertEquals($str_id, $obj_entity->getKeyId());
+        $this->assertEquals('Tom', $obj_entity->name);
+
+        $this->validateHttpClient($obj_http);
     }
 }
