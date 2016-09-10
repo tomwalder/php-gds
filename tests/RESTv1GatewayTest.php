@@ -138,7 +138,7 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         $obj_store = new \GDS\Store('Test', $obj_gateway);
         $obj_entity = new GDS\Entity();
         $obj_entity->setKeyId('123456789');
-        $obj_entity->name = 'Tom'; //)->name = 'Tom';// setKeyId('123456789');
+        $obj_entity->name = 'Tom';
         $obj_store->upsert($obj_entity);
 
         $this->validateHttpClient($obj_http);
@@ -160,7 +160,7 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         $this->validateHttpClient($obj_http);
 
 
-        // Now set up the transactional insert
+        // Now set up the transactional upsert
         $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:commit', ['json' => (object)[
             'mode' => 'TRANSACTIONAL',
             'transaction' => $str_txn_ref,
@@ -193,10 +193,70 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         // Do the upsert
         $obj_entity = new GDS\Entity();
         $obj_entity->setKeyId('123456789');
-        $obj_entity->name = 'Tom'; //)->name = 'Tom';// setKeyId('123456789');
+        $obj_entity->name = 'Tom';
         $obj_store->upsert($obj_entity);
 
         // Test the final output
         $this->validateHttpClient($obj_http);
+    }
+
+    /**
+     * Test basic entity insert
+     */
+    public function testBasicInsert()
+    {
+        $int_new_id = mt_rand(100000, 999999);
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:commit', ['json' => (object)[
+            'mode' => 'NON_TRANSACTIONAL',
+            'mutations' => [
+                (object)[
+                    'insert' => (object)[
+                        'key' => (object)[
+                            'path' => [
+                                (object)[
+                                    'kind' => 'Test'
+                                ]
+                            ],
+                            'partitionId' => (object)[
+                                'projectId' => self::TEST_PROJECT
+                            ]
+                        ],
+                        'properties' => (object)[
+                            'name' => (object)[
+                                'excludeFromIndexes' => false,
+                                'stringValue' => 'Tom'
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]], [
+            'mutationResults' => [
+                (object)[
+                    'key' => (object)[
+                        'path' => [
+                            (object)[
+                                'kind' => 'Test',
+                                'id' => $int_new_id
+                            ]
+                        ],
+                        'partitionId' => (object)[
+                            'projectId' => self::TEST_PROJECT
+                        ]
+                    ],
+                    'version' => '123'
+                ]
+            ]
+        ]);
+        $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
+
+        $obj_store = new \GDS\Store('Test', $obj_gateway);
+        $obj_entity = new GDS\Entity();
+        $obj_entity->name = 'Tom';
+        $obj_store->upsert($obj_entity);
+
+        $this->validateHttpClient($obj_http);
+
+        $this->assertEquals($int_new_id, $obj_entity->getKeyId());
     }
 }
