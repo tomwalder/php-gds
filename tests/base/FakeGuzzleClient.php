@@ -7,6 +7,13 @@ class FakeGuzzleClient implements \GuzzleHttp\ClientInterface
 
     private $arr_params;
 
+    private $obj_fake_response;
+
+    public function __construct($obj_response = null)
+    {
+        $this->obj_fake_response = $obj_response;
+    }
+
     /**
      * Pretend to do a POST request
      *
@@ -19,7 +26,10 @@ class FakeGuzzleClient implements \GuzzleHttp\ClientInterface
         // echo $str_url, '::', print_r($arr_params, true), PHP_EOL;
         $this->str_url = $str_url;
         $this->arr_params = $arr_params;
-        return new \GuzzleHttp\Psr7\Response();
+
+        $obj_response = new \GuzzleHttp\Psr7\Response();
+        return $obj_response->withBody(\GuzzleHttp\Psr7\stream_for(json_encode($this->obj_fake_response)));
+
     }
 
     public function getPostedUrl()
