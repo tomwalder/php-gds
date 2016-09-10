@@ -99,5 +99,45 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         $this->validateHttpClient($obj_http);
     }
 
+    /**
+     * Test basic entity upsert
+     */
+    public function testBasicUpsert()
+    {
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:commit', ['json' => (object)[
+            'mode' => 'NON_TRANSACTIONAL',
+            'mutations' => [
+                (object)[
+                    'upsert' => (object)[
+                        'key' => (object)[
+                            'path' => [
+                                (object)[
+                                    'kind' => 'Test',
+                                    'id' => '123456789'
+                                ]
+                            ],
+                            'partitionId' => (object)[
+                                'projectId' => self::TEST_PROJECT
+                            ]
+                        ],
+                        'properties' => (object)[
+                            'name' => (object)[
+                                'excludeFromIndexes' => false,
+                                'stringValue' => 'Tom'
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]]);
+        $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
 
+        $obj_store = new \GDS\Store('Test', $obj_gateway);
+        $obj_entity = new GDS\Entity();
+        $obj_entity->setKeyId('123456789');
+        $obj_entity->name = 'Tom'; //)->name = 'Tom';// setKeyId('123456789');
+        $obj_store->upsert($obj_entity);
+
+        $this->validateHttpClient($obj_http);
+    }
 }
