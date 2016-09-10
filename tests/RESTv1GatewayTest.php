@@ -307,7 +307,51 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
                             'name' => (object)[
                                 'excludeFromIndexes' => false,
                                 'stringValue' => 'Tom'
-                            ]
+                            ],
+                            'age' => (object)[
+                                'excludeFromIndexes' => false,
+                                'integerValue' => 37
+                            ],
+                            'dob' => (object)[
+                                'excludeFromIndexes' => false,
+                                'timestampValue' => "2014-10-02T15:01:23.045123456Z"
+                            ],
+                            'likes' => (object)[
+                                'excludeFromIndexes' => false,
+                                'arrayValue' => (object)[
+                                    'values' => [
+                                        (object)[
+                                            'stringValue' => 'Beer'
+                                        ],
+                                        (object)[
+                                            'stringValue' => 'Cycling'
+                                        ],
+                                        (object)[
+                                            'stringValue' => 'PHP'
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            'weight' => (object)[
+                                'excludeFromIndexes' => false,
+                                'doubleValue' => 85.99
+                            ],
+                            'author' => (object)[
+                                'excludeFromIndexes' => false,
+                                'booleanValue' => true
+                            ],
+                            'chickens' => (object)[
+                                'excludeFromIndexes' => false,
+                                'nullValue' => null
+                            ],
+                            'lives' => (object)[
+                                'excludeFromIndexes' => false,
+                                'geoPointValue' => (object)[
+                                    'latitude' => 1.23,
+                                    'longitude' => 4.56
+                                ]
+                            ],
+
                         ]
                     ],
                     'version' => '123',
@@ -324,6 +368,16 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\\GDS\\Entity', $obj_entity);
         $this->assertEquals($str_id, $obj_entity->getKeyId());
         $this->assertEquals('Tom', $obj_entity->name);
+        $this->assertEquals(37, $obj_entity->age);
+        $this->assertEquals('2014-10-02 15:01:23', $obj_entity->dob);
+        $this->assertTrue(is_array($obj_entity->likes));
+        $this->assertEquals(['Beer', 'Cycling', 'PHP'], $obj_entity->likes);
+        $this->assertEquals(85.99, $obj_entity->weight);
+        $this->assertInstanceOf('\\GDS\\Property\\Geopoint', $obj_entity->lives);
+        $this->assertEquals(1.23, $obj_entity->lives->getLatitude());
+        $this->assertEquals(4.56, $obj_entity->lives->getLongitude());
+        $this->assertTrue($obj_entity->author);
+        $this->assertNull($obj_entity->chickens);
 
         $this->validateHttpClient($obj_http);
     }
