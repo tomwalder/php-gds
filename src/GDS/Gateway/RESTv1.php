@@ -100,10 +100,10 @@ class RESTv1 extends \GDS\Gateway
             $this->applyPartition($obj_rest_entity->key);
 
             if(null === $obj_gds_entity->getKeyId() && null === $obj_gds_entity->getKeyName()) {
-                $arr_inserts[] = ['insert' => $obj_rest_entity];
+                $arr_inserts[] = (object)['insert' => $obj_rest_entity];
                 $arr_auto_id_required[] = $obj_gds_entity; // maintain reference to the array of requested auto-ids
             } else {
-                $arr_upserts[] = ['upsert' => $obj_rest_entity];
+                $arr_upserts[] = (object)['upsert' => $obj_rest_entity];
             }
         }
 
