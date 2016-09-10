@@ -29,11 +29,11 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
 
     private $arr_expected_payload = null;
 
-    private function initTestHttpClient($str_expected_url, $arr_expected_payload = null)
+    private function initTestHttpClient($str_expected_url, $arr_expected_payload = null, $obj_response = null)
     {
         $this->str_expected_url = $str_expected_url;
         $this->arr_expected_payload = $arr_expected_payload;
-        return new FakeGuzzleClient();
+        return new FakeGuzzleClient($obj_response);
     }
 
     private function initTestGateway()
@@ -59,11 +59,14 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
      */
     public function testTransaction()
     {
-        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:beginTransaction', []);
+        $str_txn_ref = 'txn-string-here';
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:beginTransaction', [], ['transaction' => $str_txn_ref]);
+        /** @var \GDS\Gateway\RESTv1 $obj_gateway */
         $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
 
-        $obj_gateway->beginTransaction();
+        $str_txn = $obj_gateway->beginTransaction();
 
+        $this->assertEquals($str_txn_ref, $str_txn);
         $this->validateHttpClient($obj_http);
     }
 
@@ -138,6 +141,62 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         $obj_entity->name = 'Tom'; //)->name = 'Tom';// setKeyId('123456789');
         $obj_store->upsert($obj_entity);
 
+        $this->validateHttpClient($obj_http);
+    }
+
+    /**
+     * Test transactional entity upsert
+     */
+    public function testTxnUpsert()
+    {
+
+        // First begin the transaction
+        $str_txn_ref = 'ghei34g498jhegijv0894hiwgerhiugjreiugh';
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:beginTransaction', [], ['transaction' => $str_txn_ref]);
+        /** @var \GDS\Gateway\RESTv1 $obj_gateway */
+        $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
+        $obj_store = new \GDS\Store('Test', $obj_gateway);
+        $obj_store->beginTransaction();
+        $this->validateHttpClient($obj_http);
+
+
+        // Now set up the transactional insert
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:commit', ['json' => (object)[
+            'mode' => 'TRANSACTIONAL',
+            'transaction' => $str_txn_ref,
+            'mutations' => [
+                (object)[
+                    'upsert' => (object)[
+                        'key' => (object)[
+                            'path' => [
+                                (object)[
+                                    'kind' => 'Test',
+                                    'id' => '123456789'
+                                ]
+                            ],
+                            'partitionId' => (object)[
+                                'projectId' => self::TEST_PROJECT
+                            ]
+                        ],
+                        'properties' => (object)[
+                            'name' => (object)[
+                                'excludeFromIndexes' => false,
+                                'stringValue' => 'Tom'
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]]);
+        $obj_gateway->setHttpClient($obj_http);
+
+        // Do the upsert
+        $obj_entity = new GDS\Entity();
+        $obj_entity->setKeyId('123456789');
+        $obj_entity->name = 'Tom'; //)->name = 'Tom';// setKeyId('123456789');
+        $obj_store->upsert($obj_entity);
+
+        // Test the final output
         $this->validateHttpClient($obj_http);
     }
 }
