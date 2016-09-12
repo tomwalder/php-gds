@@ -317,10 +317,10 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
                                 'timestampValue' => "2014-10-02T15:01:23.045123456Z"
                             ],
                             'likes' => (object)[
-                                'excludeFromIndexes' => false,
                                 'arrayValue' => (object)[
                                     'values' => [
                                         (object)[
+                                            'excludeFromIndexes' => false,
                                             'stringValue' => 'Beer'
                                         ],
                                         (object)[

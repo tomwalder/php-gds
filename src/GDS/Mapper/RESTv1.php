@@ -430,7 +430,7 @@ class RESTv1 extends \GDS\Mapper
                 break;
 
             case Schema::PROPERTY_STRING_LIST:
-                // @todo Determine if we need to set excludeFromIndexes on the property
+                // Docs: "A Value instance that sets field arrayValue must not set fields meaning or excludeFromIndexes."
                 $arr_values = [];
                 foreach ((array)$mix_value as $str) {
                     $obj_value = (object)['stringValue' => $str];
