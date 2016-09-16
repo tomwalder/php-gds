@@ -454,6 +454,48 @@ class GQLParserTest extends \PHPUnit_Framework_TestCase
         $obj_deny_proxy->verify();
     }
 
+    /**
+     * https://github.com/tomwalder/php-gds/issues/114
+     */
+    public function testSchemaEval()
+    {
+
+        $obj_deny_proxy = new DenyGQLProxyMock();
+        $obj_deny_proxy->init($this);
+
+        $obj_request = new \google\appengine\datastore\v4\RunQueryRequest();
+        $obj_request->setSuggestedBatchSize(1000);
+        $obj_request->mutableReadOptions();
+        $obj_partition = $obj_request->mutablePartitionId();
+        $obj_partition->setDatasetId('Dataset');
+        $obj_query = $obj_request->mutableQuery();
+        $obj_query->addKind()->setName('Service');
+
+        $obj_comp_filter = $obj_query->mutableFilter()->mutableCompositeFilter()->setOperator(\google\appengine\datastore\v4\CompositeFilter\Operator::AND_);
+
+        $obj_prop_filter1 = $obj_comp_filter->addFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter1->mutableProperty()->setName('courier');
+        $obj_prop_filter1->mutableValue()->setStringValue('DHL-1');
+
+        $obj_prop_filter2 = $obj_comp_filter->addFilter()->mutablePropertyFilter()->setOperator(\google\appengine\datastore\v4\PropertyFilter\Operator::EQUAL);
+        $obj_prop_filter2->mutableProperty()->setName('enabled');
+        $obj_prop_filter2->mutableValue()->setBooleanValue(true);
+
+        $obj_deny_proxy->expectCall('datastore_v4', 'RunQuery', $obj_request, new \google\appengine\datastore\v4\RunQueryResponse());
+
+        $obj_schema = new \GDS\Schema('Service');
+        $obj_schema->addString('courier');
+
+        $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
+        $obj_store = new GDS\Store($obj_schema, $obj_gateway);
+        $obj_store->fetchAll("SELECT * FROM Service WHERE courier = @courier AND enabled = @enabled", [
+            'courier' => 'DHL-1',
+            'enabled' => true,
+        ]);
+
+        $obj_deny_proxy->verify();
+    }
+
     public function testSingleQuotedParamFallback()
     {
         $obj_deny_proxy = new DenyGQLProxyMock();
