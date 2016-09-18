@@ -338,9 +338,11 @@ class RESTv1 extends \GDS\Mapper
         // Add any ancestors to the Key Path
         $mix_ancestry = $obj_gds_entity->getAncestry();
         if(is_array($mix_ancestry)) {
-            foreach ($mix_ancestry as $arr_ancestor_element) {
-                array_unshift($arr_full_path, $this->createKeyPathElement($arr_ancestor_element));
+            $arr_ancestor_path = [];
+            foreach($mix_ancestry as $arr_ancestor_element) {
+                $arr_ancestor_path[] = $this->createKeyPathElement($arr_ancestor_element);
             }
+            $arr_full_path = array_merge($arr_ancestor_path, $arr_full_path);
         } elseif ($mix_ancestry instanceof Entity) {
             $arr_full_path = array_merge($this->buildKeyPath($mix_ancestry, false), $arr_full_path);
         }
