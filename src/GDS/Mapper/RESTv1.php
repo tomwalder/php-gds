@@ -427,7 +427,7 @@ class RESTv1 extends \GDS\Mapper
                         "longitude" => $mix_value[1]
                     ];
                 } else {
-                    throw new \RuntimeException('Geopoint property data not supported: ' . gettype($mix_value));
+                    throw new \InvalidArgumentException('Geopoint property data not supported: ' . gettype($mix_value));
                 }
                 break;
 
