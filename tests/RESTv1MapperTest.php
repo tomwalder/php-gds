@@ -228,19 +228,118 @@ class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @todo
+     * Tests 2 tiers of ancestry, based on entity
      */
     public function testAncestryFromEntity()
     {
 
+        $obj_schema = (new \GDS\Schema('Child'))->addString('name', true);
+        $obj_mapper = new \GDS\Mapper\RESTv1();
+        $obj_mapper->setSchema($obj_schema);
+
+        $obj_gds_grandparent = new \GDS\Entity();
+        $obj_gds_grandparent->setKind('GrandParent');
+        $obj_gds_grandparent->setKeyId('123456781');
+        $obj_gds_grandparent->name = 'Grandfather';
+
+        $obj_gds_parent = new \GDS\Entity();
+        $obj_gds_parent->setKind('Parent');
+        $obj_gds_parent->setKeyId('123456782');
+        $obj_gds_parent->name = 'Dad';
+        $obj_gds_parent->setAncestry($obj_gds_grandparent);
+
+        $obj_gds_child = new \GDS\Entity();
+        $obj_gds_child->setKind('Child');
+        $obj_gds_child->name = 'Son';
+        $obj_gds_child->setAncestry($obj_gds_parent);
+
+        $obj_rest_entity = $obj_mapper->mapToGoogle($obj_gds_child);
+
+        $this->assertObjectHasAttribute('name', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('stringValue', $obj_rest_entity->properties->name);
+        $this->assertEquals('Son', $obj_rest_entity->properties->name->stringValue);
+
+        $this->assertObjectHasAttribute('key', $obj_rest_entity);
+        $this->assertObjectHasAttribute('path', $obj_rest_entity->key);
+        $this->assertTrue(is_array($obj_rest_entity->key->path));
+        $this->assertEquals(3, count($obj_rest_entity->key->path));
+
+        $obj_path_first = $obj_rest_entity->key->path[0];
+        $obj_path_second = $obj_rest_entity->key->path[1];
+        $obj_path_last = $obj_rest_entity->key->path[2];
+
+        $this->assertObjectHasAttribute('kind', $obj_path_first);
+        $this->assertObjectHasAttribute('id', $obj_path_first);
+        $this->assertObjectNotHasAttribute('name', $obj_path_first);
+        $this->assertEquals('GrandParent', $obj_path_first->kind);
+        $this->assertEquals('123456781', $obj_path_first->id);
+
+        $this->assertObjectHasAttribute('kind', $obj_path_second);
+        $this->assertObjectHasAttribute('id', $obj_path_second);
+        $this->assertObjectNotHasAttribute('name', $obj_path_second);
+        $this->assertEquals('Parent', $obj_path_second->kind);
+        $this->assertEquals('123456782', $obj_path_second->id);
+
+        $this->assertObjectHasAttribute('kind', $obj_path_last);
+        $this->assertObjectNotHasAttribute('id', $obj_path_last);
+        $this->assertObjectNotHasAttribute('name', $obj_path_last);
+        $this->assertEquals('Child', $obj_path_last->kind);
+
     }
 
     /**
-     * @todo
+     * Tests 2 tiers of ancestry, based on array
      */
     public function testAncestryFromArray()
     {
+        $obj_schema = (new \GDS\Schema('Child'))->addString('name', true);
+        $obj_mapper = new \GDS\Mapper\RESTv1();
+        $obj_mapper->setSchema($obj_schema);
 
+        $obj_gds_child = new \GDS\Entity();
+        $obj_gds_child->setKind('Child');
+        $obj_gds_child->name = 'Son';
+        $obj_gds_child->setAncestry([
+            [
+                'kind' => 'GrandParent',
+                'id' => '123456781'
+            ], [
+                'kind' => 'Parent',
+                'id' => '123456782'
+            ]
+        ]);
+
+        $obj_rest_entity = $obj_mapper->mapToGoogle($obj_gds_child);
+
+        $this->assertObjectHasAttribute('name', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('stringValue', $obj_rest_entity->properties->name);
+        $this->assertEquals('Son', $obj_rest_entity->properties->name->stringValue);
+
+        $this->assertObjectHasAttribute('key', $obj_rest_entity);
+        $this->assertObjectHasAttribute('path', $obj_rest_entity->key);
+        $this->assertTrue(is_array($obj_rest_entity->key->path));
+        $this->assertEquals(3, count($obj_rest_entity->key->path));
+
+        $obj_path_first = $obj_rest_entity->key->path[0];
+        $obj_path_second = $obj_rest_entity->key->path[1];
+        $obj_path_last = $obj_rest_entity->key->path[2];
+
+        $this->assertObjectHasAttribute('kind', $obj_path_first);
+        $this->assertObjectHasAttribute('id', $obj_path_first);
+        $this->assertObjectNotHasAttribute('name', $obj_path_first);
+        $this->assertEquals('GrandParent', $obj_path_first->kind);
+        $this->assertEquals('123456781', $obj_path_first->id);
+
+        $this->assertObjectHasAttribute('kind', $obj_path_second);
+        $this->assertObjectHasAttribute('id', $obj_path_second);
+        $this->assertObjectNotHasAttribute('name', $obj_path_second);
+        $this->assertEquals('Parent', $obj_path_second->kind);
+        $this->assertEquals('123456782', $obj_path_second->id);
+
+        $this->assertObjectHasAttribute('kind', $obj_path_last);
+        $this->assertObjectNotHasAttribute('id', $obj_path_last);
+        $this->assertObjectNotHasAttribute('name', $obj_path_last);
+        $this->assertEquals('Child', $obj_path_last->kind);
     }
 
 
