@@ -383,6 +383,127 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test fetch by single ID using schema
+     */
+    public function testFetchByIdWithSchema()
+    {
+        $str_id = '1263751723';
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:lookup', ['json' => (object)[
+            'keys' => [
+                (object)[
+                    'path' => [
+                        (object)[
+                            'kind' => 'Test',
+                            'id' => $str_id
+                        ]
+                    ],
+                    'partitionId' => (object)[
+                        'projectId' => self::TEST_PROJECT
+                    ]
+                ]
+            ]
+        ]], [
+            'found' => [
+                (object)[
+                    'entity' => (object)[
+                        'key' => (object)[
+                            'path' => [
+                                (object)[
+                                    'kind' => 'Test',
+                                    'id' => $str_id
+                                ]
+                            ]
+                        ],
+                        'properties' => (object)[
+                            'name' => (object)[
+                                'excludeFromIndexes' => false,
+                                'stringValue' => 'Tom'
+                            ],
+                            'age' => (object)[
+                                'excludeFromIndexes' => false,
+                                'integerValue' => 37
+                            ],
+                            'dob' => (object)[
+                                'excludeFromIndexes' => false,
+                                'timestampValue' => "2014-10-02T15:01:23.045123456Z"
+                            ],
+                            'likes' => (object)[
+                                'arrayValue' => (object)[
+                                    'values' => [
+                                        (object)[
+                                            'excludeFromIndexes' => false,
+                                            'stringValue' => 'Beer'
+                                        ],
+                                        (object)[
+                                            'stringValue' => 'Cycling'
+                                        ],
+                                        (object)[
+                                            'stringValue' => 'PHP'
+                                        ]
+                                    ]
+                                ]
+                            ],
+                            'weight' => (object)[
+                                'excludeFromIndexes' => false,
+                                'doubleValue' => 85.99
+                            ],
+                            'author' => (object)[
+                                'excludeFromIndexes' => false,
+                                'booleanValue' => true
+                            ],
+                            'chickens' => (object)[
+                                'excludeFromIndexes' => false,
+                                'nullValue' => null
+                            ],
+                            'lives' => (object)[
+                                'excludeFromIndexes' => false,
+                                'geoPointValue' => (object)[
+                                    'latitude' => 1.23,
+                                    'longitude' => 4.56
+                                ]
+                            ],
+
+                        ]
+                    ],
+                    'version' => '123',
+                    'cursor' => 'gfuh37f86gyu23'
+
+                ]
+            ]
+        ]);
+        $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
+
+        $obj_schema = (new \GDS\Schema('Test'))
+            ->addString('name')
+            ->addInteger('age')
+            ->addDatetime('dob')
+            ->addStringList('likes')
+            ->addFloat('weight')
+            ->addGeopoint('lives')
+            ->addBoolean('author')
+            ;
+
+        $obj_store = new \GDS\Store($obj_schema, $obj_gateway);
+        $obj_entity = $obj_store->fetchById($str_id);
+
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_entity);
+        $this->assertEquals($str_id, $obj_entity->getKeyId());
+        $this->assertEquals('Tom', $obj_entity->name);
+        $this->assertEquals(37, $obj_entity->age);
+        $this->assertEquals('2014-10-02 15:01:23', $obj_entity->dob);
+        $this->assertTrue(is_array($obj_entity->likes));
+        $this->assertEquals(['Beer', 'Cycling', 'PHP'], $obj_entity->likes);
+        $this->assertEquals(85.99, $obj_entity->weight);
+        $this->assertInstanceOf('\\GDS\\Property\\Geopoint', $obj_entity->lives);
+        $this->assertEquals(1.23, $obj_entity->lives->getLatitude());
+        $this->assertEquals(4.56, $obj_entity->lives->getLongitude());
+        $this->assertTrue($obj_entity->author);
+        $this->assertNull($obj_entity->chickens);
+
+        $this->validateHttpClient($obj_http);
+    }
+
+    /**
      * Test extraction of 2+ ancestors from GQL Query response
      */
     public function testGqlWithAncestorExtract()
@@ -473,5 +594,13 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($str_id_parent, $arr_parent['id']);
 
         $this->validateHttpClient($obj_http);
+    }
+
+    /**
+     * @todo
+     */
+    public function testGqlQueryParams()
+    {
+
     }
 }
