@@ -316,6 +316,10 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
                                 'excludeFromIndexes' => false,
                                 'timestampValue' => "2014-10-02T15:01:23.045123456Z"
                             ],
+                            'last_updated' => (object)[
+                                'excludeFromIndexes' => false,
+                                'timestampValue' => "2012-10-02 15:01:23"
+                            ],
                             'likes' => (object)[
                                 'arrayValue' => (object)[
                                     'values' => [
@@ -370,6 +374,7 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('Tom', $obj_entity->name);
         $this->assertEquals(37, $obj_entity->age);
         $this->assertEquals('2014-10-02 15:01:23', $obj_entity->dob);
+        $this->assertEquals('2012-10-02 15:01:23', $obj_entity->last_updated);
         $this->assertTrue(is_array($obj_entity->likes));
         $this->assertEquals(['Beer', 'Cycling', 'PHP'], $obj_entity->likes);
         $this->assertEquals(85.99, $obj_entity->weight);
