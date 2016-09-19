@@ -199,8 +199,8 @@ class RESTv1 extends \GDS\Mapper
                 foreach ($arr_path as $obj_kpe) {
                     $arr_anc_path[] = [
                         'kind' => $obj_kpe->kind,
-                        'id' => $obj_kpe->id,
-                        'name' => $obj_kpe->name
+                        'id' => isset($obj_kpe->id) ? $obj_kpe->id : null,
+                        'name' => isset($obj_kpe->name) ? $obj_kpe->name : null
                     ];
                 }
                 $obj_gds_entity->setAncestry($arr_anc_path);
