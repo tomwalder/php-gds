@@ -88,12 +88,18 @@ class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
 
     public function testDateTimeMapToGoogle()
     {
+        $obj_schema = (new \GDS\Schema('Person'))->addDatetime('retirement');
+
         $obj_mapper = new \GDS\Mapper\RESTv1();
+        $obj_mapper->setSchema($obj_schema);
+
         $obj_gds_entity = new \GDS\Entity();
+        $obj_gds_entity->setSchema($obj_schema);
         $obj_gds_entity->setKind('Person');
 
         $obj_gds_entity->dob = new DateTime('1979-02-05 08:30:00');
         $obj_gds_entity->exact = new DateTime('1979-02-05T08:30:00.12345678Z');
+        $obj_gds_entity->retirement = '2050-01-01 09:00:00';
 
         $obj_rest_entity = $obj_mapper->mapToGoogle($obj_gds_entity);
 
@@ -104,6 +110,112 @@ class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
         $this->assertObjectHasAttribute('exact', $obj_rest_entity->properties);
         $this->assertObjectHasAttribute('timestampValue', $obj_rest_entity->properties->exact);
         $this->assertEquals('1979-02-05T08:30:00.123457Z', $obj_rest_entity->properties->exact->timestampValue);
+
+        $this->assertObjectHasAttribute('retirement', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('timestampValue', $obj_rest_entity->properties->retirement);
+        $this->assertEquals('2050-01-01T09:00:00.000000Z', $obj_rest_entity->properties->retirement->timestampValue);
+
+    }
+
+    /**
+     * Ensure arrays of lat/lon pairs are supported for geopoints
+     */
+    public function testGeopointFromArrayData()
+    {
+        $obj_schema = (new \GDS\Schema('Pub'))->addString('name')->addGeopoint('where');
+
+        $obj_mapper = new \GDS\Mapper\RESTv1();
+        $obj_mapper->setSchema($obj_schema);
+
+        $str_name = 'The Fox and Pig and Dog and Wolf and Fiddle and Whistle and Cock';
+        $flt_lat = 1.23;
+        $flt_lon = 4.56;
+
+        $obj_gds_entity = new \GDS\Entity();
+        $obj_gds_entity->setSchema($obj_schema);
+        $obj_gds_entity->setKind('Pub');
+        $obj_gds_entity->name = $str_name;
+        $obj_gds_entity->where = [$flt_lat, $flt_lon];
+
+        $obj_rest_entity = $obj_mapper->mapToGoogle($obj_gds_entity);
+
+        $this->assertObjectHasAttribute('name', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('stringValue', $obj_rest_entity->properties->name);
+        $this->assertEquals($str_name, $obj_rest_entity->properties->name->stringValue);
+
+        $this->assertObjectHasAttribute('where', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('geoPointValue', $obj_rest_entity->properties->where);
+        $this->assertObjectHasAttribute('latitude', $obj_rest_entity->properties->where->geoPointValue);
+        $this->assertObjectHasAttribute('longitude', $obj_rest_entity->properties->where->geoPointValue);
+        $this->assertEquals(1.23, $obj_rest_entity->properties->where->geoPointValue->latitude);
+        $this->assertEquals(4.56, $obj_rest_entity->properties->where->geoPointValue->longitude);
+    }
+
+    /**
+     * Ensure we throw exceptions for incorrect geopoint data
+     *
+     * @expectedException        \InvalidArgumentException
+     * @expectedExceptionMessage Geopoint property data not supported: string
+     */
+    public function testGeopointFails()
+    {
+        $obj_schema = (new \GDS\Schema('Pub'))->addString('name')->addGeopoint('where');
+
+        $obj_mapper = new \GDS\Mapper\RESTv1();
+        $obj_mapper->setSchema($obj_schema);
+
+        $obj_gds_entity = new \GDS\Entity();
+        $obj_gds_entity->setSchema($obj_schema);
+        $obj_gds_entity->setKind('Pub');
+        $obj_gds_entity->name = 'The Fox and Pig and Dog and Wolf and Fiddle and Whistle and Cock';
+        $obj_gds_entity->where = 'Not a geopoint value';
+
+        $obj_mapper->mapToGoogle($obj_gds_entity);
+    }
+
+    /**
+     * Ensure we can control index exclusion
+     */
+    public function testIndexExclusion()
+    {
+        $obj_schema = (new \GDS\Schema('Pub'))->addString('name', true)->addString('brewer', false);
+
+        $obj_mapper = new \GDS\Mapper\RESTv1();
+        $obj_mapper->setSchema($obj_schema);
+
+        $obj_gds_entity = new \GDS\Entity();
+        $obj_gds_entity->setSchema($obj_schema);
+        $obj_gds_entity->setKind('Pub');
+        $obj_gds_entity->name = 'The George';
+        $obj_gds_entity->brewer = 'Old Brewery Limited';
+
+        $obj_rest_entity = $obj_mapper->mapToGoogle($obj_gds_entity);
+
+        $this->assertObjectHasAttribute('name', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('stringValue', $obj_rest_entity->properties->name);
+        $this->assertObjectHasAttribute('excludeFromIndexes', $obj_rest_entity->properties->name);
+        $this->assertFalse($obj_rest_entity->properties->name->excludeFromIndexes, 'name not indexed?');
+
+        $this->assertObjectHasAttribute('brewer', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('stringValue', $obj_rest_entity->properties->brewer);
+        $this->assertObjectHasAttribute('excludeFromIndexes', $obj_rest_entity->properties->brewer);
+        $this->assertTrue($obj_rest_entity->properties->brewer->excludeFromIndexes, 'brewer indexed?');
+
+    }
+
+    /**
+     * @todo
+     */
+    public function testAncestryFromEntity()
+    {
+
+    }
+
+    /**
+     * @todo
+     */
+    public function testAncestryFromArray()
+    {
 
     }
 
