@@ -596,11 +596,176 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         $this->validateHttpClient($obj_http);
     }
 
+
     /**
-     * @todo
+     * Test extraction of end cursors
+     */
+    public function testEndCursorExtract()
+    {
+        $str_end_cursor = 'gh3iu4reirh23j4ertiguhn34jetrihue';
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:runQuery', ['json' => (object)[
+            'gqlQuery' => (object)[
+                'allowLiterals' => true,
+                'queryString' => 'SELECT * FROM `Test` ORDER BY __key__ ASC LIMIT @intPageSize ',
+                'namedBindings' => (object)[
+                    'intPageSize' => (object)[
+                        'value' => (object)[
+                            'integerValue' => 50
+                        ]
+                    ],
+                ]
+            ],
+            'partitionId' => (object)[
+                'projectId' => self::TEST_PROJECT
+            ]
+
+        ]], [
+            'batch' => (object)[
+                'entityResultType' => 'FULL',
+                'entityResults' => [
+                    // Entity with key and properties
+                    (object)[
+                        'entity' => (object)[
+                            'key' => (object)[
+                                'path' => [
+                                    (object)[
+                                        'kind' => 'Test',
+                                        'id' => '123123123123'
+                                    ]
+                                ]
+                            ],
+                            'properties' => (object)[
+                                'name' => (object)[
+                                    'excludeFromIndexes' => false,
+                                    'stringValue' => 'Tom'
+                                ],
+                                'age' => (object)[
+                                    'excludeFromIndexes' => false,
+                                    'integerValue' => 37
+                                ]
+
+
+                            ]
+                        ],
+                        'version' => '123',
+                        'cursor' => 'gfuh37f86gyu23'
+                    ]
+                ],
+                'endCursor' => $str_end_cursor
+            ]
+        ]);
+        $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
+
+        $obj_store = new \GDS\Store('Test', $obj_gateway);
+        $arr_ents = $obj_store->fetchPage(50);
+
+        $this->assertTrue(is_array($arr_ents));
+
+        // End cursor?
+        $this->assertEquals($str_end_cursor, $obj_store->getCursor());
+
+        $this->validateHttpClient($obj_http);
+    }
+
+    /**
+     * Run a complex GQL Query
      */
     public function testGqlQueryParams()
     {
+
+
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:runQuery', ['json' => (object)[
+            'gqlQuery' => (object)[
+                'allowLiterals' => true,
+                'queryString' => 'SELECT * FROM Test WHERE booly = @booly AND stringy = @stringy AND inty = @inty AND floaty = @floaty AND datey = @datey AND somekey = @somekey LIMIT 1',
+                'namedBindings' => (object)[
+                    'booly' => (object)[
+                        'value' => (object)[
+                            'booleanValue' => true
+                        ]
+                    ],
+                    'stringy' => (object)[
+                        'value' => (object)[
+                            'stringValue' => 'test'
+                        ]
+                    ],
+                    'inty' => (object)[
+                        'value' => (object)[
+                            'integerValue' => 123
+                        ]
+                    ],
+                    'floaty' => (object)[
+                        'value' => (object)[
+                            'doubleValue' => 4.56
+                        ]
+                    ],
+                    'datey' => (object)[
+                        'value' => (object)[
+                            'timestampValue' => '1955-11-10T01:02:03.000000Z'
+                        ]
+                    ],
+                    'somekey' => (object)[
+                        'value' => (object)[
+                            'keyValue' => (object)[
+                                'path' => [
+                                    (object)[
+                                        'kind' => 'Test',
+                                        'name' => 'my-first-key-name'
+                                    ]
+                                ],
+                                'partitionId' => (object)[
+                                    'projectId' => self::TEST_PROJECT
+                                ]
+                            ]
+                        ]
+                    ],
+                ]
+            ],
+            'partitionId' => (object)[
+                'projectId' => self::TEST_PROJECT
+            ]
+
+        ]], [
+            'batch' => (object)[
+                'entityResultType' => 'FULL',
+                'entityResults' => [
+                    // Not required for this test
+                ]
+            ]
+        ]);
+        $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
+
+        $obj_store = new \GDS\Store('Test', $obj_gateway);
+
+        $obj_key_entity = $obj_store->createEntity()->setKeyName('my-first-key-name');
+
+        $obj_entity = $obj_store->fetchOne("SELECT * FROM Test WHERE booly = @booly AND stringy = @stringy AND inty = @inty AND floaty = @floaty AND datey = @datey AND somekey = @somekey", [
+            'booly' => true,
+            'stringy' => 'test',
+            'inty' => 123,
+            'floaty' => 4.56,
+            'datey' => new DateTime('1955-11-10 01:02:03'),
+            'somekey' => $obj_key_entity
+        ]);
+
+
+        $this->validateHttpClient($obj_http);
+    }
+
+    /**
+     * Ensure we throw exceptions for incorrect transaction usage
+     *
+     * @expectedException        \Exception
+     * @expectedExceptionMessage Cross group transactions not supported over REST API v1
+     */
+    public function testCrossGroupTransactionFails()
+    {
+        $str_txn_ref = 'txn-string-here';
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:beginTransaction', [], ['transaction' => $str_txn_ref]);
+        /** @var \GDS\Gateway\RESTv1 $obj_gateway */
+        $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
+
+        $str_txn = $obj_gateway->beginTransaction(true);
 
     }
 }
