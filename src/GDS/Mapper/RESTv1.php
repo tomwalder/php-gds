@@ -82,16 +82,13 @@ class RESTv1 extends \GDS\Mapper
      */
     protected function extractDatetimeValue($obj_property)
     {
-        if(isset($obj_property->timestampValue)) {
-            $arr_matches = [];
-            if(preg_match('/(.{19})\.?(\d{0,6}).*Z/', $obj_property->timestampValue, $arr_matches) > 0) {
-                $obj_dtm = new \DateTime($arr_matches[1] . '.' . $arr_matches[2] . 'Z');
-            } else {
-                $obj_dtm = new \DateTime($obj_property->timestampValue);
-            }
-            return $obj_dtm->format(self::DATETIME_FORMAT_V2);
+        $arr_matches = [];
+        if(preg_match('/(.{19})\.?(\d{0,6}).*Z/', $obj_property->timestampValue, $arr_matches) > 0) {
+            $obj_dtm = new \DateTime($arr_matches[1] . '.' . $arr_matches[2] . 'Z');
+        } else {
+            $obj_dtm = new \DateTime($obj_property->timestampValue);
         }
-        return null;
+        return $obj_dtm->format(self::DATETIME_FORMAT_V2);
     }
 
     /**
@@ -233,7 +230,7 @@ class RESTv1 extends \GDS\Mapper
                 return isset($obj_property->integerValue) ? $obj_property->integerValue : null;
 
             case Schema::PROPERTY_DATETIME:
-                return $this->extractDatetimeValue($obj_property);
+                return isset($obj_property->timestampValue) ? $this->extractDatetimeValue($obj_property) : null;
 
             case Schema::PROPERTY_DOUBLE:
             case Schema::PROPERTY_FLOAT:
