@@ -254,6 +254,18 @@ class ProtoBufCreateTest extends GDSTest {
     /**
      * @todo Create with 2+ Ancestors
      */
+    public function testAncestryFromEntity()
+    {
+
+    }
+
+    /**
+     * @todo Create with 2+ Ancestors (from array)
+     */
+    public function testAncestryFromArray()
+    {
+
+    }
 
     /**
      * Insert with a String List
