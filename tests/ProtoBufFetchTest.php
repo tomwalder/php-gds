@@ -129,6 +129,7 @@ class ProtoBufFetchTest extends GDSTest {
         $obj_entity->addProperty()->setName('dob')->mutableValue()->setIndexed(TRUE)->setTimestampMicrosecondsValue(286965000000000);
         $obj_entity->addProperty()->setName('weight')->mutableValue()->setIndexed(TRUE)->setDoubleValue(94.50);
         $obj_entity->addProperty()->setName('likes_php')->mutableValue()->setIndexed(TRUE)->setBooleanValue(TRUE);
+        $obj_entity->addProperty()->setName('home')->mutableValue()->setIndexed(TRUE)->mutableGeoPointValue()->setLatitude(1.23)->setLongitude(4.56);
         return $obj_response;
     }
 
@@ -261,7 +262,8 @@ class ProtoBufFetchTest extends GDSTest {
             'age' => 36,
             'dob' => '1979-02-04 08:30:00',
             'weight' => 94.50,
-            'likes_php' => TRUE
+            'likes_php' => TRUE,
+            'home' => new \GDS\Property\Geopoint(1.23, 4.56)
         ]);
         $this->apiProxyMock->verify();
     }
@@ -278,6 +280,7 @@ class ProtoBufFetchTest extends GDSTest {
             ->addDatetime('dob')
             ->addFloat('weight')
             ->addBoolean('likes_php')
+            ->addGeopoint('home')
             // ->addStringList('nicknames')
         ;
         $obj_gateway = new GDS\Gateway\ProtoBuf('Dataset');
@@ -289,7 +292,8 @@ class ProtoBufFetchTest extends GDSTest {
             'age' => 36,
             'dob' => '1979-02-04 08:30:00',
             'weight' => 94.50,
-            'likes_php' => TRUE
+            'likes_php' => TRUE,
+            'home' => new \GDS\Property\Geopoint(1.23, 4.56)
         ]);
         $this->apiProxyMock->verify();
     }

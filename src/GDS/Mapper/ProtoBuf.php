@@ -289,6 +289,48 @@ class ProtoBuf extends \GDS\Mapper
     }
 
     /**
+     * Extract a single property value from a Property object
+     *
+     * Defer any varying data type extractions to child classes
+     *
+     * @param $int_type
+     * @param object $obj_property
+     * @return array
+     * @throws \Exception
+     */
+    protected function extractPropertyValue($int_type, $obj_property)
+    {
+        switch ($int_type) {
+            case Schema::PROPERTY_STRING:
+                return $obj_property->getStringValue();
+
+            case Schema::PROPERTY_INTEGER:
+                return $obj_property->getIntegerValue();
+
+            case Schema::PROPERTY_DATETIME:
+                return $this->extractDatetimeValue($obj_property);
+
+            case Schema::PROPERTY_DOUBLE:
+            case Schema::PROPERTY_FLOAT:
+                return $obj_property->getDoubleValue();
+
+            case Schema::PROPERTY_BOOLEAN:
+                return $obj_property->getBooleanValue();
+
+            case Schema::PROPERTY_GEOPOINT:
+                return $this->extractGeopointValue($obj_property);
+
+            case Schema::PROPERTY_STRING_LIST:
+                return $this->extractStringListValue($obj_property);
+
+            case Schema::PROPERTY_DETECT:
+                return $this->extractAutoDetectValue($obj_property);
+
+        }
+        throw new \Exception('Unsupported field type: ' . $int_type);
+    }
+
+    /**
      * Auto detect & extract a value
      *
      * @todo expand auto detect types

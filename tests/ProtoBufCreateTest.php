@@ -159,6 +159,7 @@ class ProtoBufCreateTest extends GDSTest {
         $obj_entity->addProperty()->setName('dob')->mutableValue()->setIndexed(TRUE)->setTimestampMicrosecondsValue(286965000000000);
         $obj_entity->addProperty()->setName('weight')->mutableValue()->setIndexed(TRUE)->setDoubleValue(94.50);
         $obj_entity->addProperty()->setName('likes_php')->mutableValue()->setIndexed(TRUE)->setBooleanValue(TRUE);
+        $obj_entity->addProperty()->setName('home')->mutableValue()->setIndexed(TRUE)->mutableGeoPointValue()->setLatitude(1.23)->setLongitude(4.56);
 
         $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
 
@@ -170,6 +171,7 @@ class ProtoBufCreateTest extends GDSTest {
         $obj_gds_entity->dob = new DateTime('1979-02-04 08:30:00');
         $obj_gds_entity->weight = 94.50;
         $obj_gds_entity->likes_php = TRUE;
+        $obj_gds_entity->home = (new \GDS\Property\Geopoint(1.23, 4.56));
         $obj_store->upsert($obj_gds_entity);
 
         $this->apiProxyMock->verify();
