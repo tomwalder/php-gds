@@ -672,8 +672,6 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
      */
     public function testGqlQueryParams()
     {
-
-
         $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:runQuery', ['json' => (object)[
             'gqlQuery' => (object)[
                 'allowLiterals' => true,
@@ -734,12 +732,10 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
             ]
         ]);
         $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
-
         $obj_store = new \GDS\Store('Test', $obj_gateway);
 
         $obj_key_entity = $obj_store->createEntity()->setKeyName('my-first-key-name');
-
-        $obj_entity = $obj_store->fetchOne("SELECT * FROM Test WHERE booly = @booly AND stringy = @stringy AND inty = @inty AND floaty = @floaty AND datey = @datey AND somekey = @somekey", [
+        $obj_store->fetchOne("SELECT * FROM Test WHERE booly = @booly AND stringy = @stringy AND inty = @inty AND floaty = @floaty AND datey = @datey AND somekey = @somekey", [
             'booly' => true,
             'stringy' => 'test',
             'inty' => 123,
@@ -747,7 +743,6 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
             'datey' => new DateTime('1955-11-10 01:02:03'),
             'somekey' => $obj_key_entity
         ]);
-
 
         $this->validateHttpClient($obj_http);
     }
