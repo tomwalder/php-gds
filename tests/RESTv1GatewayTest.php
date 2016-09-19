@@ -381,4 +381,97 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
 
         $this->validateHttpClient($obj_http);
     }
+
+    /**
+     * Test extraction of 2+ ancestors from GQL Query response
+     */
+    public function testGqlWithAncestorExtract()
+    {
+        $str_id = '1263751723';
+        $str_id_parent = '1263751724';
+        $str_id_grandparent = '1263751725';
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:runQuery', ['json' => (object)[
+            'gqlQuery' => (object)[
+                'allowLiterals' => true,
+                'queryString' => 'SELECT * FROM Test LIMIT 1'
+            ],
+            'partitionId' => (object)[
+                'projectId' => self::TEST_PROJECT
+            ]
+
+        ]], [
+            'batch' => (object)[
+                'entityResultType' => 'FULL',
+                'entityResults' => [
+                    // Entity with key and properties
+                    (object)[
+                        'entity' => (object)[
+                            'key' => (object)[
+                                'path' => [
+                                    (object)[
+                                        'kind' => 'GrandParent',
+                                        'id' => $str_id_grandparent
+                                    ],
+                                    (object)[
+                                        'kind' => 'Parent',
+                                        'id' => $str_id_parent
+                                    ],
+                                    (object)[
+                                        'kind' => 'Test',
+                                        'id' => $str_id
+                                    ]
+                                ]
+                            ],
+                            'properties' => (object)[
+                                'name' => (object)[
+                                    'excludeFromIndexes' => false,
+                                    'stringValue' => 'Tom'
+                                ],
+                                'age' => (object)[
+                                    'excludeFromIndexes' => false,
+                                    'integerValue' => 37
+                                ]
+
+
+                            ]
+                        ],
+                        'version' => '123',
+                        'cursor' => 'gfuh37f86gyu23'
+                    ]
+                ]
+            ]
+        ]);
+        $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
+
+        $obj_store = new \GDS\Store('Test', $obj_gateway);
+        $obj_entity = $obj_store->fetchOne("SELECT * FROM Test");
+
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_entity);
+        $this->assertEquals($str_id, $obj_entity->getKeyId());
+        $this->assertEquals('Tom', $obj_entity->name);
+        $this->assertEquals(37, $obj_entity->age);
+
+        // Do we have ancestry?
+        $this->assertTrue(is_array($obj_entity->getAncestry()));
+        $this->assertEquals(2, count($obj_entity->getAncestry()));
+
+        // Extract the ancestry
+        $arr_ancestry = $obj_entity->getAncestry();
+        $arr_grandparent = $arr_ancestry[0];
+        $arr_parent = $arr_ancestry[1];
+
+        // Grandparent tests
+        $this->assertArrayHasKey('kind', $arr_grandparent);
+        $this->assertEquals('GrandParent', $arr_grandparent['kind']);
+        $this->assertArrayHasKey('id', $arr_grandparent);
+        $this->assertEquals($str_id_grandparent, $arr_grandparent['id']);
+
+        // Parent test
+        $this->assertArrayHasKey('kind', $arr_parent);
+        $this->assertEquals('Parent', $arr_parent['kind']);
+        $this->assertArrayHasKey('id', $arr_parent);
+        $this->assertEquals($str_id_parent, $arr_parent['id']);
+
+        $this->validateHttpClient($obj_http);
+    }
 }
