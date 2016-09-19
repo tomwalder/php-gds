@@ -174,6 +174,30 @@ class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Broken mapper request, type 1
+     *
+     * @expectedException        \Exception
+     * @expectedExceptionMessage Could not build full key path, no Schema set on Mapper and no Kind set on Entity
+     */
+    public function testBrokenMapperTypeOne()
+    {
+        $obj_mapper = new \GDS\Mapper\RESTv1();
+        $obj_mapper->buildKeyPath(new \GDS\Entity(), true);
+    }
+
+    /**
+     * Broken mapper request, type 2
+     *
+     * @expectedException        \Exception
+     * @expectedExceptionMessage Could not build full key path, no Kind set on (nth node) GDS Entity
+     */
+    public function testBrokenMapperTypeTwo()
+    {
+        $obj_mapper = new \GDS\Mapper\RESTv1();
+        $obj_mapper->buildKeyPath(new \GDS\Entity(), false);
+    }
+
+    /**
      * Ensure we can control index exclusion
      */
     public function testIndexExclusion()
