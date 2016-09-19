@@ -764,8 +764,6 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
         $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:beginTransaction', [], ['transaction' => $str_txn_ref]);
         /** @var \GDS\Gateway\RESTv1 $obj_gateway */
         $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
-
-        $str_txn = $obj_gateway->beginTransaction(true);
-
+        $obj_gateway->beginTransaction(true);
     }
 }
