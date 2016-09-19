@@ -322,8 +322,6 @@ class ProtoBufCreateTest extends GDSTest {
         $obj_target_ent = new \google\appengine\datastore\v4\Entity();
         $obj_mapper->mapToGoogle($obj_gds_child, $obj_target_ent);
 
-        print_r($obj_target_ent);
-
         /** @var \google\appengine\datastore\v4\Key\PathElement[] $arr_path */
         $arr_path = $obj_target_ent->getKey()->getPathElementList();
 
