@@ -211,6 +211,79 @@ class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     * Test transactional entity fetch
+     */
+    public function testTxnFetch()
+    {
+
+        // First begin the transaction
+        $str_txn_ref = 'ghei34g498jhegijv0894hiwgerhiugjreiugh';
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:beginTransaction', [], ['transaction' => $str_txn_ref]);
+        /** @var \GDS\Gateway\RESTv1 $obj_gateway */
+        $obj_gateway = $this->initTestGateway()->setHttpClient($obj_http);
+        $obj_store = new \GDS\Store('Test', $obj_gateway);
+        $obj_store->beginTransaction();
+        $this->validateHttpClient($obj_http);
+
+
+        // Now set up the transactional fetch
+        $str_id = '1263751723';
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:lookup', ['json' => (object)[
+            'readOptions' => (object)[
+                'transaction' => $str_txn_ref
+            ],
+            'keys' => [
+                (object)[
+                    'path' => [
+                        (object)[
+                            'kind' => 'Test',
+                            'id' => $str_id
+                        ]
+                    ],
+                    'partitionId' => (object)[
+                        'projectId' => self::TEST_PROJECT
+                    ]
+                ]
+            ]
+        ]], [
+            'found' => [
+                (object)[
+                    'entity' => (object)[
+                        'key' => (object)[
+                            'path' => [
+                                (object)[
+                                    'kind' => 'Test',
+                                    'id' => $str_id
+                                ]
+                            ]
+                        ],
+                        'properties' => (object)[
+                            'name' => (object)[
+                                'excludeFromIndexes' => false,
+                                'stringValue' => 'Tom'
+                            ]
+                        ]
+                    ],
+                    'version' => '123',
+                    'cursor' => 'gfuh37f86gyu23'
+
+                ]
+            ]
+        ]);
+
+        $obj_gateway->setHttpClient($obj_http);
+
+        $obj_entity = $obj_store->fetchById($str_id);
+
+        $this->assertInstanceOf('\\GDS\\Entity', $obj_entity);
+        $this->assertEquals($str_id, $obj_entity->getKeyId());
+        $this->assertEquals('Tom', $obj_entity->name);
+
+        $this->validateHttpClient($obj_http);
+
+    }
+
+    /**
      * Test basic entity insert
      */
     public function testBasicInsert()
