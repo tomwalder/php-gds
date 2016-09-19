@@ -117,10 +117,7 @@ class RESTv1 extends \GDS\Mapper
      */
     protected function extractGeopointValue($obj_property)
     {
-        if(isset($obj_property->geoPointValue)) {
-            return new Geopoint($obj_property->geoPointValue->latitude, $obj_property->geoPointValue->longitude);
-        }
-        return null;
+        return new Geopoint($obj_property->geoPointValue->latitude, $obj_property->geoPointValue->longitude);
     }
 
     /**
@@ -240,7 +237,7 @@ class RESTv1 extends \GDS\Mapper
                 return isset($obj_property->booleanValue) ? $obj_property->booleanValue : null;
 
             case Schema::PROPERTY_GEOPOINT:
-                return $this->extractGeopointValue($obj_property);
+                return isset($obj_property->geoPointValue) ? $this->extractGeopointValue($obj_property) : null;
 
             case Schema::PROPERTY_STRING_LIST:
                 return $this->extractStringListValue($obj_property);
