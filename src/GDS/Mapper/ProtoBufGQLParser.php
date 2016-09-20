@@ -335,11 +335,14 @@ class ProtoBufGQLParser
                     if(isset($arr_properties[$arr_matches['lhs']])){
                         $int_current_type = $arr_properties[$arr_matches['lhs']]['type'];
                         switch($int_current_type) {
-                            case \GDS\Schema::PROPERTY_STRING: 
-                                if(substr($arr_matches['rhs'], 0, strlen(self::TOKEN_PREFIX))
-                                    != self::TOKEN_PREFIX){
-                                    // If the right hand side has not been tokenized
-                                    throw new GQL("Invalid string representation in: [{$str_condition}]");
+                            case \GDS\Schema::PROPERTY_STRING:
+                                if('@' !== $arr_matches['rhs'][0]) { // Skip named parameters
+                                    if (substr($arr_matches['rhs'], 0, strlen(self::TOKEN_PREFIX))
+                                        != self::TOKEN_PREFIX
+                                    ) {
+                                        // If the right hand side has not been tokenized
+                                        throw new GQL("Invalid string representation in: [{$str_condition}]");
+                                    }
                                 }
                                 break;
                             // @todo Add support for other type's validity here
