@@ -159,6 +159,7 @@ class ProtoBufCreateTest extends GDSTest {
         $obj_entity->addProperty()->setName('dob')->mutableValue()->setIndexed(TRUE)->setTimestampMicrosecondsValue(286965000000000);
         $obj_entity->addProperty()->setName('weight')->mutableValue()->setIndexed(TRUE)->setDoubleValue(94.50);
         $obj_entity->addProperty()->setName('likes_php')->mutableValue()->setIndexed(TRUE)->setBooleanValue(TRUE);
+        $obj_entity->addProperty()->setName('home')->mutableValue()->setIndexed(TRUE)->mutableGeoPointValue()->setLatitude(1.23)->setLongitude(4.56);
 
         $this->apiProxyMock->expectCall('datastore_v4', 'Commit', $obj_request, new \google\appengine\datastore\v4\CommitResponse());
 
@@ -170,6 +171,7 @@ class ProtoBufCreateTest extends GDSTest {
         $obj_gds_entity->dob = new DateTime('1979-02-04 08:30:00');
         $obj_gds_entity->weight = 94.50;
         $obj_gds_entity->likes_php = TRUE;
+        $obj_gds_entity->home = (new \GDS\Property\Geopoint(1.23, 4.56));
         $obj_store->upsert($obj_gds_entity);
 
         $this->apiProxyMock->verify();
@@ -250,8 +252,91 @@ class ProtoBufCreateTest extends GDSTest {
     }
 
     /**
-     * @todo Create with 2+ Ancestors
+     * Create with 2+ Ancestors
      */
+    public function testAncestryFromEntity()
+    {
+
+        $obj_schema = (new \GDS\Schema('Child'))->addString('name', true);
+        $obj_mapper = new \GDS\Mapper\ProtoBuf();
+        $obj_mapper->setSchema($obj_schema);
+
+        $obj_gds_grandparent = new \GDS\Entity();
+        $obj_gds_grandparent->setKind('GrandParent');
+        $obj_gds_grandparent->setKeyId('123456781');
+        $obj_gds_grandparent->name = 'Grandfather';
+
+        $obj_gds_parent = new \GDS\Entity();
+        $obj_gds_parent->setKind('Parent');
+        $obj_gds_parent->setKeyId('123456782');
+        $obj_gds_parent->name = 'Dad';
+        $obj_gds_parent->setAncestry($obj_gds_grandparent);
+
+        $obj_gds_child = new \GDS\Entity();
+        $obj_gds_child->setKind('Child');
+        $obj_gds_child->name = 'Son';
+        $obj_gds_child->setAncestry($obj_gds_parent);
+
+        $obj_target_ent = new \google\appengine\datastore\v4\Entity();
+        $obj_mapper->mapToGoogle($obj_gds_child, $obj_target_ent);
+
+        /** @var \google\appengine\datastore\v4\Key\PathElement[] $arr_path */
+        $arr_path = $obj_target_ent->getKey()->getPathElementList();
+
+        $obj_path_first = $arr_path[0];
+        $obj_path_second = $arr_path[1];
+        $obj_path_last = $arr_path[2];
+
+        $this->assertEquals('GrandParent', $obj_path_first->getKind());
+        $this->assertEquals('123456781', $obj_path_first->getId());
+
+        $this->assertEquals('Parent', $obj_path_second->getKind());
+        $this->assertEquals('123456782', $obj_path_second->getId());
+
+        $this->assertEquals('Child', $obj_path_last->getKind());
+
+    }
+
+    /**
+     * Create with 2+ Ancestors (from array)
+     */
+    public function testAncestryFromArray()
+    {
+        $obj_schema = (new \GDS\Schema('Child'))->addString('name', true);
+        $obj_mapper = new \GDS\Mapper\ProtoBuf();
+        $obj_mapper->setSchema($obj_schema);
+
+        $obj_gds_child = new \GDS\Entity();
+        $obj_gds_child->setKind('Child');
+        $obj_gds_child->name = 'Son';
+        $obj_gds_child->setAncestry([
+            [
+                'kind' => 'GrandParent',
+                'id' => '123456781'
+            ], [
+                'kind' => 'Parent',
+                'id' => '123456782'
+            ]
+        ]);
+
+        $obj_target_ent = new \google\appengine\datastore\v4\Entity();
+        $obj_mapper->mapToGoogle($obj_gds_child, $obj_target_ent);
+
+        /** @var \google\appengine\datastore\v4\Key\PathElement[] $arr_path */
+        $arr_path = $obj_target_ent->getKey()->getPathElementList();
+
+        $obj_path_first = $arr_path[0];
+        $obj_path_second = $arr_path[1];
+        $obj_path_last = $arr_path[2];
+
+        $this->assertEquals('GrandParent', $obj_path_first->getKind());
+        $this->assertEquals('123456781', $obj_path_first->getId());
+
+        $this->assertEquals('Parent', $obj_path_second->getKind());
+        $this->assertEquals('123456782', $obj_path_second->getId());
+
+        $this->assertEquals('Child', $obj_path_last->getKind());
+    }
 
     /**
      * Insert with a String List

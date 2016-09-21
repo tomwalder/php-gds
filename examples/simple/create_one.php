@@ -11,8 +11,7 @@ $obj_store = new \GDS\Store('Book');
 
 // Alternative Gateway (remote JSON API)
 // Download your service JSON file from the Google Developer Console
-// $obj_client = \GDS\Gateway\GoogleAPIClient::createClientFromJson('/path/to/your/service.json');
-// $obj_gateway = new \GDS\Gateway\GoogleAPIClient($obj_client, 'your-app-id');
+// $obj_gateway = new \GDS\Gateway\RESTv1('your-app-id');
 // $obj_store = new \GDS\Store('Book', $obj_gateway);
 
 // Create a simple Entity object
