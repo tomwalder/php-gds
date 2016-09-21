@@ -13,6 +13,7 @@ require_once(dirname(__FILE__) . '/../vendor/autoload.php');
 
 // Base Test Files
 require_once(dirname(__FILE__) . '/base/GDSTest.php');
+require_once(dirname(__FILE__) . '/base/RESTv1Test.php');
 require_once(dirname(__FILE__) . '/base/Simple.php');
 require_once(dirname(__FILE__) . '/base/Book.php');
 require_once(dirname(__FILE__) . '/base/DenyGQLProxyMock.php');

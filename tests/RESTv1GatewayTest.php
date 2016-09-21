@@ -22,47 +22,8 @@
  *
  * @author Tom Walder <tom@docnet.nu>
  */
-class RESTv1GatewayTest extends \PHPUnit_Framework_TestCase
+class RESTv1GatewayTest extends \RESTv1Test
 {
-
-    const TEST_PROJECT = 'DatasetTest';
-
-    private $str_expected_url = null;
-
-    private $arr_expected_payload = null;
-
-    /**
-     * Prepare and return a fake Guzzle HTTP client, so that we can test and simulate requests/responses
-     *
-     * @param $str_expected_url
-     * @param null $arr_expected_payload
-     * @param null $obj_response
-     * @return FakeGuzzleClient
-     */
-    private function initTestHttpClient($str_expected_url, $arr_expected_payload = null, $obj_response = null)
-    {
-        $this->str_expected_url = $str_expected_url;
-        $this->arr_expected_payload = $arr_expected_payload;
-        return new FakeGuzzleClient($obj_response);
-    }
-
-    private function initTestGateway()
-    {
-        return $this->getMockBuilder('\\GDS\\Gateway\\RESTv1')->setMethods(['initHttpClient'])->setConstructorArgs([self::TEST_PROJECT])->getMock();
-    }
-
-    /**
-     * Validate URL and Payload
-     *
-     * @param FakeGuzzleClient $obj_http
-     */
-    private function validateHttpClient(\FakeGuzzleClient $obj_http)
-    {
-        $this->assertEquals($this->str_expected_url, $obj_http->getPostedUrl());
-        if(null !== $this->arr_expected_payload) {
-           $this->assertEquals($this->arr_expected_payload, $obj_http->getPostedParams());
-        }
-    }
 
     /**
      * Test begin transaction
