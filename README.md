@@ -1,18 +1,19 @@
 [![Build Status](https://api.travis-ci.org/tomwalder/php-gds.svg)](https://travis-ci.org/tomwalder/php-gds)
-[![Coverage Status](https://coveralls.io/repos/github/tomwalder/php-gds/badge.svg?branch=datastore-api-v1)](https://coveralls.io/github/tomwalder/php-gds?branch=datastore-api-v1)
+[![Coverage Status](https://coveralls.io/repos/github/tomwalder/php-gds/badge.svg)](https://coveralls.io/github/tomwalder/php-gds)
+
 # Google Cloud Datastore Library for PHP #
 
 [Google Cloud Datastore](https://cloud.google.com/datastore/) is a great NoSQL solution (hosted, scalable, free up to a point), but it can be tricky (i.e. there's lots of code glue needed) to get even the "Hello World" of data persistence up and running in PHP.
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
-**VERSION 3 ALPHA**
+**VERSION 3**, September 2016
 
 ## Table of Contents ##
 
 - [Examples](#examples)
 - [New in version 3.0](#new-in-version-20): [Datastore REST API v1 (Sep 2016)](#using-the-datastore-rest-api-v1-sep-2016)
-- [Earlier Changes in version 2.0](#changes-in-version-20)
+- [Changes in version 2.0](#changes-in-version-20)
 - [Getting Started](#getting-started) including installation with Composer
 - [Defining Your Model](#defining-your-model)
 - [Creating Records](#creating-records)
@@ -64,7 +65,7 @@ foreach($obj_store->fetchAll() as $obj_book) {
 ### More about the Examples ###
 
 These initial examples assume you are either running a Google AppEngine application or in a local AppEngine dev environment. 
-In both of these cases, we can auto detect the **dataset** and use the default ***Protocol Buffer Gateway*** (new in 2.0).
+In both of these cases, we can auto detect the **dataset** and use the default ***Protocol Buffer Gateway***.
 
 We use a `GDS\Store` to read and write `GDS\Entity` objects to and from Datastore. 
 
@@ -82,8 +83,10 @@ Code: https://github.com/tomwalder/php-gds-demo
 
 ## New in Version 3.0 ##
 
-Just one major upgrade in 3.0
+Major upgrades in 3.0
 * Support for the new Datastore API, v1 - via REST (gRPC to come)
+* Removal of support for the old 1.x series "PHP Google API Client"
+* GeoPoint data is now supported over the REST API v1 as well as ProtoBuf
 
 ### Using the Datastore REST API v1 (Sep 2016) ###
 
@@ -121,6 +124,12 @@ Features in 2.0 included
 
 ### Backwards Compatibility ###
 
+#### v3 over v2 ####
+
+The REST API v1 implementation now follows the same datetime response formats at the ProtoBuf API. (Y-m-d H:i:s).
+
+#### v2 over v1 ####
+
 The library is *almost* fully backwards compatible. And in fact, the main operations of the `GDS\Store` class are identical. 
 
 There is one BC-break in 2.0 - the re-ordering of construction parameters for the `GDS\Store` class.
@@ -147,7 +156,7 @@ If you want to use the JSON API from remote or non-App Engine environments, you 
 
 To install using Composer, use this require line **alpha series**
 
-`"tomwalder/php-gds": "dev-datastore-api-v1"`
+`"tomwalder/php-gds": "v3.*"`
 
 For older, version 2 series
 
@@ -184,7 +193,7 @@ Available Schema configuration methods:
 - `GDS\Schema::addFloat`
 - `GDS\Schema::addBoolean`
 - `GDS\Schema::addStringList`
-- `GDS\Schema::addGeopoint` *(not supported over JSON API)*
+- `GDS\Schema::addGeopoint`
 
 Take a look at the `examples` folder for a fully operational set of code.
 
