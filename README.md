@@ -1,5 +1,5 @@
 [![Build Status](https://api.travis-ci.org/tomwalder/php-gds.svg)](https://travis-ci.org/tomwalder/php-gds)
-[![Coverage Status](https://coveralls.io/repos/github/tomwalder/php-gds/badge.svg)](https://coveralls.io/github/tomwalder/php-gds)
+[![Coverage Status](https://coveralls.io/repos/github/tomwalder/php-gds/badge.svg?branch=master)](https://coveralls.io/github/tomwalder/php-gds?branch=master)
 
 # Google Cloud Datastore Library for PHP #
 
