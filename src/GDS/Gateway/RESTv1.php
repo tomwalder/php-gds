@@ -43,7 +43,6 @@ class RESTv1 extends \GDS\Gateway
     {
         $this->str_dataset_id = $str_project_id;
         $this->str_namespace = $str_namespace;
-        $this->obj_http_client = $this->initHttpClient();
     }
 
     /**
@@ -56,6 +55,14 @@ class RESTv1 extends \GDS\Gateway
     {
         $this->obj_http_client = $obj_client;
         return $this;
+    }
+
+    protected function httpClient()
+    {
+        if (!$this->obj_http_client) {
+            $this->obj_http_client = $this->initHttpClient();
+        }
+        return $this->obj_http_client;
     }
 
     /**
@@ -129,7 +136,7 @@ class RESTv1 extends \GDS\Gateway
         if(null !== $obj_request_body) {
             $arr_options['json'] = $obj_request_body;
         }
-        $obj_response = $this->obj_http_client->post($this->actionUrl($str_action), $arr_options);
+        $obj_response = $this->httpClient()->post($this->actionUrl($str_action), $arr_options);
         $this->obj_last_response = json_decode((string)$obj_response->getBody());
     }
 
