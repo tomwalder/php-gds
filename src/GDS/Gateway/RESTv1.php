@@ -57,9 +57,24 @@ class RESTv1 extends \GDS\Gateway
         return $this;
     }
 
+    /**
+     * Get the current HTTP Client in use
+     *
+     * @return ClientInterface
+     */
+    public function getHttpClient()
+    {
+        return $this->obj_http_client;
+    }
+
+    /**
+     * Lazily initialise the HTTP Client when needed. Once.
+     *
+     * @return ClientInterface
+     */
     protected function httpClient()
     {
-        if (!$this->obj_http_client) {
+        if (null === $this->obj_http_client) {
             $this->obj_http_client = $this->initHttpClient();
         }
         return $this->obj_http_client;
