@@ -42,6 +42,28 @@ class RESTv1GatewayTest extends \RESTv1Test
     }
 
     /**
+     * Ensure the REST gateway only inits the HTTP client lazily
+     */
+    public function testHttpClient()
+    {
+        $obj_gateway = new \GDS\Gateway\RESTv1('test1');
+        $this->assertNull($obj_gateway->getHttpClient());
+
+        $obj_gateway = $this->getMockBuilder('\\GDS\\Gateway\\RESTv1')->setMethods(['initHttpClient'])->setConstructorArgs([self::TEST_PROJECT])->getMock();
+
+        $str_txn_ref = 'dfguerfjr';
+        $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:beginTransaction', [], ['transaction' => $str_txn_ref]);
+
+        $obj_gateway->expects($this->once())->method('initHttpClient')->willReturn($obj_http);
+
+        $str_txn = $obj_gateway->beginTransaction();
+
+        $this->assertEquals($str_txn_ref, $str_txn);
+        $this->validateHttpClient($obj_http);
+
+    }
+
+    /**
      * Test basic entity delete
      */
     public function testDelete()
