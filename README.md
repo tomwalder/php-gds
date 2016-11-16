@@ -9,9 +9,9 @@ Library **VERSION 3**, September 2016
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
-## Datastore API Turn Down, Aug-Sep 2016 ##
+## Datastore API Turn Down, Sep 2016 ##
 
-Google are turning down the older versions of the REST API. Version v1beta1 and v1beta2 are being turned off on 30th September 2016.
+Google turned down the older versions of the REST API on September 30th, 2016. Version v1beta1 and v1beta2 are no longer available.
 
 * If you are using this library on App Engine, and using the default `Protobuf` gateway then NO CHANGES ARE NEEDED. Version 2.x or 3.x are both supported.
 * If you are using this library anywhere else, like Compute Engine, and you are using the `GoogleAPIClient` gateway (version 2.x), then you will need to upgrade to version 3.x
