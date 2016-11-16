@@ -13,7 +13,7 @@
     ],
     "require": {
         "php": ">=5.5.0",
-        "google/auth": "0.10"
+        "google/auth": "~0.10"
     },
     "require-dev": {
         "google/appengine-php-sdk": ">=1.9.22",
