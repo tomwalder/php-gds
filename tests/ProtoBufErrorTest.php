@@ -18,7 +18,7 @@
 /**
  * Tests for Protocol Buffer Errors
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class ProtoBufErrorTest extends GDSTest {
 

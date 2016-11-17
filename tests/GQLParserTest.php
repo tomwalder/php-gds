@@ -18,7 +18,7 @@
 /**
  * Tests for the GQL parser
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class GQLParserTest extends \PHPUnit_Framework_TestCase
 {

@@ -2,7 +2,7 @@
 /**
  * Fetch all records from GDS
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('boilerplate.php');
 
@@ -36,7 +36,7 @@ foreach($arr_books as $obj_book) {
 }
 
 $obj_store = new GDS\Store('Contact', $obj_gateway);
-$arr_contacts = $obj_store->fetchByNames(['tom@docnet.nu', 'beermonster@gmail.com']);
+$arr_contacts = $obj_store->fetchByNames(['twalder@gmail.com', 'beermonster@gmail.com']);
 foreach($arr_contacts as $obj_contact) {
     echo "  Found: {$obj_contact->first_name}, {$obj_contact->last_name}", PHP_EOL;
 }

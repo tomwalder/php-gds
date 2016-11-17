@@ -19,7 +19,7 @@ use google\appengine\testing\ApiProxyTestBase;
 /**
  * Contains shared code for our tests
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 abstract class GDSTest extends ApiProxyTestBase
 {

@@ -4,7 +4,7 @@
  *
  * Intended for use when you have changed the index configuration for an Entity
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('boilerplate.php');
 

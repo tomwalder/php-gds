@@ -18,7 +18,7 @@
 /**
  * Tests for Protocol Buffer Namespace usage
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class ProtoBufNamepsaceTest extends GDSTest {
 

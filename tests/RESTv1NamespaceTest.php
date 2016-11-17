@@ -18,7 +18,7 @@
 /**
  * Tests for REST API v1 Namespaces
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class RESTv1NamespaceTest extends \RESTv1Test
 {

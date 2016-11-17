@@ -2,7 +2,7 @@
 /**
  * Fetch data from GDS  * with an indexed string field *
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('../vendor/autoload.php');
 require_once('config/setup.php');

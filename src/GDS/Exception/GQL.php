@@ -19,7 +19,7 @@ namespace GDS\Exception;
 /**
  * An error parsing GQL
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class GQL extends \Exception
 {

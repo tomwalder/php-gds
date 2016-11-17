@@ -2,7 +2,7 @@
 /**
  * GDS Example - Create several records in one upsert, with no Schema
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('../_includes.php');
 

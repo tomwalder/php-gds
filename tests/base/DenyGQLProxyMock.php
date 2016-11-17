@@ -3,7 +3,7 @@
 /**
  * Class DenyGQLProxyMock
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  *
  */
 class DenyGQLProxyMock extends google\appengine\testing\ApiProxyMock

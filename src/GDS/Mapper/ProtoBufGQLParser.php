@@ -24,7 +24,7 @@ use google\appengine\datastore\v4\Value;
 /**
  * A *trivial* GQL Parser to hep with local App Engine development
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class ProtoBufGQLParser
 {

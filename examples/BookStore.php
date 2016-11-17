@@ -2,7 +2,7 @@
 /**
  * Represents a GDS Book repository
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class BookStore extends GDS\Store
 {

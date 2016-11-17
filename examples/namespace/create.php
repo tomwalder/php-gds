@@ -2,7 +2,7 @@
 /**
  * Name-spaced CREATE examples for GDS
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('../_includes.php');
 

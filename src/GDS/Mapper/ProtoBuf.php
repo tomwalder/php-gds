@@ -25,7 +25,7 @@ use google\appengine\datastore\v4\Value;
 /**
  * Protocol Buffer v4 Mapper
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class ProtoBuf extends \GDS\Mapper
 {

@@ -21,7 +21,7 @@ namespace GDS;
  *
  * @todo Consider providing a __construct('Kind')
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  * @package GDS
  */
 class Entity

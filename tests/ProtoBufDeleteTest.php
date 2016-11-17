@@ -18,7 +18,7 @@
 /**
  * Tests for Protocol Buffer Deletes
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class ProtoBufDeleteTest extends GDSTest {
 

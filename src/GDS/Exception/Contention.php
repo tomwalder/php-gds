@@ -19,7 +19,7 @@ namespace GDS\Exception;
 /**
  * A Datastore contention error
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class Contention extends \Exception
 {

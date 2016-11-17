@@ -2,7 +2,7 @@
 /**
  * Simplest GDS example - no schema, Kind only
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('../vendor/autoload.php');
 

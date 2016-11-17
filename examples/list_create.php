@@ -2,7 +2,7 @@
 /**
  * Create or some records in GDS  * with an indexed string field *
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('../vendor/autoload.php');
 
@@ -24,7 +24,7 @@ $obj_contact1 = $obj_store->createEntity([
     'last_name' => 'Walder',
     'tags' => ["customer", "newsletter"]
 ]);
-$obj_contact1->setKeyName('tom@docnet.nu');
+$obj_contact1->setKeyName('twalder@gmail.com');
 
 // Create 2
 $obj_contact2 = $obj_store->createEntity([

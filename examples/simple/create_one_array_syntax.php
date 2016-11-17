@@ -2,7 +2,7 @@
 /**
  * GDS Example - Create one record (using the array syntax), with no Schema
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('../_includes.php');
 

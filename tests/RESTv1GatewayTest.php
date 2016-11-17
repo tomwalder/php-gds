@@ -20,7 +20,7 @@
  *
  * @todo Consider storing the request and response payloads as JSON files
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class RESTv1GatewayTest extends \RESTv1Test
 {

@@ -18,7 +18,7 @@
 /**
  * Tests for Gateway class
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class GatewayTest extends \PHPUnit_Framework_TestCase {
 

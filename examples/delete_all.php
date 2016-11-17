@@ -2,7 +2,7 @@
 /**
  * Delete all records from GDS
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('boilerplate.php');
 

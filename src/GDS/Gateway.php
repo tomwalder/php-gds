@@ -24,7 +24,7 @@ namespace GDS;
  * This class is designed to work FOR the \GDS\Store, it is not generally
  * expected to be used directly by the application developer
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  * @package GDS
  */
 abstract class Gateway

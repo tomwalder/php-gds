@@ -4,7 +4,7 @@
  *
  * Contains a 5 second sleep so you can run concurrently for testing
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('boilerplate.php');
 

@@ -2,7 +2,7 @@
 /**
  * Any set-up needed to run the tests
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 
 // Time zone

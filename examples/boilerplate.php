@@ -2,7 +2,7 @@
 /**
  * Boilerplate for GDS examples
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('../vendor/autoload.php');
 require_once('config/setup.php');

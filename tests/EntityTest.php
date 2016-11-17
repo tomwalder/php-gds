@@ -18,7 +18,7 @@
 /**
  * Tests for Entity class
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class EntityTest extends \PHPUnit_Framework_TestCase
 {

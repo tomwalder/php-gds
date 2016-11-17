@@ -18,7 +18,7 @@
 /**
  * Tests for REST API v1 Mapper
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
 {

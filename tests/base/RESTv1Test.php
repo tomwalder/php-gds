@@ -18,7 +18,7 @@
 /**
  * Tests for REST API v1
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 abstract class RESTv1Test extends \PHPUnit_Framework_TestCase
 {

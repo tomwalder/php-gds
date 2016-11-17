@@ -18,7 +18,7 @@
 /**
  * Tests for Protocol Buffer GQL queries
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class ProtoBufGqlTest extends GDSTest {
 

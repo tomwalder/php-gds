@@ -21,7 +21,7 @@ namespace GDS;
  *
  * MUST be for a specific Entity Kind (as defined by the Schema or Kind passed in on construction)
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class Store
 {

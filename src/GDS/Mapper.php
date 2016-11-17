@@ -20,7 +20,7 @@ use GDS\Property\Geopoint;
 /**
  * Map between Google Entity and GDS Entity data/objects
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 abstract class Mapper
 {

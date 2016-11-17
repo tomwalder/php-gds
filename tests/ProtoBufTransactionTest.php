@@ -18,7 +18,7 @@
 /**
  * Tests for Protocol Buffer Transactions
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 class ProtoBufTransactionTest extends GDSTest {
 

@@ -19,7 +19,7 @@ namespace GDS\Property;
 /**
  * Geopoint Property
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  * @package GDS
  */
 class Geopoint implements \ArrayAccess

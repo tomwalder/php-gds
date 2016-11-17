@@ -38,7 +38,7 @@ use google\net\ProtocolMessage;
 /**
  * Protocol Buffer v4 Datastore Gateway
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  * @package GDS\Gateway
  */
 class ProtoBuf extends \GDS\Gateway

@@ -2,7 +2,7 @@
 /**
  * Includes required for examples (no Composer needed!)
  *
- * @author Tom Walder <tom@docnet.nu>
+ * @author Tom Walder <twalder@gmail.com>
  */
 require_once('../src/GDS/Entity.php');
 require_once('../src/GDS/Schema.php');
