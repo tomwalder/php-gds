@@ -17,16 +17,16 @@ class RESTv1 extends \GDS\Gateway
 {
 
     /**
-     * REST API Base Endpoint
-     */
-    const BASE_URL = 'https://datastore.googleapis.com';
-
-    /**
      * Modes
      */
     const MODE_TRANSACTIONAL = 'TRANSACTIONAL';
     const MODE_NON_TRANSACTIONAL = 'NON_TRANSACTIONAL';
     const MODE_UNSPECIFIED = 'UNSPECIFIED';
+
+    /**
+     * REST API Base Endpoint
+     */
+    private $base_url = 'https://datastore.googleapis.com';
 
     /**
      * @var ClientInterface
@@ -92,10 +92,14 @@ class RESTv1 extends \GDS\Gateway
         $obj_stack = HandlerStack::create();
         $obj_stack->push(ApplicationDefaultCredentials::getMiddleware(['https://www.googleapis.com/auth/datastore']));
 
+        if (getenv("DATASTORE_EMULATOR_HOST") !== FALSE) {
+            $this->base_url = getenv("DATASTORE_EMULATOR_HOST");
+        }
+
         // Create the HTTP client
         return new Client([
             'handler' => $obj_stack,
-            'base_url' => self::BASE_URL,
+            'base_url' => $this->base_url,
             'auth' => 'google_auth'  // authorize all requests
         ]);
     }
@@ -478,7 +482,7 @@ class RESTv1 extends \GDS\Gateway
      */
     private function actionUrl($str_action)
     {
-        return self::BASE_URL . '/v1/projects/' . $this->str_dataset_id . ':' . $str_action;
+        return $this->base_url . '/v1/projects/' . $this->str_dataset_id . ':' . $str_action;
     }
 
 }
