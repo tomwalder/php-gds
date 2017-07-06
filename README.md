@@ -21,7 +21,7 @@ Google turned down the older versions of the REST API on September 30th, 2016. V
 - [Examples](#examples)
 - [New in version 3.0](#new-in-version-20): [Datastore REST API v1 (Sep 2016)](#using-the-datastore-rest-api-v1-sep-2016)
 - [Changes in version 2.0](#changes-in-version-20)
-- [Getting Started](#getting-started) including installation with Composer
+- [Getting Started](#getting-started) including installation with Composer and setup for GDS Emulator
 - [Defining Your Model](#defining-your-model)
 - [Creating Records](#creating-records)
 - [Geopoint Support](#geopoint)
@@ -171,6 +171,9 @@ For older, version 2 series
 and for bleeding-edge features, dev-master
 
 `"tomwalder/php-gds": "dev-master"`
+
+### Use with the GDS emulator ###
+If you want to use it with the GDS emulator make sure the environment variable `DATASTORE_EMULATOR_HOST` is set with the host, for example `localhost:8081`
 
 ## Defining Your Model ##
 
