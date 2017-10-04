@@ -215,7 +215,7 @@ class ProtoBuf extends \GDS\Mapper
                 } else {
                     $obj_dtm = new \DateTime($mix_value);
                 }
-                $obj_val->setTimestampMicrosecondsValue($obj_dtm->format('Uu'));
+                $obj_val->setTimestampMicrosecondsValue($obj_dtm->format(self::DATETIME_FORMAT_UU));
                 break;
 
             case Schema::PROPERTY_DOUBLE:
@@ -246,14 +246,19 @@ class ProtoBuf extends \GDS\Mapper
     /**
      * Extract a datetime value
      *
-     * @todo Validate 32bit compatibility. Consider substr() or use bc math
-     *
      * @param object $obj_property
      * @return mixed
      */
     protected function extractDatetimeValue($obj_property)
     {
-        return date(self::DATETIME_FORMAT_V2, $obj_property->getTimestampMicrosecondsValue() / 1000000);
+        // Attempt to retain microsecond precision
+        return \DateTime::createFromFormat(
+            self::DATETIME_FORMAT_UDOTU,
+            sprintf('%0.6F', bcdiv($obj_property->getTimestampMicrosecondsValue(), self::MICROSECONDS))
+        );
+
+        // Works, to seconds only
+        // return (new \DateTime())->setTimestamp($obj_property->getTimestampMicrosecondsValue() / self::MICROSECONDS);
     }
 
     /**
