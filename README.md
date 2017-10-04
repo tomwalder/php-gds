@@ -3,7 +3,7 @@
 
 # Google Cloud Datastore Library for PHP #
 
-Library **VERSION 3**, September 2016
+Library **VERSION 4**, October 2017
 
 [Google Cloud Datastore](https://cloud.google.com/datastore/) is a great NoSQL solution (hosted, scalable, free up to a point), but it can be tricky (i.e. there's lots of code glue needed) to get even the "Hello World" of data persistence up and running in PHP.
 
@@ -19,7 +19,9 @@ Google turned down the older versions of the REST API on September 30th, 2016. V
 ## Table of Contents ##
 
 - [Examples](#examples)
-- [New in version 3.0](#new-in-version-20): [Datastore REST API v1 (Sep 2016)](#using-the-datastore-rest-api-v1-sep-2016)
+
+- [New in version 4.0](#new-in-version-40)
+- [New in version 3.0](#new-in-version-30): [Datastore REST API v1 (Sep 2016)](#using-the-datastore-rest-api-v1-sep-2016)
 - [Changes in version 2.0](#changes-in-version-20)
 - [Getting Started](#getting-started) including installation with Composer and setup for GDS Emulator
 - [Defining Your Model](#defining-your-model)
@@ -87,6 +89,11 @@ A simple guest book application
 Application: http://php-gds-demo.appspot.com/
 
 Code: https://github.com/tomwalder/php-gds-demo
+
+## New in Version 4.0 ##
+
+* More consistent use of `DateTime` objects - now all result sets will use them instead of `'Y-m-d H:i:s'` strings   
+* Move the `google/auth` to an optional dependency
 
 ## New in Version 3.0 ##
 
