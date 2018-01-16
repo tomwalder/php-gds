@@ -3,7 +3,7 @@
 
 # Google Cloud Datastore Library for PHP #
 
-Library **VERSION 3**, September 2016
+Library **VERSION 4**, October 2017
 
 [Google Cloud Datastore](https://cloud.google.com/datastore/) is a great NoSQL solution (hosted, scalable, free up to a point), but it can be tricky (i.e. there's lots of code glue needed) to get even the "Hello World" of data persistence up and running in PHP.
 
@@ -18,21 +18,22 @@ Google turned down the older versions of the REST API on September 30th, 2016. V
 
 ## Table of Contents ##
 
-- [Examples](#examples)
-- [New in version 3.0](#new-in-version-20): [Datastore REST API v1 (Sep 2016)](#using-the-datastore-rest-api-v1-sep-2016)
-- [Changes in version 2.0](#changes-in-version-20)
-- [Getting Started](#getting-started) including installation with Composer and setup for GDS Emulator
-- [Defining Your Model](#defining-your-model)
-- [Creating Records](#creating-records)
-- [Geopoint Support](#geopoint)
-- [Queries, GQL & The Default Query](#queries-gql--the-default-query)
-- [Multi-tenant Applications & Data Namespaces](#multi-tenant-applications--data-namespaces)
-- [Entity Groups, Hierarchy & Ancestors](#entity-groups-hierarchy--ancestors)
-- [Transactions](#transactions)
-- [Data Migrations](#data-migrations)
-- [More About Google Cloud Datastore](#more-about-google-cloud-datastore)
-- [Unit Tests](#unit-tests)
-- [Footnotes](#footnotes)
+* [Examples](#examples)
+* [New in version 4.0](#new-in-version-40)
+* [Changes in version 3.0](#changes-in-version-30): [Datastore REST API v1 (Sep 2016)](#using-the-datastore-rest-api-v1-sep-2016)
+* [Changes in version 2.0](#changes-in-version-20)
+* [Getting Started](#getting-started) including installation with Composer and setup for GDS Emulator
+* [Defining Your Model](#defining-your-model)
+* [Creating Records](#creating-records)
+* [Geopoint Support](#geopoint)
+* [Queries, GQL & The Default Query](#queries-gql--the-default-query)
+* [Multi-tenant Applications & Data Namespaces](#multi-tenant-applications--data-namespaces)
+* [Entity Groups, Hierarchy & Ancestors](#entity-groups-hierarchy--ancestors)
+* [Transactions](#transactions)
+* [Data Migrations](#data-migrations)
+* [More About Google Cloud Datastore](#more-about-google-cloud-datastore)
+* [Unit Tests](#unit-tests)
+* [Footnotes](#footnotes)
 
 ## Examples ##
 
@@ -88,7 +89,12 @@ Application: http://php-gds-demo.appspot.com/
 
 Code: https://github.com/tomwalder/php-gds-demo
 
-## New in Version 3.0 ##
+## New in Version 4.0 ##
+
+* More consistent use of `DateTime` objects - now all result sets will use them instead of `Y-m-d H:i:s` strings   
+* Move the `google/auth` to an optional dependency - if you need the REST API
+
+## Changes in Version 3.0 ##
 
 * Support for the new **Datastore API, v1 - via REST** (gRPC to come)
 * Removal of support for the old 1.x series "PHP Google API Client"

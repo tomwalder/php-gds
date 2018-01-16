@@ -13,12 +13,16 @@
     ],
     "require": {
         "php": ">=5.5.0",
-        "google/auth": "~0.10"
+        "ext-bcmath" : "*"
     },
     "require-dev": {
+        "google/auth": "v1.0.*",
         "google/appengine-php-sdk": ">=1.9.22",
         "phpunit/phpunit": "~4.8",
         "satooshi/php-coveralls": "dev-master"
+    },
+    "suggest": {
+        "google/auth": "If you need to use the REST API (i.e. not on AppEngine Standard) Tested with v1.0.1"
     },
     "autoload": {
         "classmap": [

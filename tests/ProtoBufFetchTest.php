@@ -257,14 +257,14 @@ class ProtoBufFetchTest extends GDSTest {
         $obj_store = new GDS\Store('Person', $obj_gateway);
         $obj_result = $obj_store->fetchById(123456789);
         $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
-        $this->assertEquals($obj_result->getData(), [
+        $this->assertEquals([
             'name' => 'Tom',
             'age' => 36,
-            'dob' => '1979-02-04 08:30:00',
+            'dob' => new \DateTime('1979-02-04 08:30:00'),
             'weight' => 94.50,
             'likes_php' => TRUE,
             'home' => new \GDS\Property\Geopoint(1.23, 4.56)
-        ]);
+        ], $obj_result->getData());
         $this->apiProxyMock->verify();
     }
 
@@ -287,14 +287,14 @@ class ProtoBufFetchTest extends GDSTest {
         $obj_store = new GDS\Store($obj_schema, $obj_gateway);
         $obj_result = $obj_store->fetchById(123456789);
         $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
-        $this->assertEquals($obj_result->getData(), [
+        $this->assertEquals([
             'name' => 'Tom',
             'age' => 36,
-            'dob' => '1979-02-04 08:30:00',
+            'dob' => new \DateTime('1979-02-04 08:30:00'),
             'weight' => 94.50,
             'likes_php' => TRUE,
             'home' => new \GDS\Property\Geopoint(1.23, 4.56)
-        ]);
+        ], $obj_result->getData());
         $this->apiProxyMock->verify();
     }
 

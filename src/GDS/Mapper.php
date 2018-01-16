@@ -26,9 +26,15 @@ abstract class Mapper
 {
 
     /**
-     * Datetime format for backwards compatibility
+     * Datetime formats
      */
-    const DATETIME_FORMAT_V2 = 'Y-m-d H:i:s';
+    const DATETIME_FORMAT_UU = 'Uu';
+    const DATETIME_FORMAT_UDOTU = 'U.u';
+
+    /**
+     * Microseconds in a second
+     */
+    const MICROSECONDS = 1000000;
 
     /**
      * Current Schema

@@ -429,8 +429,12 @@ class RESTv1GatewayTest extends \RESTv1Test
         $this->assertEquals($str_id, $obj_entity->getKeyId());
         $this->assertEquals('Tom', $obj_entity->name);
         $this->assertEquals(37, $obj_entity->age);
-        $this->assertEquals('2014-10-02 15:01:23', $obj_entity->dob);
-        $this->assertEquals('2012-10-02 15:01:23', $obj_entity->last_updated);
+
+        $this->assertInstanceOf(DateTime::class, $obj_entity->dob);
+        $this->assertInstanceOf(DateTime::class, $obj_entity->last_updated);
+        $this->assertEquals('2014-10-02 15:01:23', $obj_entity->dob->format('Y-m-d H:i:s'));
+        $this->assertEquals('2012-10-02 15:01:23', $obj_entity->last_updated->format('Y-m-d H:i:s'));
+
         $this->assertTrue(is_array($obj_entity->likes));
         $this->assertEquals(['Beer', 'Cycling', 'PHP'], $obj_entity->likes);
         $this->assertEquals(85.99, $obj_entity->weight);
@@ -551,7 +555,9 @@ class RESTv1GatewayTest extends \RESTv1Test
         $this->assertEquals($str_id, $obj_entity->getKeyId());
         $this->assertEquals('Tom', $obj_entity->name);
         $this->assertEquals(37, $obj_entity->age);
-        $this->assertEquals('2014-10-02 15:01:23', $obj_entity->dob);
+        $this->assertInstanceOf(DateTime::class, $obj_entity->dob);
+        $this->assertEquals('2014-10-02 15:01:23', $obj_entity->dob->format('Y-m-d H:i:s'));
+
         $this->assertTrue(is_array($obj_entity->likes));
         $this->assertEquals(['Beer', 'Cycling', 'PHP'], $obj_entity->likes);
         $this->assertEquals(85.99, $obj_entity->weight);

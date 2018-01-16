@@ -75,8 +75,6 @@ class RESTv1 extends \GDS\Mapper
      * - past seconds in version 3.0
      * - past microseconds (down from nanoseconds) in version 4.0
      *
-     * @todo In version 4.0 we will start returning DateTime objects. Here we maintain compatibility with version 2.x
-     *
      * @param $obj_property
      * @return mixed
      */
@@ -88,7 +86,7 @@ class RESTv1 extends \GDS\Mapper
         } else {
             $obj_dtm = new \DateTime($obj_property->timestampValue);
         }
-        return $obj_dtm->format(self::DATETIME_FORMAT_V2);
+        return $obj_dtm;
     }
 
     /**
