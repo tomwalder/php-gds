@@ -495,7 +495,13 @@ A few highlighted topics you might want to read up on
 
 ## Unit Tests ##
 
-A full suite of unit tests is in the works. [Click here for more details](tests/).
+A full suite of unit tests is in the works. Assuming you've installed `php-gds` and its dependencies with Composer, you can run
+
+```bash
+vendor/bin/phpunit
+```
+
+[Click here for more details](tests/).
 
 ## Footnotes ##
 
