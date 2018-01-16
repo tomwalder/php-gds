@@ -168,9 +168,11 @@ If you want to use the JSON API from remote or non-App Engine environments, you 
 
 To install using Composer, use this require line
 
-`"tomwalder/php-gds": "v3.*"`
+`"tomwalder/php-gds": "v4.*"`
 
-For older, version 2 series
+For older series
+
+`"tomwalder/php-gds": "v3.*"`
 
 `"tomwalder/php-gds": "v2.*"`
 
