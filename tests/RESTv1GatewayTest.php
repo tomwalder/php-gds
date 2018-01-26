@@ -742,7 +742,7 @@ class RESTv1GatewayTest extends \RESTv1Test
         $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:runQuery', ['json' => (object)[
             'gqlQuery' => (object)[
                 'allowLiterals' => true,
-                'queryString' => 'SELECT * FROM Test WHERE booly = @booly AND stringy = @stringy AND inty = @inty AND floaty = @floaty AND datey = @datey AND somekey = @somekey LIMIT 1',
+                'queryString' => 'SELECT * FROM Test WHERE booly = @booly AND stringy = @stringy AND inty = @inty AND floaty = @floaty AND datey = @datey AND somekey = @somekey AND nully = @nully LIMIT 1',
                 'namedBindings' => (object)[
                     'booly' => (object)[
                         'value' => (object)[
@@ -784,6 +784,11 @@ class RESTv1GatewayTest extends \RESTv1Test
                             ]
                         ]
                     ],
+                    'nully' => (object)[
+                        'value' => (object)[
+                            'nullValue' => null
+                        ]
+                    ],
                 ]
             ],
             'partitionId' => (object)[
@@ -802,13 +807,14 @@ class RESTv1GatewayTest extends \RESTv1Test
         $obj_store = new \GDS\Store('Test', $obj_gateway);
 
         $obj_key_entity = $obj_store->createEntity()->setKeyName('my-first-key-name');
-        $obj_store->fetchOne("SELECT * FROM Test WHERE booly = @booly AND stringy = @stringy AND inty = @inty AND floaty = @floaty AND datey = @datey AND somekey = @somekey", [
+        $obj_store->fetchOne("SELECT * FROM Test WHERE booly = @booly AND stringy = @stringy AND inty = @inty AND floaty = @floaty AND datey = @datey AND somekey = @somekey AND nully = @nully", [
             'booly' => true,
             'stringy' => 'test',
             'inty' => 123,
             'floaty' => 4.56,
             'datey' => new DateTime('1955-11-10 01:02:03'),
-            'somekey' => $obj_key_entity
+            'somekey' => $obj_key_entity,
+            'nully' => null,
         ]);
 
         $this->validateHttpClient($obj_http);
