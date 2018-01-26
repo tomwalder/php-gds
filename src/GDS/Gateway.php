@@ -286,7 +286,7 @@ abstract class Gateway
                 $this->configureObjectValueParamForQuery($obj_val, $mix_value);
                 break;
 
-            case 'null':
+            case 'NULL':
                 $obj_val->setStringValue(null);
                 break;
 
