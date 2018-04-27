@@ -376,10 +376,7 @@ class RESTv1 extends \GDS\Mapper
         if(isset($arr_field_def['index']) && FALSE === $arr_field_def['index']) {
             $bol_index = FALSE;
         }
-        // Docs: "A Value instance that sets field arrayValue must not set fields meaning or excludeFromIndexes."
-        if($arr_field_def['type'] !== Schema::PROPERTY_STRING_LIST) {
-           $obj_property_value->excludeFromIndexes = !$bol_index;
-        }
+        $obj_property_value->excludeFromIndexes = !$bol_index;
 
         switch ($arr_field_def['type']) {
             case Schema::PROPERTY_STRING:
@@ -427,6 +424,8 @@ class RESTv1 extends \GDS\Mapper
                 break;
 
             case Schema::PROPERTY_STRING_LIST:
+                // Docs: "A Value instance that sets field arrayValue must not set fields meaning or excludeFromIndexes."
+                unset($obj_property_value->excludeFromIndexes);
                 // As we cannot set excludeFromIndexes on the property itself, set it on each value in the array
                 $arr_values = [];
                 foreach ((array)$mix_value as $str) {
