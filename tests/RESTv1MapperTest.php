@@ -228,6 +228,90 @@ class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
+     *
+     */
+    public function testStringListIndexed()
+    {
+        $obj_schema = (new \GDS\Schema('Pub'))
+            ->addString('name', true)
+            ->addStringList('beers', true)
+        ;
+
+        $obj_mapper = new \GDS\Mapper\RESTv1();
+        $obj_mapper->setSchema($obj_schema);
+
+        $obj_gds_entity = new \GDS\Entity();
+        $obj_gds_entity->setSchema($obj_schema);
+        $obj_gds_entity->setKind('Pub');
+        $obj_gds_entity->name = 'The George';
+        $obj_gds_entity->beers = ['Doom Bar', 'Punk IPA'];
+
+        $obj_rest_entity = $obj_mapper->mapToGoogle($obj_gds_entity);
+
+        $this->assertObjectHasAttribute('name', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('stringValue', $obj_rest_entity->properties->name);
+        $this->assertObjectHasAttribute('excludeFromIndexes', $obj_rest_entity->properties->name);
+        $this->assertFalse($obj_rest_entity->properties->name->excludeFromIndexes, 'name not indexed?');
+
+        $this->assertObjectHasAttribute('beers', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('arrayValue', $obj_rest_entity->properties->beers);
+        $this->assertObjectNotHasAttribute('excludeFromIndexes', $obj_rest_entity->properties->beers);
+
+        $this->assertObjectHasAttribute('values', $obj_rest_entity->properties->beers->arrayValue);
+
+        $this->assertEquals(2, count($obj_rest_entity->properties->beers->arrayValue->values));
+
+        $obj_first_beer_val = $obj_rest_entity->properties->beers->arrayValue->values[0];
+
+        $this->assertObjectHasAttribute('stringValue', $obj_first_beer_val);
+        $this->assertObjectHasAttribute('excludeFromIndexes', $obj_first_beer_val);
+
+        $this->assertFalse($obj_first_beer_val->excludeFromIndexes, 'beer[0] indexed?');
+    }
+
+    /**
+     *
+     */
+    public function testStringListNotIndexed()
+    {
+        $obj_schema = (new \GDS\Schema('Pub'))
+            ->addString('name', true)
+            ->addStringList('beers', false)
+        ;
+
+        $obj_mapper = new \GDS\Mapper\RESTv1();
+        $obj_mapper->setSchema($obj_schema);
+
+        $obj_gds_entity = new \GDS\Entity();
+        $obj_gds_entity->setSchema($obj_schema);
+        $obj_gds_entity->setKind('Pub');
+        $obj_gds_entity->name = 'The George';
+        $obj_gds_entity->beers = ['Doom Bar', 'Punk IPA'];
+
+        $obj_rest_entity = $obj_mapper->mapToGoogle($obj_gds_entity);
+
+        $this->assertObjectHasAttribute('name', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('stringValue', $obj_rest_entity->properties->name);
+        $this->assertObjectHasAttribute('excludeFromIndexes', $obj_rest_entity->properties->name);
+        $this->assertFalse($obj_rest_entity->properties->name->excludeFromIndexes, 'name not indexed?');
+
+        $this->assertObjectHasAttribute('beers', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('arrayValue', $obj_rest_entity->properties->beers);
+        $this->assertObjectNotHasAttribute('excludeFromIndexes', $obj_rest_entity->properties->beers);
+
+        $this->assertObjectHasAttribute('values', $obj_rest_entity->properties->beers->arrayValue);
+
+        $this->assertEquals(2, count($obj_rest_entity->properties->beers->arrayValue->values));
+
+        $obj_first_beer_val = $obj_rest_entity->properties->beers->arrayValue->values[0];
+
+        $this->assertObjectHasAttribute('stringValue', $obj_first_beer_val);
+        $this->assertObjectHasAttribute('excludeFromIndexes', $obj_first_beer_val);
+
+        $this->assertTrue($obj_first_beer_val->excludeFromIndexes, 'beer[0] indexed?');
+    }
+
+    /**
      * Tests 2 tiers of ancestry, based on entity
      */
     public function testAncestryFromEntity()
