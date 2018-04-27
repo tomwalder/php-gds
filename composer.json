@@ -19,7 +19,7 @@
         "google/auth": "v1.0.*",
         "google/appengine-php-sdk": ">=1.9.22",
         "phpunit/phpunit": "~4.8",
-        "satooshi/php-coveralls": "dev-master"
+        "satooshi/php-coveralls": "v2.0.*"
     },
     "suggest": {
         "google/auth": "If you need to use the REST API (i.e. not on AppEngine Standard) Tested with v1.0.1"
