@@ -78,8 +78,16 @@ class Store
     public function __construct($kind_schema = null, Gateway $obj_gateway = null)
     {
         $this->obj_schema = $this->determineSchema($kind_schema);
-        $this->obj_gateway = (null === $obj_gateway) ? new \GDS\Gateway\ProtoBuf() : $obj_gateway;
         $this->str_last_query = 'SELECT * FROM `' . $this->obj_schema->getKind() . '` ORDER BY __key__ ASC';
+
+        if (null !== $obj_gateway) {
+            $this->obj_gateway = $obj_gateway;
+        } elseif (getenv("DATASTORE_EMULATOR_HOST") !== FALSE) {
+            $application_id = isset($_SERVER['APPLICATION_ID']) ? $_SERVER['APPLICATION_ID'] : 'local-app-id';
+            $this->obj_gateway = new \GDS\Gateway\RESTv1($application_id);
+        } else {
+            $this->obj_gateway = new \GDS\Gateway\ProtoBuf();
+        }
     }
 
     /**
