@@ -90,10 +90,11 @@ class RESTv1 extends \GDS\Gateway
 
         // Middleware
         $obj_stack = HandlerStack::create();
-        $obj_stack->push(ApplicationDefaultCredentials::getMiddleware(['https://www.googleapis.com/auth/datastore']));
 
         if (getenv("DATASTORE_EMULATOR_HOST") !== FALSE) {
             $this->base_url = getenv("DATASTORE_EMULATOR_HOST");
+        } else {
+            $obj_stack->push(ApplicationDefaultCredentials::getMiddleware(['https://www.googleapis.com/auth/datastore']));
         }
 
         // Create the HTTP client
