@@ -190,7 +190,7 @@ class Store
      * Only works for root Entities (i.e. those without parent Entities)
      *
      * @param $arr_names
-     * @return Entity|null
+     * @return Entity[]|null
      */
     public function fetchByNames(array $arr_names)
     {
