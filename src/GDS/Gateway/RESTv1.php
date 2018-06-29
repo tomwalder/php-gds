@@ -24,9 +24,14 @@ class RESTv1 extends \GDS\Gateway
     const MODE_UNSPECIFIED = 'UNSPECIFIED';
 
     /**
-     * REST API Base Endpoint
+     * Client config keys.
      */
-    private $base_url = 'https://datastore.googleapis.com';
+    const CONFIG_CLIENT_BASE_URL = 'base_url';
+
+    /**
+     * Default Base URL to use.
+     */
+    const DEFAULT_BASE_URL = 'https://datastore.googleapis.com';
 
     /**
      * @var ClientInterface
@@ -92,14 +97,16 @@ class RESTv1 extends \GDS\Gateway
         $obj_stack = HandlerStack::create();
         $obj_stack->push(ApplicationDefaultCredentials::getMiddleware(['https://www.googleapis.com/auth/datastore']));
 
+        $str_base_url = self::DEFAULT_BASE_URL;
+
         if (getenv("DATASTORE_EMULATOR_HOST") !== FALSE) {
-            $this->base_url = getenv("DATASTORE_EMULATOR_HOST");
+            $str_base_url = getenv("DATASTORE_EMULATOR_HOST");
         }
 
         // Create the HTTP client
         return new Client([
             'handler' => $obj_stack,
-            'base_url' => $this->base_url,
+            'base_url' => $str_base_url,
             'auth' => 'google_auth'  // authorize all requests
         ]);
     }
@@ -475,6 +482,22 @@ class RESTv1 extends \GDS\Gateway
     }
 
     /**
+     * Get the base url from the client object.
+     *
+     * Note: If for some reason the client's base URL is not set then we will return the default endpoint.
+     *
+     * @return string
+     */
+    protected function getBaseUrl() {
+        $str_base_url = $this->obj_http_client->getConfig(self::CONFIG_CLIENT_BASE_URL);
+        if (!empty($str_base_url)) {
+            return $str_base_url;
+        }
+
+        return self::DEFAULT_BASE_URL;
+    }
+
+    /**
      * Build a URL for a Datastore action
      *
      * @param $str_action
@@ -482,7 +505,7 @@ class RESTv1 extends \GDS\Gateway
      */
     private function actionUrl($str_action)
     {
-        return $this->base_url . '/v1/projects/' . $this->str_dataset_id . ':' . $str_action;
+        return $this->getBaseUrl() . '/v1/projects/' . $this->str_dataset_id . ':' . $str_action;
     }
 
 }
