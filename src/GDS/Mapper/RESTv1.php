@@ -99,6 +99,11 @@ class RESTv1 extends \GDS\Mapper
     protected function extractStringListValue($obj_property)
     {
         $arr_values = [];
+
+        if (!isset($obj_property->arrayValue->values)) {
+            return $arr_values;
+        }
+
         foreach((array)$obj_property->arrayValue->values as $obj_value) {
             if(isset($obj_value->stringValue)) {
                 $arr_values[] = $obj_value->stringValue;
