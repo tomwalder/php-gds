@@ -255,7 +255,7 @@ class ProtoBuf extends \GDS\Mapper
         return \DateTime::createFromFormat(
             self::DATETIME_FORMAT_UDOTU,
             sprintf('%0.6F', bcdiv($obj_property->getTimestampMicrosecondsValue(), self::MICROSECONDS))
-        );
+        )->setTimezone(new \DateTimeZone(date_default_timezone_get()));
 
         // Works, to seconds only
         // return (new \DateTime())->setTimestamp($obj_property->getTimestampMicrosecondsValue() / self::MICROSECONDS);
