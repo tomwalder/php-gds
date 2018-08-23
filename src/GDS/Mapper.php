@@ -85,7 +85,7 @@ abstract class Mapper
                 break;
 
             case 'object':
-                if($mix_value instanceof \DateTime) {
+                if($mix_value instanceof \DateTimeInterface) {
                     $int_dynamic_type = Schema::PROPERTY_DATETIME;
                     break;
                 }

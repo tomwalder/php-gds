@@ -393,10 +393,10 @@ class RESTv1 extends \GDS\Mapper
                 break;
 
             case Schema::PROPERTY_DATETIME:
-                if($mix_value instanceof \DateTime) {
+                if($mix_value instanceof \DateTimeInterface) {
                     $obj_dtm = $mix_value;
                 } else {
-                    $obj_dtm = new \DateTime($mix_value);
+                    $obj_dtm = new \DateTimeImmutable($mix_value);
                 }
                 // A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
                 $obj_property_value->timestampValue = $obj_dtm->format(self::DATETIME_FORMAT);

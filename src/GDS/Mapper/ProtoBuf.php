@@ -210,10 +210,10 @@ class ProtoBuf extends \GDS\Mapper
                 break;
 
             case Schema::PROPERTY_DATETIME:
-                if($mix_value instanceof \DateTime) {
+                if($mix_value instanceof \DateTimeInterface) {
                     $obj_dtm = $mix_value;
                 } else {
-                    $obj_dtm = new \DateTime($mix_value);
+                    $obj_dtm = new \DateTimeImmutable($mix_value);
                 }
                 $obj_val->setTimestampMicrosecondsValue($obj_dtm->format(self::DATETIME_FORMAT_UU));
                 break;

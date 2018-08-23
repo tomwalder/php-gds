@@ -428,7 +428,7 @@ class RESTv1 extends \GDS\Gateway
         if($mix_value instanceof Entity) {
             /** @var Entity $mix_value */
             $obj_val->keyValue = $this->applyPartition((object)['path' => $this->createMapper()->buildKeyPath($mix_value)]);
-        } elseif ($mix_value instanceof \DateTime) {
+        } elseif ($mix_value instanceof \DateTimeInterface) {
             $obj_val->timestampValue = $mix_value->format(\GDS\Mapper\RESTv1::DATETIME_FORMAT);
         } elseif (method_exists($mix_value, '__toString')) {
             $obj_val->stringValue = $mix_value->__toString();
