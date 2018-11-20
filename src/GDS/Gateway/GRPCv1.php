@@ -357,13 +357,59 @@ class GRPCv1 extends \GDS\Gateway
                     $obj_arg->setCursor($mix_value);
                 } else {
                     $obj_val = new Value();
-                    $this->configureObjectValueParamForQuery($obj_val, $mix_value);
+                    $this->configureValueParamForQuery($obj_val, $mix_value);
                     $obj_arg->setValue($obj_val);
                 }
                 $namedArgs[$str_name] = $obj_arg;
             }
             $obj_query->setNamedBindings($namedArgs);
         }
+    }
+
+    /**
+     * Part of our "add parameters to query" sequence.
+     *
+     * @param $obj_val
+     * @param $mix_value
+     * @return $obj_val
+     */
+    protected function configureValueParamForQuery($obj_val, $mix_value)
+    {
+        $str_type = gettype($mix_value);
+        switch($str_type) {
+            case 'boolean':
+                $obj_val->setBooleanValue($mix_value);
+                break;
+
+            case 'integer':
+                $obj_val->setIntegerValue($mix_value);
+                break;
+
+            case 'double':
+                $obj_val->setDoubleValue($mix_value);
+                break;
+
+            case 'string':
+                $obj_val->setStringValue($mix_value);
+                break;
+
+            case 'array':
+                throw new \InvalidArgumentException('Unexpected array parameter');
+
+            case 'object':
+                $this->configureObjectValueParamForQuery($obj_val, $mix_value);
+                break;
+
+            case 'NULL':
+                $obj_val->setNullValue(null);
+                break;
+
+            case 'resource':
+            case 'unknown type':
+            default:
+                throw new \InvalidArgumentException('Unsupported parameter type: ' . $str_type);
+        }
+        return $obj_val;
     }
 
     /**
