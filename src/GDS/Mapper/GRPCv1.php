@@ -346,7 +346,7 @@ class GRPCv1 extends \GDS\Mapper
      */
     protected function extractStringListValue($obj_property)
     {
-        $arr_values = $obj_property->getArrayValue();
+        $arr_values = $obj_property->getArrayValue()->getValues();
         if(count($arr_values) > 0) {
             $arr = [];
             foreach ($arr_values as $obj_val) {
