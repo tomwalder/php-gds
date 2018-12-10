@@ -423,25 +423,25 @@ class GRPCv1 extends \GDS\Mapper
     protected function extractAutoDetectValue($obj_property)
     {
         switch ( $obj_property->getValueType() ) {
-            case "string":
+            case "string_value":
                 return $obj_property->getStringValue();
                 break;
-            case "integer":
+            case "integer_value":
                 return $obj_property->getIntegerValue();
                 break;
-            case "timestamp":
+            case "timestamp_value":
                 return $this->extractDatetimeValue($obj_property);
                 break;
-            case "double":
+            case "double_value":
                 return $obj_property->getDoubleValue();
                 break;
-            case "boolean":
+            case "boolean_value":
                 return $obj_property->getBooleanValue();
                 break;
-            case "geo_point":
+            case "geo_point_value":
                 return $this->extractGeopointValue($obj_property);
                 break;
-            case "array":
+            case "array_value":
                 return $this->extractStringListValue($obj_property);
                 break;
             default:
