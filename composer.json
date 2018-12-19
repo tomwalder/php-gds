@@ -13,8 +13,7 @@
     ],
     "require": {
         "php": ">=5.5.0",
-        "ext-bcmath" : "*",
-        "google/datastore": "dev-master"
+        "ext-bcmath" : "*"
     },
     "require-dev": {
         "google/auth": "v1.0.*",
@@ -23,7 +22,8 @@
         "satooshi/php-coveralls": "v2.0.*"
     },
     "suggest": {
-        "google/auth": "If you need to use the REST API (i.e. not on AppEngine Standard) Tested with v1.0.1"
+        "google/auth": "If you need to use the REST API (i.e. not on AppEngine Standard) Tested with v1.0.1",
+        "google/cloud-datastore": "If you need to use the gRPC API (for speed). Tested with v0.90.0"
     },
     "autoload": {
         "classmap": [
@@ -31,11 +31,5 @@
         ],
         "psr-4": {"GDS\\": "src/GDS/"}
     },
-    "include-path": ["src/"],
-    "repositories": [
-        {
-          "type": "git",
-          "url": "https://github.com/a1comms/datastore-grpc.git"
-        }
-    ]
+    "include-path": ["src/"]
 }
