@@ -7,7 +7,7 @@
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
-## Firestore in Datastore Mode ##
+## Firestore in Datastore Mode, Dec 2019 ##
 
 If you are using Firestore in Datastore mode and `php-gds` from App Engine standard, you may run into `Internal Error`s from the `Protobuf` gateway.
 
