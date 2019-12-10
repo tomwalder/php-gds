@@ -16,14 +16,15 @@
         "ext-bcmath" : "*"
     },
     "require-dev": {
-        "google/auth": "v1.0.*",
-        "google/appengine-php-sdk": ">=1.9.22",
+        "google/auth": "^1.0",
+        "google/appengine-php-sdk": "^1.9.30",
+        "google/cloud-datastore": "v1.10.0",
         "phpunit/phpunit": "~4.8",
         "satooshi/php-coveralls": "v2.0.*"
     },
     "suggest": {
-        "google/auth": "If you need to use the REST API (i.e. not on AppEngine Standard) Tested with v1.0.1",
-        "google/cloud-datastore": "If you need to use the gRPC API (for speed). Tested with v0.90.0"
+        "google/auth": "If you need to use the REST API or Firestore in Datastore mode.",
+        "google/cloud-datastore": "If you need to use the gRPC API (for speed) or Firestore in Datastore mode."
     },
     "autoload": {
         "classmap": [
