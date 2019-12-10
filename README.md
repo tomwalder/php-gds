@@ -3,11 +3,17 @@
 
 # Google Cloud Datastore Library for PHP #
 
-Library **VERSION 4**, October 2017
-
 [Google Cloud Datastore](https://cloud.google.com/datastore/) is a great NoSQL solution (hosted, scalable, free up to a point), but it can be tricky (i.e. there's lots of code glue needed) to get even the "Hello World" of data persistence up and running in PHP.
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
+
+## Firestore in Datastore Mode ##
+
+If you are using Firestore in Datastore mode and `php-gds` from App Engine standard, you may run into `Internal Error`s from the `Protobuf` gateway.
+
+You can resolve this by using the `RESTv1` Gateway & APIs. [See here for basic guidance](#using-the-datastore-rest-api-v1-sep-2016)
+
+More details and recommended upgrade paths to come. Along with better gRPC support for outside App Engine.
 
 ## Datastore API Turn Down, Sep 2016 ##
 
