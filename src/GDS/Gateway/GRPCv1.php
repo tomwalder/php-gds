@@ -19,8 +19,6 @@ namespace GDS\Gateway;
 
 use GDS\Entity;
 use GDS\Exception\Contention;
-use GDS\Mapper;
-use GDS\Mapper\ProtoBufGQLParser;
 use Google\ApiCore\ApiException;
 use Google\Protobuf\Timestamp;
 use Google\Protobuf\Internal\RepeatedField;
@@ -75,7 +73,11 @@ class GRPCv1 extends \GDS\Gateway
 
         if (!(self::$grpc_client instanceof \Google\Cloud\Datastore\V1\DatastoreClient))
         {
-            self::$grpc_client = new DatastoreClient();
+            $arr_options = [];
+            if (!extension_loaded('grpc')) {
+                $arr_options = ['transport' => 'grpc-fallback'];
+            }
+            self::$grpc_client = new DatastoreClient($arr_options);
         }
     }
 
@@ -304,10 +306,13 @@ class GRPCv1 extends \GDS\Gateway
     {
         $arr_ids = [];
         foreach($this->obj_last_response->getMutationResults() as $obj_list) {
+            /** @var \Google\Cloud\Datastore\V1\MutationResult $obj_list */
             $obj_key = $obj_list->getKey();
             if ($obj_key !== null) {
-                $arr_key_path = $obj_key->getPath();
-                $obj_path_end = end($arr_key_path);
+                /** @var \Google\Protobuf\Internal\RepeatedField $obj_key_path */
+                $obj_key_path = $obj_key->getPath();
+                $int_last_index = count($obj_key_path) - 1;
+                $obj_path_end = $obj_key_path[$int_last_index];
                 $arr_ids[] = $obj_path_end->getId();
             }
         }
