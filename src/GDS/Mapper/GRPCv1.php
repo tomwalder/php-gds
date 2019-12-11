@@ -20,6 +20,7 @@ namespace GDS\Mapper;
 use GDS\Entity;
 use GDS\Property\Geopoint;
 use GDS\Schema;
+use Google\Cloud\Datastore\V1\PartitionId;
 use Google\Type\LatLng;
 use Google\Protobuf\Timestamp;
 use Google\Protobuf\Internal\RepeatedField;
@@ -41,17 +42,20 @@ class GRPCv1 extends \GDS\Mapper
 
     /**
      * Project & Namespace Info for Keys
+     * 
+     * @todo review use of this is the Mapper - move to Gateway?
      */
-    private $partitionId;
+    private $obj_partition_id;
 
     /**
      * Set the partition (project & namespace) object internally for key generation.
      *
-     * @param Google\Cloud\Datastore\V1\PartitionId $var
+     * @param PartitionId $obj_partition_id
+     * @return GRPCv1
      */
-    public function setPartitionId($var)
+    public function setPartitionId($obj_partition_id)
     {
-        $this->partitionId = $var;
+        $this->obj_partition_id = $obj_partition_id;
         return $this;
     }
 
@@ -59,7 +63,8 @@ class GRPCv1 extends \GDS\Mapper
      * Map from GDS to gRPC object.
      *
      * @param Entity $obj_gds_entity
-     * @param Google\Cloud\Datastore\V1\Entity $obj_entity
+     * @param GRPC_Entity $obj_entity
+     * @throws \Exception
      */
     public function mapToGoogle(Entity $obj_gds_entity, GRPC_Entity $obj_entity)
     {
@@ -67,18 +72,18 @@ class GRPCv1 extends \GDS\Mapper
         $obj_entity->setKey($this->createGoogleKey($obj_gds_entity));
 
         // Properties
-        $props = [];
+        $arr_props = [];
         $arr_field_defs = $this->obj_schema->getProperties();
         foreach($obj_gds_entity->getData() as $str_field_name => $mix_value) {
             if(isset($arr_field_defs[$str_field_name])) {
-                $props[$str_field_name] = $this->configureGooglePropertyValue($arr_field_defs[$str_field_name], $mix_value);
+                $arr_props[$str_field_name] = $this->configureGooglePropertyValue($arr_field_defs[$str_field_name], $mix_value);
             } else {
                 $arr_dynamic_data = $this->determineDynamicType($mix_value);
-                $props[$str_field_name] = $this->configureGooglePropertyValue(['type' => $arr_dynamic_data['type'], 'index' => TRUE], $arr_dynamic_data['value']);
+                $arr_props[$str_field_name] = $this->configureGooglePropertyValue(['type' => $arr_dynamic_data['type'], 'index' => TRUE], $arr_dynamic_data['value']);
             }
         }
 
-        $obj_entity->setProperties($props);
+        $obj_entity->setProperties($arr_props);
     }
 
     /**
@@ -86,8 +91,9 @@ class GRPCv1 extends \GDS\Mapper
      *
      * @todo Validate dynamic schema mapping in multi-kind responses like fetchEntityGroup()
      *
-     * @param EntityResult $obj_result
+     * @param GRPC_EntityResult $obj_result
      * @return Entity
+     * @throws \Exception
      */
     public function mapOneFromResult($obj_result)
     {
@@ -97,6 +103,9 @@ class GRPCv1 extends \GDS\Mapper
         // Properties
         $arr_property_definitions = $this->obj_schema->getProperties();
         foreach($obj_result->getEntity()->getProperties() as $str_field => $obj_property) {
+
+            /** @var Value $obj_property */
+
             /* string => Google\Cloud\Datastore\V1\Value */
             if ($bol_schema_match && isset($arr_property_definitions[$str_field])) {
                 $obj_gds_entity->__set($str_field, $this->extractPropertyValue($arr_property_definitions[$str_field]['type'], $obj_property));
@@ -175,19 +184,15 @@ class GRPCv1 extends \GDS\Mapper
     /**
      * Return a gRPC Key from a GDS Entity
      *
-     * @param Key $obj_key
      * @param Entity $obj_gds_entity
      * @return Key
      */
     public function createGoogleKey(Entity $obj_gds_entity)
     {
         $obj_key = new Key();
-        $obj_key->setPartitionId($this->partitionId);
-
+        $obj_key->setPartitionId($this->obj_partition_id);
         $path = $this->walkGoogleKeyPathElement([], $obj_gds_entity);
-
         $obj_key->setPath($path);
-
         return $obj_key;
     }
 
@@ -260,6 +265,8 @@ class GRPCv1 extends \GDS\Mapper
      *
      * @param array $arr_field_def
      * @param $mix_value
+     * @return Value
+     * @throws \Exception
      */
     private function configureGooglePropertyValue(array $arr_field_def, $mix_value)
     {
@@ -292,8 +299,10 @@ class GRPCv1 extends \GDS\Mapper
                 } else {
                     $obj_dtm = new \DateTimeImmutable($mix_value);
                 }
-                $timestamp = (new Timestamp())->setSeconds($obj_dtm->getTimestamp())->setNanos(1000 * $obj_dtm->format('u'));
-                $obj_val->setTimestampValue($timestamp);
+                $obj_timestamp = (new Timestamp())
+                    ->setSeconds($obj_dtm->getTimestamp())
+                    ->setNanos(1000 * $obj_dtm->format('u'));
+                $obj_val->setTimestampValue($obj_timestamp);
                 break;
 
             case Schema::PROPERTY_DOUBLE:
@@ -306,17 +315,24 @@ class GRPCv1 extends \GDS\Mapper
                 break;
 
             case Schema::PROPERTY_GEOPOINT:
-                $geo = (new LatLng())->setLatitude($mix_value[0])->setLongitude($mix_value[1]);
-                $obj_val->setGeoPointValue($geo);
+                $obj_geo = (new LatLng())
+                    ->setLatitude($mix_value[0])
+                    ->setLongitude($mix_value[1]);
+                $obj_val->setGeoPointValue($obj_geo);
                 break;
 
             case Schema::PROPERTY_STRING_LIST:
                 $obj_val->setExcludeFromIndexes(false); // Ensure we only index the values, not the list
-                $vals = [];
+                $arr_values = [];
                 foreach ((array)$mix_value as $str) {
-                    $vals[] = (new Value())->setStringValue($str)->setExcludeFromIndexes(!$bol_index);
+                    $arr_values[] = (new Value())
+                        ->setStringValue($str)
+                        ->setExcludeFromIndexes(!$bol_index);
                 }
-                $obj_val->setArrayValue($vals);
+                $obj_val->setArrayValue(
+                    (new \Google\Cloud\Datastore\V1\ArrayValue())
+                        ->setValues($arr_values)
+                );
                 break;
 
             default:
@@ -376,7 +392,7 @@ class GRPCv1 extends \GDS\Mapper
      * Defer any varying data type extractions to child classes
      *
      * @param $int_type
-     * @param object $obj_property
+     * @param Value $obj_property
      * @return mixed
      * @throws \Exception
      */
@@ -415,10 +431,11 @@ class GRPCv1 extends \GDS\Mapper
     /**
      * Auto detect & extract a value
      *
-     * @todo expand auto detect types
-     *
      * @param Value $obj_property
      * @return mixed
+     * @throws \Exception
+     * @todo expand auto detect types
+     *
      */
     protected function extractAutoDetectValue($obj_property)
     {

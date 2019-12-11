@@ -20,6 +20,7 @@ namespace GDS\Gateway;
 use GDS\Entity;
 use GDS\Exception\Contention;
 use Google\ApiCore\ApiException;
+use Google\Cloud\Datastore\V1\LookupResponse;
 use Google\Protobuf\Timestamp;
 use Google\Protobuf\Internal\RepeatedField;
 use Google\Cloud\Datastore\V1\DatastoreClient;
@@ -86,7 +87,6 @@ class GRPCv1 extends \GDS\Gateway
      *
      * Usually applied to a Key or RunQueryRequest
      *
-     * @param object $obj_target
      * @return mixed
      */
     private function getPartitionId()
@@ -132,24 +132,25 @@ class GRPCv1 extends \GDS\Gateway
      * Convert a RepeatedField to a standard array,
      * as it isn't compatible with the usual array functions.
      *
-     * @param RepeatedField $rep
+     * @param RepeatedField $obj_repeats
      * @return array
      */
-    public function convertRepeatedField(RepeatedField $rep)
+    public function convertRepeatedFieldToArray(RepeatedField $obj_repeats)
     {
-        $arr = [];
-        foreach ($rep as $v) {
-            $arr[] = $v;
+        $arr_values = [];
+        foreach ($obj_repeats as $obj_value) {
+            $arr_values[] = $obj_value;
         }
-        return $arr;
+        return $arr_values;
     }
 
     /**
      * Fetch 1-many Entities, using the Key parts provided
      *
      * @param array $arr_key_parts
-     * @param $str_setter
+     * @param string $str_setter
      * @return \GDS\Entity[]|null
+     * @throws \Exception
      */
     protected function fetchByKeyPart(array $arr_key_parts, $str_setter)
     {
@@ -169,10 +170,14 @@ class GRPCv1 extends \GDS\Gateway
             $keys[] = $obj_key;
         }
 
-        $response = $this->execute('lookup', [$keys, ['readOptions' => $this->getReadOptions()]]);
-
-        $results = $response->getFound();
-        $arr_mapped_results = $this->createMapper()->mapFromResults($this->convertRepeatedField($results));
+        /** @var LookupResponse $obj_response */
+        $obj_response = $this->execute('lookup', [$keys, ['readOptions' => $this->getReadOptions()]]);
+        $arr_mapped_results = $this->createMapper()
+            ->mapFromResults(
+                $this->convertRepeatedFieldToArray(
+                    $obj_response->getFound()
+                )
+            );
 
         $this->obj_schema = null; // Consume Schema
 
@@ -266,15 +271,19 @@ class GRPCv1 extends \GDS\Gateway
             $this->addParamsToQuery($obj_gql_query, $arr_params);
         }
 
-        $obj_gql_response = $this->execute('runQuery', [
-            $this->getPartitionId(), [
-                'readOptions' => $readOptions,
-                'gqlQuery' => $obj_gql_query
+        $obj_gql_response = $this->execute(
+            'runQuery',
+            [
+                $this->getPartitionId(),
+                [
+                    'readOptions' => $readOptions,
+                    'gqlQuery' => $obj_gql_query
+                ]
             ]
-        ]);
+        );
 
         $results = $obj_gql_response->getBatch()->getEntityResults();
-        $arr_mapped_results = $this->createMapper()->mapFromResults($this->convertRepeatedField($results));
+        $arr_mapped_results = $this->createMapper()->mapFromResults($this->convertRepeatedFieldToArray($results));
         $this->obj_schema = null; // Consume Schema
         return $arr_mapped_results;
     }
@@ -431,8 +440,10 @@ class GRPCv1 extends \GDS\Gateway
             $obj_key = $this->createMapper()->createGoogleKey($mix_value);
             $obj_val->setKeyValue($obj_key);
         } elseif ($mix_value instanceof \DateTimeInterface) {
-            $timestamp = (new Timestamp())->setSeconds($mix_value->getTimestamp())->setNanos(1000 * $mix_value->format('u'));
-            $obj_val->setTimestampValue($timestamp);
+            $obj_timestamp = (new Timestamp())
+                ->setSeconds($mix_value->getTimestamp())
+                ->setNanos(1000 * $mix_value->format('u'));
+            $obj_val->setTimestampValue($obj_timestamp);
         } elseif (method_exists($mix_value, '__toString')) {
             $obj_val->setStringValue($mix_value->__toString());
         } else {
