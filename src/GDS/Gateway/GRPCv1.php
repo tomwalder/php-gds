@@ -28,7 +28,7 @@ use Google\Cloud\Datastore\V1\Entity as GRPC_Entity;
 use Google\Cloud\Datastore\V1\Key;
 use Google\Cloud\Datastore\V1\Key\PathElement as KeyPathElement;
 use Google\Cloud\Datastore\V1\PartitionId;
-use Google\Cloud\Datastore\V1\CommitRequest_Mode;
+use Google\Cloud\Datastore\V1\CommitRequest\Mode;
 use Google\Cloud\Datastore\V1\Mutation;
 use Google\Cloud\Datastore\V1\ReadOptions;
 use Google\Cloud\Datastore\V1\GqlQuery;
@@ -47,9 +47,9 @@ class GRPCv1 extends \GDS\Gateway
 {
 
     /**
-     * gRPC Client
+     * Cloud Datastore (gRPC & REST) Client
      */
-    protected static $grpc_client;
+    protected static $obj_datstore_client;
 
     /**
      * Set up the dataset and optional namespace,
@@ -72,13 +72,13 @@ class GRPCv1 extends \GDS\Gateway
         }
         $this->str_namespace = $str_namespace;
 
-        if (!(self::$grpc_client instanceof \Google\Cloud\Datastore\V1\DatastoreClient))
-        {
+        // Build the Datastore client
+        if (!(self::$obj_datstore_client instanceof DatastoreClient)) {
             $arr_options = [];
             if (!extension_loaded('grpc')) {
-                $arr_options = ['transport' => 'grpc-fallback'];
+                $arr_options = ['transport' => 'grpc-fallback']; // This is Protocol buffers over HTTP 1.1
             }
-            self::$grpc_client = new DatastoreClient($arr_options);
+            self::$obj_datstore_client = new DatastoreClient($arr_options);
         }
     }
 
@@ -87,26 +87,25 @@ class GRPCv1 extends \GDS\Gateway
      *
      * Usually applied to a Key or RunQueryRequest
      *
-     * @return mixed
+     * @return PartitionId
      */
-    private function getPartitionId()
+    private function createPartitionId()
     {
-        $obj = new PartitionId();
-        $obj->setProjectId($this->str_dataset_id);
+        $obj_partition_id = (new PartitionId())
+            ->setProjectId($this->str_dataset_id);
         if ($this->str_namespace !== null) {
-            $obj->setNamespaceId($this->str_namespace);
+            $obj_partition_id->setNamespaceId($this->str_namespace);
         }
-        return $obj;
+        return $obj_partition_id;
     }
 
     /**
      * Execute a method against the Datastore client.
      *
-     * @param $str_method
+     * @param string $str_method
      * @param mixed[] $args
      * @return mixed
-     * @throws ApiException
-     * @throws Contention
+     * @throws \Exception
      */
     private function execute($str_method, $args)
     {
@@ -114,7 +113,7 @@ class GRPCv1 extends \GDS\Gateway
             // Call gRPC client,
             //   prepend projectId as first parameter automatically.
             array_unshift($args, $this->str_dataset_id);
-            $this->obj_last_response = call_user_func_array([self::$grpc_client, $str_method], $args);
+            $this->obj_last_response = call_user_func_array([self::$obj_datstore_client, $str_method], $args);
         } catch (ApiException $obj_exception) {
             $this->obj_last_response = null;
             if (FALSE !== strpos($obj_exception->getMessage(), 'too much contention') || FALSE !== strpos($obj_exception->getMessage(), 'Concurrency')) {
@@ -155,7 +154,7 @@ class GRPCv1 extends \GDS\Gateway
     protected function fetchByKeyPart(array $arr_key_parts, $str_setter)
     {
         $keys = [];
-        $partitionId = $this->getPartitionId();
+        $partitionId = $this->createPartitionId();
 
         foreach($arr_key_parts as $mix_key_part) {
             $obj_key = new Key();
@@ -191,10 +190,11 @@ class GRPCv1 extends \GDS\Gateway
      *
      * @param \GDS\Entity[] $arr_entities
      * @return \GDS\Entity[]
+     * @throws \Exception
      */
     public function upsert(array $arr_entities)
     {
-        $mutations = [];
+        $arr_mutations = [];
         $arr_auto_id_required = [];
 
         foreach($arr_entities as $obj_gds_entity) {
@@ -203,18 +203,18 @@ class GRPCv1 extends \GDS\Gateway
             }
             $obj_entity = new GRPC_Entity();
             $this->determineMapper($obj_gds_entity)->mapToGoogle($obj_gds_entity, $obj_entity);
-            $mutations[] = (new Mutation())->setUpsert($obj_entity);
+            $arr_mutations[] = (new Mutation())->setUpsert($obj_entity);
         }
 
-        $options = [];
+        $arr_options = [];
         if(null === $this->str_next_transaction) {
-            $mode = CommitRequest_Mode::NON_TRANSACTIONAL;
+            $int_mode = Mode::NON_TRANSACTIONAL;
         } else {
-            $mode = CommitRequest_Mode::TRANSACTIONAL;
-            $options['transaction'] = $this->getTransaction();
+            $int_mode = Mode::TRANSACTIONAL;
+            $arr_options['transaction'] = $this->getTransaction();
         }
 
-        $this->execute('commit', [$mode, $mutations, $options]);
+        $this->execute('commit', [$int_mode, $arr_mutations, $arr_options]);
 
         return $arr_auto_id_required;
     }
@@ -226,29 +226,33 @@ class GRPCv1 extends \GDS\Gateway
      *
      * @todo Determine success. Not 100% how to do this from the response yet.
      *
+     * @todo Tests...
+     *
      * @param array $arr_entities
      * @return bool
+     * @throws \Exception
      */
     public function deleteMulti(array $arr_entities)
     {
         $obj_mapper = $this->createMapper();
-        $partitionId = $this->getPartitionId();
-        $mutations = [];
+        // $partitionId = $this->createPartitionId();
+        $arr_mutations = [];
 
         foreach($arr_entities as $obj_gds_entity) {
             $obj_key = $obj_mapper->createGoogleKey($obj_gds_entity);
-            $mutations[] = (new Mutation())->setDelete($obj_key);
+            $arr_mutations[] = (new Mutation())->setDelete($obj_key);
         }
 
+        // @todo withTransaction???
         $options = [];
         if(null === $this->str_next_transaction) {
-            $mode = CommitRequest_Mode::NON_TRANSACTIONAL;
+            $int_mode = Mode::NON_TRANSACTIONAL;
         } else {
-            $mode = CommitRequest_Mode::TRANSACTIONAL;
+            $int_mode = Mode::TRANSACTIONAL;
             $options['transaction'] = $this->getTransaction();
         }
 
-        $this->execute('commit', [$mode, $mutations, $options]);
+        $this->execute('commit', [$int_mode, $arr_mutations, $options]);
         $this->obj_schema = null;
         return TRUE; // really?
     }
@@ -263,9 +267,11 @@ class GRPCv1 extends \GDS\Gateway
      */
     public function gql($str_gql, $arr_params = null)
     {
-        $readOptions = $this->getReadOptions();
+        $obj_read_options = $this->getReadOptions();
 
-        $obj_gql_query = (new GqlQuery())->setAllowLiterals(true)->setQueryString($str_gql);
+        $obj_gql_query = (new GqlQuery())
+            ->setAllowLiterals(true)
+            ->setQueryString($str_gql);
 
         if(null !== $arr_params) {
             $this->addParamsToQuery($obj_gql_query, $arr_params);
@@ -274,16 +280,19 @@ class GRPCv1 extends \GDS\Gateway
         $obj_gql_response = $this->execute(
             'runQuery',
             [
-                $this->getPartitionId(),
+                $this->createPartitionId(),
                 [
-                    'readOptions' => $readOptions,
+                    'readOptions' => $obj_read_options,
                     'gqlQuery' => $obj_gql_query
                 ]
             ]
         );
 
-        $results = $obj_gql_response->getBatch()->getEntityResults();
-        $arr_mapped_results = $this->createMapper()->mapFromResults($this->convertRepeatedFieldToArray($results));
+        $obj_results = $obj_gql_response->getBatch()->getEntityResults();
+        $arr_mapped_results = $this->createMapper()
+            ->mapFromResults(
+                $this->convertRepeatedFieldToArray($obj_results)
+            );
         $this->obj_schema = null; // Consume Schema
         return $arr_mapped_results;
     }
@@ -295,6 +304,7 @@ class GRPCv1 extends \GDS\Gateway
      *
      * @param bool $bol_cross_group
      * @return string|null
+     * @throws \Exception
      */
     public function beginTransaction($bol_cross_group = FALSE)
     {
@@ -343,7 +353,7 @@ class GRPCv1 extends \GDS\Gateway
     /**
      * Get a ReadOptions object, containing transaction info.
      *
-     * @return mixed
+     * @return null|ReadOptions
      */
     private function getReadOptions()
     {
@@ -383,9 +393,9 @@ class GRPCv1 extends \GDS\Gateway
     /**
      * Part of our "add parameters to query" sequence.
      *
-     * @param $obj_val
-     * @param $mix_value
-     * @return $obj_val
+     * @param Value $obj_val
+     * @param mixed $mix_value
+     * @return Value
      */
     protected function configureValueParamForQuery($obj_val, $mix_value)
     {
@@ -466,6 +476,10 @@ class GRPCv1 extends \GDS\Gateway
      */
     protected function createMapper()
     {
-        return (new \GDS\Mapper\GRPCv1())->setSchema($this->obj_schema)->setPartitionId($this->getPartitionId());
+        return (new \GDS\Mapper\GRPCv1())
+            ->setSchema($this->obj_schema)
+            ->setPartitionId(
+                $this->createPartitionId()
+            );
     }
 }
