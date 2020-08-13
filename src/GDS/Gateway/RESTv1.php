@@ -453,6 +453,20 @@ class RESTv1 extends \GDS\Gateway
         return null;
     }
 
+    
+    /**
+     * Get the batch informations from the last response
+     *
+     * @return mixed
+     */
+    public function getBatch()
+    {
+        if(isset($this->obj_last_response->batch)) {
+            return $this->obj_last_response->batch;
+        }
+        return null;
+    }
+    
     /**
      * Create a mapper that's right for this Gateway
      *
