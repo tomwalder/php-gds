@@ -254,7 +254,7 @@ class ProtoBuf extends \GDS\Mapper
         // Attempt to retain microsecond precision
         return \DateTime::createFromFormat(
             self::DATETIME_FORMAT_UDOTU,
-            sprintf('%0.6F', bcdiv($obj_property->getTimestampMicrosecondsValue(), self::MICROSECONDS))
+            sprintf('%0.6F', bcdiv($obj_property->getTimestampMicrosecondsValue(), self::MICROSECONDS, 6))
         );
 
         // Works, to seconds only
