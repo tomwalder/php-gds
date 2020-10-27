@@ -109,7 +109,12 @@ class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
 
         $this->assertObjectHasAttribute('exact', $obj_rest_entity->properties);
         $this->assertObjectHasAttribute('timestampValue', $obj_rest_entity->properties->exact);
-        $this->assertEquals('1979-02-05T08:30:00.123457Z', $obj_rest_entity->properties->exact->timestampValue);
+
+        // '1979-02-05T08:30:00.123457Z' 6 OR 7, depending on PHP version (>= 7.2, cuts not rounds)
+        $this->assertTrue(in_array($obj_rest_entity->properties->exact->timestampValue, [
+            '1979-02-05T08:30:00.123456Z', // PHP >= 7.2
+            '1979-02-05T08:30:00.123457Z', // PHP up to 7.1
+        ]));
 
         $this->assertObjectHasAttribute('retirement', $obj_rest_entity->properties);
         $this->assertObjectHasAttribute('timestampValue', $obj_rest_entity->properties->retirement);
