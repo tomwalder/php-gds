@@ -29,7 +29,10 @@ class GatewayTest extends \PHPUnit_Framework_TestCase {
     {
         $obj_entity = new GDS\Entity();
         /** @var \GDS\Gateway $obj_gateway */
-        $obj_gateway = $this->getMockBuilder('\\GDS\\Gateway\\ProtoBuf')->setMethods(['deleteMulti'])->setConstructorArgs(['DatasetTest'])->getMock();
+        $obj_gateway = $this->getMockBuilder('\\GDS\\Gateway\\ProtoBuf')
+            ->setMethods(['deleteMulti'])
+            ->setConstructorArgs(['DatasetTest'])
+            ->getMock();
         $obj_gateway->expects($this->once())->method('deleteMulti')->with(
             $this->equalTo([$obj_entity])
         );
