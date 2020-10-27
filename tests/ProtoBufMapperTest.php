@@ -23,6 +23,9 @@
  */
 class ProtoBufMapperTest extends \PHPUnit_Framework_TestCase {
 
+    /**
+     * Additional test for timestamp microsecond handling
+     */
     public function testDateTimeMapToGoogle()
     {
         $obj_schema = (new \GDS\Schema('Person'))->addDatetime('retirement');
