@@ -67,7 +67,9 @@ class ProtoBuf extends \GDS\Gateway
         if(null === $str_dataset) {
             if(isset($_SERVER['APPLICATION_ID'])) {
                 $this->str_dataset_id = $_SERVER['APPLICATION_ID'];
-            } else {
+            } elseif (isset($_SERVER['GAE_APPLICATION'])) {
+                $this->str_dataset_id = $_SERVER['GAE_APPLICATION'];
+            }  else {
                 throw new \Exception('Could not determine DATASET, please pass to ' . get_class($this) . '::__construct()');
             }
         } else {
