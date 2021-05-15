@@ -1,10 +1,6 @@
 vendor/
 examples/scratch.php
-pb4/
-pb3/
 build/
-_examples/
-vendor/
-app.yaml
 index.yaml
 composer.lock
+.phpunit.result.cache

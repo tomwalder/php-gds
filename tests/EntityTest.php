@@ -20,7 +20,7 @@
  *
  * @author Tom Walder <twalder@gmail.com>
  */
-class EntityTest extends \PHPUnit_Framework_TestCase
+class EntityTest extends \PHPUnit\Framework\TestCase
 {
 
     /**

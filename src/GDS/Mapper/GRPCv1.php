@@ -14,46 +14,76 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 namespace GDS\Mapper;
+
 use GDS\Entity;
 use GDS\Property\Geopoint;
 use GDS\Schema;
-use google\appengine\datastore\v4\EntityResult;
-use google\appengine\datastore\v4\Key;
-use google\appengine\datastore\v4\Value;
+use Google\Cloud\Datastore\V1\PartitionId;
+use Google\Type\LatLng;
+use Google\Protobuf\Timestamp;
+use Google\Protobuf\Internal\RepeatedField;
+use Google\Cloud\Datastore\V1\Key;
+use Google\Cloud\Datastore\V1\Key\PathElement as KeyPathElement;
+use Google\Cloud\Datastore\V1\Entity as GRPC_Entity;
+use Google\Cloud\Datastore\V1\EntityResult as GRPC_EntityResult;
+use Google\Cloud\Datastore\V1\Value;
 
 /**
- * Protocol Buffer v4 Mapper
+ * gRPC v1 Mapper
+ * based on Protobuf Mapper by Tom Walder <twalder@gmail.com>
  *
+ * @author Samuel Melrose <sam@infitialis.com>
  * @author Tom Walder <twalder@gmail.com>
  */
-class ProtoBuf extends \GDS\Mapper
+class GRPCv1 extends \GDS\Mapper
 {
 
     /**
-     * Map from GDS to Google Protocol Buffer
+     * Project & Namespace Info for Keys
+     * 
+     * @todo review use of this is the Mapper - move to Gateway?
+     */
+    private $obj_partition_id;
+
+    /**
+     * Set the partition (project & namespace) object internally for key generation.
+     *
+     * @param PartitionId $obj_partition_id
+     * @return GRPCv1
+     */
+    public function setPartitionId($obj_partition_id)
+    {
+        $this->obj_partition_id = $obj_partition_id;
+        return $this;
+    }
+
+    /**
+     * Map from GDS to gRPC object.
      *
      * @param Entity $obj_gds_entity
-     * @param \google\appengine\datastore\v4\Entity $obj_entity
+     * @param GRPC_Entity $obj_entity
+     * @throws \Exception
      */
-    public function mapToGoogle(Entity $obj_gds_entity, \google\appengine\datastore\v4\Entity $obj_entity)
+    public function mapToGoogle(Entity $obj_gds_entity, GRPC_Entity $obj_entity)
     {
         // Key
-        $this->configureGoogleKey($obj_entity->mutableKey(), $obj_gds_entity);
+        $obj_entity->setKey($this->createGoogleKey($obj_gds_entity));
 
         // Properties
+        $arr_props = [];
         $arr_field_defs = $this->obj_schema->getProperties();
         foreach($obj_gds_entity->getData() as $str_field_name => $mix_value) {
-            $obj_prop = $obj_entity->addProperty();
-            $obj_prop->setName($str_field_name);
-            $obj_val = $obj_prop->mutableValue();
             if(isset($arr_field_defs[$str_field_name])) {
-                $this->configureGooglePropertyValue($obj_val, $arr_field_defs[$str_field_name], $mix_value);
+                $arr_props[$str_field_name] = $this->configureGooglePropertyValue($arr_field_defs[$str_field_name], $mix_value);
             } else {
                 $arr_dynamic_data = $this->determineDynamicType($mix_value);
-                $this->configureGooglePropertyValue($obj_val, ['type' => $arr_dynamic_data['type'], 'index' => TRUE], $arr_dynamic_data['value']);
+                $arr_props[$str_field_name] = $this->configureGooglePropertyValue(['type' => $arr_dynamic_data['type'], 'index' => TRUE], $arr_dynamic_data['value']);
             }
         }
+
+        $obj_entity->setProperties($arr_props);
     }
 
     /**
@@ -61,8 +91,9 @@ class ProtoBuf extends \GDS\Mapper
      *
      * @todo Validate dynamic schema mapping in multi-kind responses like fetchEntityGroup()
      *
-     * @param EntityResult $obj_result
+     * @param GRPC_EntityResult $obj_result
      * @return Entity
+     * @throws \Exception
      */
     public function mapOneFromResult($obj_result)
     {
@@ -71,16 +102,32 @@ class ProtoBuf extends \GDS\Mapper
 
         // Properties
         $arr_property_definitions = $this->obj_schema->getProperties();
-        foreach($obj_result->getEntity()->getPropertyList() as $obj_property) {
-            /* @var $obj_property \google\appengine\datastore\v4\Property */
-            $str_field = $obj_property->getName();
+        foreach($obj_result->getEntity()->getProperties() as $str_field => $obj_property) {
+            /** @var Value $obj_property */
             if ($bol_schema_match && isset($arr_property_definitions[$str_field])) {
-                $obj_gds_entity->__set($str_field, $this->extractPropertyValue($arr_property_definitions[$str_field]['type'], $obj_property->getValue()));
+                $int_type = $arr_property_definitions[$str_field]['type'];
             } else {
-                $obj_gds_entity->__set($str_field, $this->extractPropertyValue(Schema::PROPERTY_DETECT, $obj_property->getValue()));
+                $int_type = Schema::PROPERTY_DETECT;
             }
+            $obj_gds_entity->__set($str_field, $this->extractPropertyValue($int_type, $obj_property));
         }
         return $obj_gds_entity;
+    }
+
+    /**
+     * Convert a RepeatedField to a standard array,
+     * as it isn't compatible with the usual array functions.
+     *
+     * @param RepeatedField $rep
+     * @return array
+     */
+    public function convertRepeatedField(RepeatedField $rep)
+    {
+        $arr = [];
+        foreach ($rep as $v) {
+            $arr[] = $v;
+        }
+        return $arr;
     }
 
     /**
@@ -88,13 +135,13 @@ class ProtoBuf extends \GDS\Mapper
      *
      * @todo Validate dynamic mapping
      *
-     * @param EntityResult $obj_result
+     * @param GRPC_EntityResult $obj_result
      * @return array
      */
-    private function createEntityWithKey(EntityResult $obj_result)
+    private function createEntityWithKey(GRPC_EntityResult $obj_result)
     {
         // Get the full key path
-        $arr_key_path = $obj_result->getEntity()->getKey()->getPathElementList();
+        $arr_key_path = $this->convertRepeatedField($obj_result->getEntity()->getKey()->getPath());
 
         // Key for 'self' (the last part of the KEY PATH)
         /* @var $obj_path_end \google\appengine\datastore\v4\Key\PathElement */
@@ -108,7 +155,7 @@ class ProtoBuf extends \GDS\Mapper
         }
 
         // Set ID or Name (will always have one or the other)
-        if($obj_path_end->hasId()) {
+        if($obj_path_end->getIdType() == 'id') {
             $obj_gds_entity->setKeyId($obj_path_end->getId());
         } else {
             $obj_gds_entity->setKeyName($obj_path_end->getName());
@@ -120,9 +167,9 @@ class ProtoBuf extends \GDS\Mapper
             $arr_anc_path = [];
             foreach ($arr_key_path as $obj_kpe) {
                 $arr_anc_path[] = [
-                    'kind' => $obj_kpe->getKind(),
-                    'id' => $obj_kpe->hasId() ? $obj_kpe->getId() : null,
-                    'name' => $obj_kpe->hasName() ? $obj_kpe->getName() : null
+                    'kind'  => $obj_kpe->getKind(),
+                    'id'    => ($obj_kpe->getIdType() == 'id') ? $obj_kpe->getId() : null,
+                    'name'  => ($obj_kpe->getIdType() == 'name') ? $obj_kpe->getName() : null
                 ];
             }
             $obj_gds_entity->setAncestry($arr_anc_path);
@@ -133,70 +180,105 @@ class ProtoBuf extends \GDS\Mapper
     }
 
     /**
-     * Populate a ProtoBuf Key from a GDS Entity
+     * Return a gRPC Key from a GDS Entity
      *
-     * @param Key $obj_key
      * @param Entity $obj_gds_entity
      * @return Key
      */
-    public function configureGoogleKey(Key $obj_key, Entity $obj_gds_entity)
+    public function createGoogleKey(Entity $obj_gds_entity)
     {
-        // Add any ancestors FIRST
-        $mix_ancestry = $obj_gds_entity->getAncestry();
-        if(is_array($mix_ancestry)) {
-            // @todo Get direction right!
-            foreach ($mix_ancestry as $arr_ancestor_element) {
-                $this->configureGoogleKeyPathElement($obj_key->addPathElement(), $arr_ancestor_element);
-            }
-        } elseif ($mix_ancestry instanceof Entity) {
-            // Recursive
-            $this->configureGoogleKey($obj_key, $mix_ancestry);
-        }
-
-        // Root Key (must be the last in the chain)
-        $this->configureGoogleKeyPathElement($obj_key->addPathElement(), [
-            'kind' => $obj_gds_entity->getKind(),
-            'id' => $obj_gds_entity->getKeyId(),
-            'name' => $obj_gds_entity->getKeyName()
-        ]);
-
+        $obj_key = new Key();
+        $obj_key->setPartitionId($this->obj_partition_id);
+        $path = $this->walkGoogleKeyPathElement([], $obj_gds_entity);
+        $obj_key->setPath($path);
         return $obj_key;
     }
 
     /**
-     * Configure a Google Key Path Element object
+     * Recursively walk the Key hierarchy to return a fully mapped key.
      *
-     * @param Key\PathElement $obj_path_element
-     * @param array $arr_kpe
+     * @param KeyPathElement[] $path
+     * @param Entity $obj_gds_entity
+     * @return KeyPathElement[]
      */
-    private function configureGoogleKeyPathElement(Key\PathElement $obj_path_element, array $arr_kpe)
+    public function walkGoogleKeyPathElement($path, Entity $obj_gds_entity)
     {
-        $obj_path_element->setKind($arr_kpe['kind']);
-        isset($arr_kpe['id']) && $obj_path_element->setId($arr_kpe['id']);
-        isset($arr_kpe['name']) && $obj_path_element->setName($arr_kpe['name']);
+        // Root Key (must be the first in the chain)
+        $path = $this->prependGoogleKeyPathElement($path, $obj_gds_entity);
+
+        // Add any ancestors
+        $mix_ancestry = $obj_gds_entity->getAncestry();
+        if(is_array($mix_ancestry)) {
+            // @todo Get direction right!
+            foreach ($mix_ancestry as $arr_ancestor_element) {
+                $this->prependGoogleKeyPathElement($path, $arr_ancestor_element);
+            }
+        } elseif ($mix_ancestry instanceof Entity) {
+            // Recursive
+            $this->walkGoogleKeyPathElement($path, $mix_ancestry);
+        }
+
+        return $path;
     }
 
     /**
-     * Populate a ProtoBuf Property Value from a GDS Entity field definition & value
+     * Prepend KeyPathElement to key hierarchy array.
+     *
+     * @param KeyPathElement[] $arr
+     * @param Entity $obj_gds_entity
+     * @return KeyPathElement[]
+     */
+    public function prependGoogleKeyPathElement($arr, Entity $obj_gds_entity)
+    {
+        $data = [
+            'kind'  => $obj_gds_entity->getKind(),
+            'id'    => $obj_gds_entity->getKeyId(),
+            'name'  => $obj_gds_entity->getKeyName()
+        ];
+        array_unshift($arr, $this->createGoogleKeyPathElement($data));
+        return $arr;
+    }
+
+    /**
+     * Create a Google Key Path Element object
+     *
+     * @param array $arr_kpe
+     * @return KeyPathElement
+     */
+    private function createGoogleKeyPathElement(array $arr_kpe)
+    {
+        $obj_path_element = new KeyPathElement();
+
+        $obj_path_element->setKind($arr_kpe['kind']);
+        isset($arr_kpe['id']) && $obj_path_element->setId($arr_kpe['id']);
+        isset($arr_kpe['name']) && $obj_path_element->setName($arr_kpe['name']);
+
+        return $obj_path_element;
+    }
+
+    /**
+     * Return a gRPC Property Value from a GDS Entity field definition & value
      *
      * @todo compare with Google API implementation
      *
-     * @param Value $obj_val
      * @param array $arr_field_def
      * @param $mix_value
+     * @return Value
+     * @throws \Exception
      */
-    private function configureGooglePropertyValue(Value $obj_val, array $arr_field_def, $mix_value)
+    private function configureGooglePropertyValue(array $arr_field_def, $mix_value)
     {
+        $obj_val = new Value();
         // Indexed?
         $bol_index = TRUE;
         if(isset($arr_field_def['index']) && FALSE === $arr_field_def['index']) {
             $bol_index = FALSE;
         }
-        $obj_val->setIndexed($bol_index);
+        $obj_val->setExcludeFromIndexes(!$bol_index);
 
         // null checks
         if(null === $mix_value) {
-            return;
+            return $obj_val;
         }
 
         // Value
@@ -215,12 +297,15 @@ class ProtoBuf extends \GDS\Mapper
                 } else {
                     $obj_dtm = new \DateTimeImmutable($mix_value);
                 }
-                $obj_val->setTimestampMicrosecondsValue($obj_dtm->format(self::DATETIME_FORMAT_UU));
+                $obj_timestamp = (new Timestamp())
+                    ->setSeconds($obj_dtm->getTimestamp())
+                    ->setNanos(1000 * $obj_dtm->format('u'));
+                $obj_val->setTimestampValue($obj_timestamp);
                 break;
 
             case Schema::PROPERTY_DOUBLE:
             case Schema::PROPERTY_FLOAT:
-            $obj_val->setDoubleValue(floatval($mix_value));
+                $obj_val->setDoubleValue(floatval($mix_value));
                 break;
 
             case Schema::PROPERTY_BOOLEAN:
@@ -228,48 +313,54 @@ class ProtoBuf extends \GDS\Mapper
                 break;
 
             case Schema::PROPERTY_GEOPOINT:
-                $obj_val->mutableGeoPointValue()->setLatitude($mix_value[0])->setLongitude($mix_value[1]);
+                $obj_geo = (new LatLng())
+                    ->setLatitude($mix_value[0])
+                    ->setLongitude($mix_value[1]);
+                $obj_val->setGeoPointValue($obj_geo);
                 break;
 
             case Schema::PROPERTY_STRING_LIST:
-                $obj_val->clearIndexed(); // Ensure we only index the values, not the list
+                $obj_val->setExcludeFromIndexes(false); // Ensure we only index the values, not the list
+                $arr_values = [];
                 foreach ((array)$mix_value as $str) {
-                    $obj_val->addListValue()->setStringValue($str)->setIndexed($bol_index);
+                    $arr_values[] = (new Value())
+                        ->setStringValue($str)
+                        ->setExcludeFromIndexes(!$bol_index);
                 }
+                $obj_val->setArrayValue(
+                    (new \Google\Cloud\Datastore\V1\ArrayValue())
+                        ->setValues($arr_values)
+                );
                 break;
 
             default:
                 throw new \RuntimeException('Unable to process field type: ' . $arr_field_def['type']);
         }
+
+        return $obj_val;
     }
 
     /**
      * Extract a datetime value
      *
-     * @param object $obj_property
+     * @param Value $obj_property
      * @return mixed
      */
     protected function extractDatetimeValue($obj_property)
     {
         // Attempt to retain microsecond precision
-        return \DateTime::createFromFormat(
-            self::DATETIME_FORMAT_UDOTU,
-            sprintf('%0.6F', bcdiv($obj_property->getTimestampMicrosecondsValue(), self::MICROSECONDS, 6))
-        );
-
-        // Works, to seconds only
-        // return (new \DateTime())->setTimestamp($obj_property->getTimestampMicrosecondsValue() / self::MICROSECONDS);
+        return $obj_property->getTimestampValue()->toDateTime();
     }
 
     /**
      * Extract a String List value
      *
-     * @param object $obj_property
+     * @param Value $obj_property
      * @return mixed
      */
     protected function extractStringListValue($obj_property)
     {
-        $arr_values = $obj_property->getListValueList();
+        $arr_values = $obj_property->getArrayValue()->getValues();
         if(count($arr_values) > 0) {
             $arr = [];
             foreach ($arr_values as $obj_val) {
@@ -284,7 +375,7 @@ class ProtoBuf extends \GDS\Mapper
     /**
      * Extract a Geopoint value (lat/lon pair)
      *
-     * @param \google\appengine\datastore\v4\Value $obj_property
+     * @param Value $obj_property
      * @return Geopoint
      */
     protected function extractGeopointValue($obj_property)
@@ -299,8 +390,8 @@ class ProtoBuf extends \GDS\Mapper
      * Defer any varying data type extractions to child classes
      *
      * @param $int_type
-     * @param object $obj_property
-     * @return array
+     * @param Value $obj_property
+     * @return mixed
      * @throws \Exception
      */
     protected function extractPropertyValue($int_type, $obj_property)
@@ -338,35 +429,40 @@ class ProtoBuf extends \GDS\Mapper
     /**
      * Auto detect & extract a value
      *
-     * @todo expand auto detect types
-     *
      * @param Value $obj_property
      * @return mixed
+     * @throws \Exception
+     * @todo expand auto detect types
+     *
      */
     protected function extractAutoDetectValue($obj_property)
     {
-        if($obj_property->hasStringValue()) {
-            return $obj_property->getStringValue();
+        switch ( $obj_property->getValueType() ) {
+            case "string_value":
+                return $obj_property->getStringValue();
+                break;
+            case "integer_value":
+                return $obj_property->getIntegerValue();
+                break;
+            case "timestamp_value":
+                return $this->extractDatetimeValue($obj_property);
+                break;
+            case "double_value":
+                return $obj_property->getDoubleValue();
+                break;
+            case "boolean_value":
+                return $obj_property->getBooleanValue();
+                break;
+            case "geo_point_value":
+                return $this->extractGeopointValue($obj_property);
+                break;
+            case "array_value":
+                return $this->extractStringListValue($obj_property);
+                break;
+            default:
+                throw new \Exception('Unsupported field type: ' . $obj_property->getValueType());
+                break;
         }
-        if($obj_property->hasIntegerValue()) {
-            return $obj_property->getIntegerValue();
-        }
-        if($obj_property->hasTimestampMicrosecondsValue()) {
-            return $this->extractDatetimeValue($obj_property);
-        }
-        if($obj_property->hasDoubleValue()) {
-            return $obj_property->getDoubleValue();
-        }
-        if($obj_property->hasBooleanValue()) {
-            return $obj_property->getBooleanValue();
-        }
-        if($obj_property->hasGeoPointValue()) {
-            return $this->extractGeopointValue($obj_property);
-        }
-        if($obj_property->getListValueSize() > 0) {
-            return $this->extractStringListValue($obj_property);
-        }
-        // $this->extractPropertyValue($int_field_type, $obj_property); // Recursive detection call
         return null;
     }
 }

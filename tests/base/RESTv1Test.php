@@ -20,7 +20,7 @@
  *
  * @author Tom Walder <twalder@gmail.com>
  */
-abstract class RESTv1Test extends \PHPUnit_Framework_TestCase
+abstract class RESTv1Test extends \PHPUnit\Framework\TestCase
 {
 
     /**

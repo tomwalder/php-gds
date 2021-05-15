@@ -20,7 +20,7 @@
  *
  * @author Tom Walder <twalder@gmail.com>
  */
-class SchemaTest extends \PHPUnit_Framework_TestCase {
+class SchemaTest extends \PHPUnit\Framework\TestCase {
 
     /**
      * Set up a schema with all data types

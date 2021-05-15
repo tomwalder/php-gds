@@ -78,7 +78,10 @@ class Store
     public function __construct($kind_schema = null, Gateway $obj_gateway = null)
     {
         $this->obj_schema = $this->determineSchema($kind_schema);
-        $this->obj_gateway = (null === $obj_gateway) ? new \GDS\Gateway\ProtoBuf() : $obj_gateway;
+        if (null === $obj_gateway) {
+            $obj_gateway = new \GDS\Gateway\RESTv1(Gateway::determineProjectId());
+        }
+        $this->obj_gateway = $obj_gateway;
         $this->str_last_query = 'SELECT * FROM `' . $this->obj_schema->getKind() . '` ORDER BY __key__ ASC';
     }
 
@@ -89,7 +92,7 @@ class Store
      * @return Schema
      * @throws \Exception
      */
-    private function determineSchema($mix_schema)
+    private function determineSchema($mix_schema): Schema
     {
         if(null === $mix_schema) {
             $mix_schema = $this->buildSchema();

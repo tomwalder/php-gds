@@ -20,7 +20,7 @@
  *
  * @author Tom Walder <twalder@gmail.com>
  */
-class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
+class RESTv1MapperTest extends \PHPUnit\Framework\TestCase
 {
 
     public function testDynamicPropertiesMapToGoogle()
@@ -159,11 +159,12 @@ class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
     /**
      * Ensure we throw exceptions for incorrect geopoint data
      *
-     * @expectedException        \InvalidArgumentException
-     * @expectedExceptionMessage Geopoint property data not supported: string
      */
     public function testGeopointFails()
     {
+        $this->expectException('InvalidArgumentException');
+        $this->expectExceptionMessage('Geopoint property data not supported: string');
+
         $obj_schema = (new \GDS\Schema('Pub'))->addString('name')->addGeopoint('where');
 
         $obj_mapper = new \GDS\Mapper\RESTv1();
@@ -180,24 +181,24 @@ class RESTv1MapperTest extends \PHPUnit_Framework_TestCase
 
     /**
      * Broken mapper request, type 1
-     *
-     * @expectedException        \Exception
-     * @expectedExceptionMessage Could not build full key path, no Schema set on Mapper and no Kind set on Entity
      */
     public function testBrokenMapperTypeOne()
     {
+        $this->expectException('Exception');
+        $this->expectExceptionMessage('Could not build full key path, no Schema set on Mapper and no Kind set on Entity');
+
         $obj_mapper = new \GDS\Mapper\RESTv1();
         $obj_mapper->buildKeyPath(new \GDS\Entity(), true);
     }
 
     /**
      * Broken mapper request, type 2
-     *
-     * @expectedException        \Exception
-     * @expectedExceptionMessage Could not build full key path, no Kind set on (nth node) GDS Entity
      */
     public function testBrokenMapperTypeTwo()
     {
+        $this->expectException('Exception');
+        $this->expectExceptionMessage('Could not build full key path, no Kind set on (nth node) GDS Entity');
+
         $obj_mapper = new \GDS\Mapper\RESTv1();
         $obj_mapper->buildKeyPath(new \GDS\Entity(), false);
     }

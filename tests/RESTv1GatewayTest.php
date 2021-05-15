@@ -822,12 +822,11 @@ class RESTv1GatewayTest extends \RESTv1Test
 
     /**
      * Ensure we throw exceptions for incorrect transaction usage
-     *
-     * @expectedException        \Exception
-     * @expectedExceptionMessage Cross group transactions not supported over REST API v1
      */
     public function testCrossGroupTransactionFails()
     {
+        $this->expectException('Exception');
+        $this->expectExceptionMessage('Cross group transactions not supported over REST API v1');
         $str_txn_ref = 'txn-string-here';
         $obj_http = $this->initTestHttpClient('https://datastore.googleapis.com/v1/projects/DatasetTest:beginTransaction', [], ['transaction' => $str_txn_ref]);
         /** @var \GDS\Gateway\RESTv1 $obj_gateway */

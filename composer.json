@@ -12,17 +12,17 @@
         }
     ],
     "require": {
-        "php": ">=5.5.0",
-        "ext-bcmath" : "*"
+        "php": ">=7.0",
+        "ext-bcmath" : "*",
+        "google/auth": "^1.0"
     },
     "require-dev": {
-        "google/auth": "v1.0.*",
-        "google/appengine-php-sdk": ">=1.9.22",
-        "phpunit/phpunit": "~4.8",
-        "satooshi/php-coveralls": "v2.0.*"
+        "google/cloud-datastore": "^v1.12",
+        "phpunit/phpunit": "~8",
+        "satooshi/php-coveralls": "^v2.2"
     },
     "suggest": {
-        "google/auth": "If you need to use the REST API (i.e. not on AppEngine Standard) Tested with v1.0.1"
+        "google/cloud-datastore": "If you need to use the gRPC API & Gateway"
     },
     "autoload": {
         "classmap": [
@@ -30,5 +30,12 @@
         ],
         "psr-4": {"GDS\\": "src/GDS/"}
     },
-    "include-path": ["src/"]
+    "include-path": ["src/"],
+    "config": {
+        "platform": {
+            "php": "7.2.0"
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
 }

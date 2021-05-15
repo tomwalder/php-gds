@@ -7,27 +7,44 @@
 
 This library is intended to make it easier for you to get started with and to use Datastore in your applications.
 
-## Firestore in Datastore Mode, Dec 2019 ##
+## Quick Start ##
+```bash
+composer require "tomwalder/php-gds:^5.0"
+```
+```php
+// Build a new entity
+$obj_book = new GDS\Entity();
+$obj_book->title = 'Romeo and Juliet';
+$obj_book->author = 'William Shakespeare';
+$obj_book->isbn = '1840224339';
 
-If you are using Firestore in Datastore mode and `php-gds` from App Engine standard, you may run into `Internal Error`s from the `Protobuf` gateway.
+// Write it to Datastore
+$obj_store = new GDS\Store('Book');
+$obj_store->upsert($obj_book);
 
-You can resolve this by using the `RESTv1` Gateway & APIs. [See here for basic guidance](#using-the-datastore-rest-api-v1-sep-2016)
+// Fetch all books
+foreach($obj_store->fetchAll() as $obj_book) {
+    echo "Title: {$obj_book->title}, ISBN: {$obj_book->isbn} <br />", PHP_EOL;
+}
+```
 
-More details and recommended upgrade paths to come. Along with better gRPC support for outside App Engine.
+## New in Version 5.0 ##
 
-## Datastore API Turn Down, Sep 2016 ##
+**As of version 5 (May 2021), this library provides support for**
 
-Google turned down the older versions of the REST API on September 30th, 2016. Version v1beta1 and v1beta2 are no longer available.
+* PHP 7 second-generation App Engine runtimes - using the REST API by default
+* PHP 7 "anywhere" (e.g. Google Compute Engine, Cloud Run, GKE) - using REST or gRPC
 
-* If you are using this library on App Engine, and using the default `Protobuf` gateway then NO CHANGES ARE NEEDED. Version 2.x or 3.x are both supported.
-* If you are using this library anywhere else, like Compute Engine, and you are using the `GoogleAPIClient` gateway (version 2.x), then you will need to upgrade to version 3.x
+**Key features removed from version 5 onwards**
+
+* PHP 5 support
+* Support for the legacy "Protocol Buffer" API built into first-generation App Engine runtimes
+
+If you need to continue running applications on that infrastructure, stick to version 4.x or earlier.
 
 ## Table of Contents ##
 
 * [Examples](#examples)
-* [New in version 4.0](#new-in-version-40)
-* [Changes in version 3.0](#changes-in-version-30): [Datastore REST API v1 (Sep 2016)](#using-the-datastore-rest-api-v1-sep-2016)
-* [Changes in version 2.0](#changes-in-version-20)
 * [Getting Started](#getting-started) including installation with Composer and setup for GDS Emulator
 * [Defining Your Model](#defining-your-model)
 * [Creating Records](#creating-records)
@@ -40,6 +57,33 @@ Google turned down the older versions of the REST API on September 30th, 2016. V
 * [More About Google Cloud Datastore](#more-about-google-cloud-datastore)
 * [Unit Tests](#unit-tests)
 * [Footnotes](#footnotes)
+
+## Using the REST API (default from 5.0) ##
+
+As of PHP-GDS version 5, the REST API Gateway is the default.
+
+It will attempt to auto-detect your Google Project ID - and usually the Google auth library will use the default application credentials.
+
+You might need to set an environment variable with the path to your JSON credentials file first, usually if you're running outside of App Engine or Google Compute Engine.
+
+```php
+putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
+
+// A regular Store, but with a custom Gateway
+$obj_book_store = new GDS\Store('Book', new \GDS\Gateway\RESTv1('my-project-id'));
+```
+
+You can find out more about the auth system here: [Google Auth Library for PHP](https://github.com/google/google-auth-library-php)
+
+You can download a service account JSON file from the Google Cloud Console `API Manager > Credentials`.
+
+## Firestore in Datastore Mode ##
+
+If you are using PHP-GDS version 4 or earlier, and Firestore in Datastore mode from App Engine standard (first generation), you may run into `Internal Error`s from the `Protobuf` gateway.
+
+You can resolve this by using the `RESTv1` Gateway & APIs. [See here for basic guidance](#using-the-datastore-rest-api-v1-sep-2016)
+
+More details and recommended upgrade paths to come. Along with better gRPC support for outside App Engine.
 
 ## Examples ##
 
@@ -79,13 +123,11 @@ foreach($obj_store->fetchAll() as $obj_book) {
 ### More about the Examples ###
 
 These initial examples assume you are either running a Google AppEngine application or in a local AppEngine dev environment. 
-In both of these cases, we can auto detect the **dataset** and use the default ***Protocol Buffer Gateway***.
+In both of these cases, we can auto detect the **dataset**.
 
 We use a `GDS\Store` to read and write `GDS\Entity` objects to and from Datastore. 
 
 These examples use the generic `GDS\Entity` class with a dynamic Schema. See [Defining Your Model](#defining-your-model) below for more details on custom Schemas and indexed fields.
-
-Check out the [examples](examples/) folder for many more and fuller code samples.
 
 ### Demo Application ###
 
@@ -95,70 +137,22 @@ Application: http://php-gds-demo.appspot.com/
 
 Code: https://github.com/tomwalder/php-gds-demo
 
-## New in Version 4.0 ##
+## Changes in Version 5 ##
+
+* Add PHP 7 support
+* Remove PHP 5 support
+* Remove App Engine first-generation runtime support (inc direct Protocol Buffer API)
+
+## Changes in Version 4 ##
 
 * More consistent use of `DateTime` objects - now all result sets will use them instead of `Y-m-d H:i:s` strings   
 * Move the `google/auth` to an optional dependency - if you need the REST API
 
-## Changes in Version 3.0 ##
+## Changes in Version 3 ##
 
-* Support for the new **Datastore API, v1 - via REST** (gRPC to come)
+* Support for the new **Datastore API, v1 - via REST**
 * Removal of support for the old 1.x series "PHP Google API Client"
 * **GeoPoint data is now supported over the REST API** v1 as well as ProtoBuf
-
-### Using the Datastore REST API v1 (Sep 2016) ###
-
-The Datastore REST API v1 went Generally Available (GA) in 2016. The previous REST API will be deprecated after September 2016.
-
-If you are running PHP-GDS from somewhere other than App Engine, you need to use the REST API v1.
-
-You just have to pass an instance of the RESTv1 gateway into your Store objects on construction.
-
-You might need to set an environment variable with the path to your JSON credentials file first.
-
-```php
-putenv('GOOGLE_APPLICATION_CREDENTIALS=/path/to/my/credentials.json');
-
-// A regular Store, but with a custom Gateway
-$obj_book_store = new GDS\Store('Book', new \GDS\Gateway\RESTv1(PROJECT_ID));
-```
-
-You can find out more about the auth system here: [Google Auth Library for PHP](https://github.com/google/google-auth-library-php)
-
-You can download a service account JSON file from the Google Cloud Console `API Manager > Credentials`.
-
-## Changes in Version 2.0 ##
-
-Features in 2.0 included 
-* **Faster** - use of Google Protocol Buffer allows faster, low-level access to Datastore
-* **Easier to use** - sensible defaults and auto-detection for AppEngine environments
-* **Less dependencies** - no need for the Google PHP API Client, unless running remote or from non-AppEngine environments
-* **Local development** - Using the Protocol Buffers allows us to access the development server Datastore
-* **Local GQL support** - By default, the local development server does not support GQL. I've included a basic GQL parser that makes this work.
-* **Data Migrations** - leverage multiple Gateways to ship data between local and live Datastore
-* **Contention Exceptions** - standardised Exception for handling Datastore transaction contention
-* **Unit tests**
-* Optional drop-in JSON API Gateway for remote or non-AppEngine environments (this was the only Gateway in 1.x)
-
-### Backwards Compatibility ###
-
-#### v3 over v2 ####
-
-The REST API v1 implementation now follows the same datetime response formats at the ProtoBuf API. (Y-m-d H:i:s).
-
-#### v2 over v1 ####
-
-The library is *almost* fully backwards compatible. And in fact, the main operations of the `GDS\Store` class are identical. 
-
-There is one BC-break in 2.0 - the re-ordering of construction parameters for the `GDS\Store` class.
-
-`GDS\Store::__construct(<Kind or Schema>, <Gateway>)`
-
-instead of 
-
-`GDS\Store::__construct(<Gateway>, <Kind or Schema>)`
-
-This is because the Gateway is now optional, and has a sensible, automated, default - the new Protocol Buffer implementation.
 
 ## Getting Started ##
 
@@ -172,22 +166,17 @@ If you want to use the JSON API from remote or non-App Engine environments, you 
 
 ### Composer, Dependencies ###
 
-To install using Composer, use this require line
+To install using Composer
 
-`"tomwalder/php-gds": "v4.*"`
+```bash
+composer require "tomwalder/php-gds:^5.0"
+```
 
-For older series
+### Use with the Datastore Emulator ###
+Local development is supported using the REST Gateway and the Datastore Emulator.
 
-`"tomwalder/php-gds": "v3.*"`
-
-`"tomwalder/php-gds": "v2.*"`
-
-and for bleeding-edge features, dev-master
-
-`"tomwalder/php-gds": "dev-master"`
-
-### Use with the GDS emulator ###
-If you want to use it with the GDS emulator make sure the environment variable `DATASTORE_EMULATOR_HOST` is set with the host, for example `localhost:8081`
+Detailed instructions can be found here:
+https://cloud.google.com/datastore/docs/tools/datastore-emulator
 
 ## Defining Your Model ##
 
@@ -274,11 +263,9 @@ echo $obj_person->location->getLongitude();
 
 **It is not currently possible to query Geopoint fields, although this feature is in Alpha with Google**
 
-**Geopoint data is only supported using the native Protocol Buffer API. It will work well on App Engine and in development, but not via the JSON API**
-
 ## Queries, GQL & The Default Query ##
 
-At the time of writing, the `GDS\Store` object uses Datastore GQL as its query language. Here is an example:
+The `GDS\Store` object uses Datastore GQL as its query language. Here is an example:
 
 ```php
 $obj_book_store->fetchOne("SELECT * FROM Book WHERE isbn = '1853260304'");
@@ -457,8 +444,8 @@ Using multiple Gateway classes, you can move data between namespaces
 
 ```php
 // Name-spaced Gateways
-$obj_gateway_one = new \GDS\Gateway\ProtoBuf('dataset', 'namespace_one');
-$obj_gateway_two = new \GDS\Gateway\ProtoBuf('dataset', 'namespace_two');
+$obj_gateway_one = new \GDS\Gateway\RESTv1('project-id', 'namespace_one');
+$obj_gateway_two = new \GDS\Gateway\RESTv1('project-id', 'namespace_two');
 
 // Grab some books from one
 $arr_books = (new \GDS\Store('Book', $obj_gateway_one))->fetchPage(20);
