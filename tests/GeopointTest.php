@@ -20,7 +20,7 @@
  *
  * @author Tom Walder <twalder@gmail.com>
  */
-class GeopointTest extends \PHPUnit_Framework_TestCase
+class GeopointTest extends \PHPUnit\Framework\TestCase
 {
 
     /**
@@ -101,14 +101,14 @@ class GeopointTest extends \PHPUnit_Framework_TestCase
     public function testFailSet()
     {
         $obj_gp = new \GDS\Property\Geopoint();
-        $this->setExpectedException('UnexpectedValueException');
+        $this->expectException('UnexpectedValueException');
         $obj_gp[2] = 1.21;
     }
 
     public function testFailGet()
     {
         $obj_gp = new \GDS\Property\Geopoint();
-        $this->setExpectedException('UnexpectedValueException');
+        $this->expectException('UnexpectedValueException');
         $int_tmp = $obj_gp[2];
     }
 

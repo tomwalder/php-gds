@@ -19,6 +19,7 @@ namespace GDS\Gateway;
 
 use GDS\Entity;
 use GDS\Exception\Contention;
+use GDS\Gateway;
 use Google\ApiCore\ApiException;
 use Google\Cloud\Datastore\V1\LookupResponse;
 use Google\Protobuf\Timestamp;
@@ -49,7 +50,7 @@ class GRPCv1 extends \GDS\Gateway
     /**
      * Cloud Datastore (gRPC & REST) Client
      */
-    protected static $obj_datstore_client;
+    protected static $obj_datastore_client;
 
     /**
      * Set up the dataset and optional namespace,
@@ -62,23 +63,18 @@ class GRPCv1 extends \GDS\Gateway
     public function __construct($str_dataset = null, $str_namespace = null)
     {
         if(null === $str_dataset) {
-            if(isset($_SERVER['GOOGLE_CLOUD_PROJECT'])) {
-                $this->str_dataset_id = $_SERVER['GOOGLE_CLOUD_PROJECT'];
-            } else {
-                throw new \Exception('Could not determine DATASET, please pass to ' . get_class($this) . '::__construct()');
-            }
-        } else {
-            $this->str_dataset_id = $str_dataset;
+            $str_dataset = Gateway::determineProjectId();
         }
+        $this->str_dataset_id = $str_dataset;
         $this->str_namespace = $str_namespace;
 
         // Build the Datastore client
-        if (!(self::$obj_datstore_client instanceof DatastoreClient)) {
+        if (!(self::$obj_datastore_client instanceof DatastoreClient)) {
             $arr_options = [];
             if (!extension_loaded('grpc')) {
                 $arr_options = ['transport' => 'grpc-fallback']; // This is Protocol buffers over HTTP 1.1
             }
-            self::$obj_datstore_client = new DatastoreClient($arr_options);
+            self::$obj_datastore_client = new DatastoreClient($arr_options);
         }
     }
 
@@ -113,7 +109,7 @@ class GRPCv1 extends \GDS\Gateway
             // Call gRPC client,
             //   prepend projectId as first parameter automatically.
             array_unshift($args, $this->str_dataset_id);
-            $this->obj_last_response = call_user_func_array([self::$obj_datstore_client, $str_method], $args);
+            $this->obj_last_response = call_user_func_array([self::$obj_datastore_client, $str_method], $args);
         } catch (ApiException $obj_exception) {
             $this->obj_last_response = null;
             if (FALSE !== strpos($obj_exception->getMessage(), 'too much contention') || FALSE !== strpos($obj_exception->getMessage(), 'Concurrency')) {

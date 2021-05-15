@@ -20,31 +20,29 @@
  *
  * @author Tom Walder <twalder@gmail.com>
  */
-class CustomEntityClassTest extends GDSTest
+class CustomEntityClassTest extends \PHPUnit\Framework\TestCase
 {
 
     /**
      * Test setting a non-existent Entity class
-     *
-     * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Cannot set missing Entity class: DoesNotExist
      */
     public function testSetMissingClass()
     {
-        $obj_gateway = new \GDS\Gateway\ProtoBuf('Dataset');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot set missing Entity class: DoesNotExist');
+        $obj_gateway = new \GDS\Gateway\RESTv1('Dataset');
         $obj_store = new \GDS\Store('Book', $obj_gateway);
         $obj_store->setEntityClass('DoesNotExist');
     }
 
     /**
      * Test setting a non-Entity class
-     *
-     * @expectedException        InvalidArgumentException
-     * @expectedExceptionMessage Cannot set an Entity class that does not extend "GDS\Entity": Simple
      */
     public function testSetInvalidClass()
     {
-        $obj_gateway = new \GDS\Gateway\ProtoBuf('Dataset');
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Cannot set an Entity class that does not extend "GDS\Entity": Simple');
+        $obj_gateway = new \GDS\Gateway\RESTv1('Dataset');
         $obj_store = new \GDS\Store('Book', $obj_gateway);
         $obj_store->setEntityClass('Simple');
     }
@@ -54,9 +52,10 @@ class CustomEntityClassTest extends GDSTest
      */
     public function testSetClass()
     {
-        $obj_gateway = new \GDS\Gateway\ProtoBuf('Dataset');
+        $obj_gateway = new \GDS\Gateway\RESTv1('Dataset');
         $obj_store = new \GDS\Store('Book', $obj_gateway);
-        $obj_store->setEntityClass('Book');
+        $obj_store2 = $obj_store->setEntityClass('Book');
+        $this->assertSame($obj_store, $obj_store2);
     }
 
     /**
@@ -64,57 +63,12 @@ class CustomEntityClassTest extends GDSTest
      */
     public function testCreateEntity()
     {
-        $obj_gateway = new \GDS\Gateway\ProtoBuf('Dataset');
+        $obj_gateway = new \GDS\Gateway\RESTv1('Dataset');
         $obj_store = new \GDS\Store('Book', $obj_gateway);
         $obj_store->setEntityClass('Book');
         $obj_book = $obj_store->createEntity(['title' => 'Discworld']);
         $this->assertInstanceOf('\\Book', $obj_book);
     }
-
-    /**
-     * Fetch with custom entity class
-     */
-    public function testFetchByIdWithResult()
-    {
-
-        $obj_request = new \google\appengine\datastore\v4\LookupRequest();
-        $obj_request->mutableReadOptions();
-        $obj_key = $obj_request->addKey();
-        $obj_partition = $obj_key->mutablePartitionId();
-        $obj_partition->setDatasetId('Dataset');
-        $obj_kpe = $obj_key->addPathElement();
-        $obj_kpe->setKind('Book');
-        $obj_kpe->setId(123456789);
-
-        $obj_response = new \google\appengine\datastore\v4\LookupResponse();
-        $obj_found = $obj_response->addFound();
-        $obj_entity = $obj_found->mutableEntity();
-        $obj_result_key = $obj_entity->mutableKey();
-        $obj_result_kpe = $obj_result_key->addPathElement();
-        $obj_result_kpe->setKind('Book');
-        $obj_result_kpe->setId(123456789);
-        $obj_result_property = $obj_entity->addProperty();
-        $obj_result_property->setName('author');
-        $obj_val = $obj_result_property->mutableValue(); // addDeprecatedValue();
-        $obj_val->setStringValue('William Shakespeare');
-
-        $this->apiProxyMock->expectCall('datastore_v4', 'Lookup', $obj_request, $obj_response);
-
-        $obj_gateway = new \GDS\Gateway\ProtoBuf('Dataset');
-        $obj_store = new \GDS\Store('Book', $obj_gateway);
-        $obj_store->setEntityClass('Book');
-        $obj_result = $obj_store->fetchById(123456789);
-
-        $this->assertInstanceOf('\\GDS\\Entity', $obj_result);
-        $this->assertInstanceOf('\\Book', $obj_result);
-        $this->assertEquals(1, count($obj_result->getData()));
-        $this->assertEquals('Book', $obj_result->getKind());
-        $this->assertEquals(123456789, $obj_result->getKeyId());
-        $this->assertEquals($obj_result->author, 'William Shakespeare');
-
-        $this->apiProxyMock->verify();
-    }
-
 
     // @todo test with Schema
 

@@ -195,11 +195,48 @@ abstract class Gateway
     }
 
     /**
+     * Attempt to extract the current Google project ID
+     *
+     * @return string
+     */
+    public static function determineProjectId(): string
+    {
+        static $str_project_id = null;
+        if (null !== $str_project_id) {
+            return $str_project_id;
+        }
+        $arr_env = getenv();
+        $str_project_id = $arr_env['GOOGLE_CLOUD_PROJECT'] ?? null;
+        if (null === $str_project_id) {
+            $str_project_id = $arr_env['DATASTORE_PROJECT_ID'] ?? null;
+        }
+        if (null === $str_project_id) {
+            $str_project_id = $arr_env['DATASTORE_DATASET'] ?? null;
+        }
+        if (null === $str_project_id) {
+            $str_project_id = $_SERVER['GOOGLE_CLOUD_PROJECT'] ?? null;
+        }
+        if (null === $str_project_id) {
+            try {
+                if (class_exists('\Google\Auth\Credentials\GCECredentials')) {
+                    $str_project_id = (new \Google\Auth\Credentials\GCECredentials())->getProjectId();
+                }
+            } catch (\Throwable $obj_thrown) {
+                // Silent
+            }
+        }
+        if (null === $str_project_id) {
+            throw new \RuntimeException('Could not determine project ID, please configure your Gateway');
+        }
+        return $str_project_id;
+    }
+
+    /**
      * Default Kind & Schema support for "new" Entities
      *
      * @param \GDS\Entity[] $arr_entities
      */
-    protected function ensureSchema($arr_entities)
+    protected function ensureSchema(array $arr_entities)
     {
         foreach($arr_entities as $obj_gds_entity) {
             if($obj_gds_entity instanceof Entity) {

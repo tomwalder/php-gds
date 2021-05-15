@@ -1,0 +1,7 @@
+# Simple app.yaml for the PHP GDS demo app
+
+runtime: php74
+
+handlers:
+  - url: .*
+    script: auto
