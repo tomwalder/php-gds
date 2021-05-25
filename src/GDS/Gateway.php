@@ -394,6 +394,13 @@ abstract class Gateway
     abstract public function getEndCursor();
 
     /**
+     * Get the batch from the last response
+     *
+     * @return mixed
+     */
+    abstract public function getBatch();
+    
+    /**
      * Create a mapper that's right for this Gateway
      *
      * @return Mapper
