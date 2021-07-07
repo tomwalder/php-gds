@@ -28,13 +28,9 @@ abstract class Mapper
     /**
      * Datetime formats
      */
-    const DATETIME_FORMAT_UU = 'Uu';
     const DATETIME_FORMAT_UDOTU = 'U.u';
-
-    /**
-     * Microseconds in a second
-     */
-    const MICROSECONDS = 1000000;
+    const TZ_UTC = 'UTC';
+    const TZ_UTC_OFFSET = '+00:00';
 
     /**
      * Current Schema

@@ -30,7 +30,7 @@ class RESTv1 extends \GDS\Mapper
      *
      * A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
      */
-    const DATETIME_FORMAT = 'Y-m-d\TH:i:s.u\Z';
+    const DATETIME_FORMAT_ZULU = 'Y-m-d\TH:i:s.u\Z';
 
     /**
      * Auto detect & extract a value
@@ -71,22 +71,40 @@ class RESTv1 extends \GDS\Mapper
     /**
      * Extract a datetime value
      *
-     * We will lose accuracy
-     * - past seconds in version 3.0
-     * - past microseconds (down from nanoseconds) in version 4.0
+     * Response values are ...
+     * A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
+     *
+     * Construct as UTC, then apply default timezone before returning
+     *
+     * PHP cannot handle more that 6 d.p. (microseconds), so we parse out as best we can with preg_match()
      *
      * @param $obj_property
      * @return mixed
      */
     protected function extractDatetimeValue($obj_property)
     {
+        return $this->buildLocalisedDateTimeObjectFromUTCString((string) $obj_property->timestampValue);
+    }
+
+    /**
+     * Build and return a DateTime, with the current timezone applied
+     *
+     * @param string $str_datetime
+     * @return \DateTime
+     * @throws \Exception
+     */
+    public function buildLocalisedDateTimeObjectFromUTCString(string $str_datetime): \DateTime
+    {
         $arr_matches = [];
-        if(preg_match('/(.{19})\.?(\d{0,6}).*Z/', $obj_property->timestampValue, $arr_matches) > 0) {
-            $obj_dtm = new \DateTime($arr_matches[1] . '.' . $arr_matches[2] . 'Z');
-        } else {
-            $obj_dtm = new \DateTime($obj_property->timestampValue);
+        if(preg_match('/(.{19})\.?(\d{0,6}).*Z/', $str_datetime, $arr_matches) > 0) {
+            $str_datetime = $arr_matches[1] . '.' . $arr_matches[2] . 'Z';
         }
-        return $obj_dtm;
+        $str_default_tz = date_default_timezone_get();
+        if (self::TZ_UTC === $str_default_tz || self::TZ_UTC_OFFSET === $str_default_tz) {
+            new \DateTime($str_datetime);
+        }
+        return (new \DateTime($str_datetime, new \DateTimeZone(self::TZ_UTC)))
+            ->setTimezone(new \DateTimeZone($str_default_tz));
     }
 
     /**
@@ -399,7 +417,10 @@ class RESTv1 extends \GDS\Mapper
                     $obj_dtm = new \DateTimeImmutable($mix_value);
                 }
                 // A timestamp in RFC3339 UTC "Zulu" format, accurate to nanoseconds. Example: "2014-10-02T15:01:23.045123456Z".
-                $obj_property_value->timestampValue = $obj_dtm->format(self::DATETIME_FORMAT);
+                $obj_property_value->timestampValue = \DateTime::createFromFormat(
+                        self::DATETIME_FORMAT_UDOTU,
+                        $obj_dtm->format(self::DATETIME_FORMAT_UDOTU)
+                    )->format(self::DATETIME_FORMAT_ZULU);
                 break;
 
             case Schema::PROPERTY_DOUBLE:

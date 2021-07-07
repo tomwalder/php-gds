@@ -343,13 +343,19 @@ class GRPCv1 extends \GDS\Mapper
     /**
      * Extract a datetime value
      *
+     * Attempt to retain microsecond precision
+     *
      * @param Value $obj_property
      * @return mixed
      */
     protected function extractDatetimeValue($obj_property)
     {
-        // Attempt to retain microsecond precision
-        return $obj_property->getTimestampValue()->toDateTime();
+        $obj_dtm = $obj_property->getTimestampValue()->toDateTime();
+        $str_default_tz = date_default_timezone_get();
+        if (self::TZ_UTC === $str_default_tz || self::TZ_UTC_OFFSET === $str_default_tz) {
+            return $obj_dtm;
+        }
+        return $obj_dtm->setTimezone(new \DateTimeZone($str_default_tz));
     }
 
     /**

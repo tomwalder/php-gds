@@ -48,6 +48,7 @@ If you need to continue running applications on that infrastructure, stick to ve
 * [Getting Started](#getting-started) including installation with Composer and setup for GDS Emulator
 * [Defining Your Model](#defining-your-model)
 * [Creating Records](#creating-records)
+* [Timezones and DateTime](#updated-timezone-support)
 * [Geopoint Support](#geopoint)
 * [Queries, GQL & The Default Query](#queries-gql--the-default-query)
 * [Multi-tenant Applications & Data Namespaces](#multi-tenant-applications--data-namespaces)
@@ -142,6 +143,33 @@ Code: https://github.com/tomwalder/php-gds-demo
 * Add PHP 7 support
 * Remove PHP 5 support
 * Remove App Engine first-generation runtime support (inc direct Protocol Buffer API)
+
+### Updated Timezone Support ###
+
+In 5.1, timezone support has been improved for `DateTime` objects going in & out of Datastore.
+
+#### How the data is stored
+Datstore keeps the data recorded as UTC. When you browse data in the Google Cloud Console, they represent it in your locale.
+
+#### Data coming out through PHP-GDS as Entities
+You can now expect any `DateTime` object coming out of Datastore from PHP-GDS to have your current PHP default timezone applied. Example follows:
+
+```php
+date_default_timezone_set('America/New_York');
+
+$obj_store = new GDS\Store('Book');
+$obj_book = $obj_store->fetchOne();
+echo $obj_book->published->format('c'); // 2004-02-12T15:19:21-05:00
+echo $obj_book->published->getTimezone()->getName(); // America/New_York
+```
+
+#### Data going in - multi format support
+If you pass in a `DateTime` object (or anything matching `DateTimeInterface`), we will respect the timezone set on it.
+
+Any other string-based value passed in for a `datetime` field will be converted to a `DateTimeImmutable` object before being converted to UTC, using the standard PHP methods:
+https://www.php.net/manual/en/datetime.construct.php
+
+This means that unless using a timestamp value (e.g. `@946684800`), or a value with a timezone already stated (e.g. `2010-01-28T15:00:00+02:00`), we will assume the value is in your current timezone context.
 
 ## Changes in Version 4 ##
 
