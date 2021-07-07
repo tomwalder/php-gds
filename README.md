@@ -9,7 +9,7 @@ This library is intended to make it easier for you to get started with and to us
 
 ## Quick Start ##
 ```bash
-composer require "tomwalder/php-gds:^5.0"
+composer require "tomwalder/php-gds:^5.1"
 ```
 ```php
 // Build a new entity
@@ -197,7 +197,7 @@ If you want to use the JSON API from remote or non-App Engine environments, you 
 To install using Composer
 
 ```bash
-composer require "tomwalder/php-gds:^5.0"
+composer require "tomwalder/php-gds:^5.1"
 ```
 
 ### Use with the Datastore Emulator ###
