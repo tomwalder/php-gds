@@ -60,7 +60,14 @@ class Store
      * @var string|null
      */
     private $str_last_cursor = null;
-
+    
+    /**
+     * The last result bacth
+     *
+     * @var string|null
+     */
+    public $str_last_batch = null;
+    
     /**
      * Transaction ID
      *
@@ -287,6 +294,7 @@ class Store
             ->withTransaction($this->str_transaction_id)
             ->gql($this->str_last_query . " LIMIT @intPageSize {$str_offset}", $arr_params);
         $this->str_last_cursor = $this->obj_gateway->getEndCursor();
+        $this->str_last_batch  = $this->obj_gateway->getBatch();
         return $arr_results;
     }
 
