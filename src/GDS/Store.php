@@ -278,7 +278,7 @@ class Store
                 $str_offset = 'OFFSET @startCursor';
                 $arr_params['startCursor'] = $mix_offset;
             }
-        } else if (strlen($this->str_last_cursor) > 1) {
+        } else if (!is_null($this->str_last_cursor) && strlen($this->str_last_cursor) > 1) {
             $str_offset = 'OFFSET @startCursor';
             $arr_params['startCursor'] = $this->str_last_cursor;
         }
