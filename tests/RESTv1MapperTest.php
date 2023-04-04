@@ -567,4 +567,49 @@ class RESTv1MapperTest extends \PHPUnit\Framework\TestCase
             ]
         ];
     }
+
+    public function testNullValuesMapToGoogle()
+    {
+        $obj_schema = (new \GDS\Schema('Person'))
+            ->addString('name')
+            ->addInteger('age')
+            ->addFloat('weight')
+            ->addGeopoint('location')
+            ->addDatetime('dob');
+
+        $obj_mapper = new \GDS\Mapper\RESTv1();
+        $obj_mapper->setSchema($obj_schema);
+
+        $obj_gds_entity = new \GDS\Entity();
+        $obj_gds_entity->setSchema($obj_schema);
+        $obj_gds_entity->setKind('Person');
+
+        $obj_gds_entity->name = null;
+        $obj_gds_entity->age = null;
+        $obj_gds_entity->weight = null;
+        $obj_gds_entity->location = null;
+        $obj_gds_entity->dob = null;
+
+        $obj_rest_entity = $obj_mapper->mapToGoogle($obj_gds_entity);
+
+        $this->assertObjectHasAttribute('name', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('nullValue', $obj_rest_entity->properties->name);
+        $this->assertEquals(null, $obj_rest_entity->properties->name->nullValue);
+
+        $this->assertObjectHasAttribute('age', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('nullValue', $obj_rest_entity->properties->age);
+        $this->assertEquals(null, $obj_rest_entity->properties->age->nullValue);
+
+        $this->assertObjectHasAttribute('weight', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('nullValue', $obj_rest_entity->properties->weight);
+        $this->assertEquals(null, $obj_rest_entity->properties->weight->nullValue);
+
+        $this->assertObjectHasAttribute('location', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('nullValue', $obj_rest_entity->properties->location);
+        $this->assertEquals(null, $obj_rest_entity->properties->location->nullValue);
+
+        $this->assertObjectHasAttribute('dob', $obj_rest_entity->properties);
+        $this->assertObjectHasAttribute('nullValue', $obj_rest_entity->properties->dob);
+        $this->assertEquals(null, $obj_rest_entity->properties->dob->nullValue);
+    }
 }
