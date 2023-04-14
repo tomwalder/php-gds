@@ -149,7 +149,7 @@ Code: https://github.com/tomwalder/php-gds-demo
 In 5.1, timezone support has been improved for `DateTime` objects going in & out of Datastore.
 
 #### How the data is stored
-Datstore keeps the data recorded as UTC. When you browse data in the Google Cloud Console, they represent it in your locale.
+Datastore keeps the data recorded as UTC. When you browse data in the Google Cloud Console, they represent it in your locale.
 
 #### Data coming out through PHP-GDS as Entities
 You can now expect any `DateTime` object coming out of Datastore from PHP-GDS to have your current PHP default timezone applied. Example follows:
