@@ -401,7 +401,7 @@ class RESTv1 extends \GDS\Mapper
         }
         $obj_property_value->excludeFromIndexes = !$bol_index;
 
-        if (is_null($mix_value)) {
+        if (null === $mix_value) {
             $obj_property_value->nullValue = $mix_value;
             return $obj_property_value;
         }
