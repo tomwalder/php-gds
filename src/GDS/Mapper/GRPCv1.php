@@ -21,6 +21,7 @@ use GDS\Entity;
 use GDS\Property\Geopoint;
 use GDS\Schema;
 use Google\Cloud\Datastore\V1\PartitionId;
+use Google\Protobuf\NullValue;
 use Google\Type\LatLng;
 use Google\Protobuf\Timestamp;
 use Google\Protobuf\Internal\RepeatedField;
@@ -276,8 +277,8 @@ class GRPCv1 extends \GDS\Mapper
         }
         $obj_val->setExcludeFromIndexes(!$bol_index);
 
-        // null checks
-        if(null === $mix_value) {
+        if (null === $mix_value) {
+            $obj_val->setNullValue(NullValue::NULL_VALUE);
             return $obj_val;
         }
 
