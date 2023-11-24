@@ -29,6 +29,8 @@ namespace GDS;
  */
 abstract class Gateway
 {
+    // 8 = about 5 seconds total, with last gap ~2.5 seconds
+    const RETRY_MAX_ATTEMPTS = 8;
 
     /**
      * The dataset ID
@@ -71,6 +73,19 @@ abstract class Gateway
      * @var \GDS\Mapper[]
      */
     protected $arr_kind_mappers = [];
+
+    protected static $bol_retry = false;
+
+    /**
+     * Configure gateway retries (for 503, 500 responses)
+     *
+     * @param bool $bol_retry
+     * @return void
+     */
+    public static function exponentialBackoff(bool $bol_retry = true)
+    {
+        self::$bol_retry = $bol_retry;
+    }
 
     /**
      * Set the Schema to be used next (once?)
@@ -333,6 +348,20 @@ abstract class Gateway
                 throw new \InvalidArgumentException('Unsupported parameter type: ' . $str_type);
         }
         return $obj_val;
+    }
+
+    /**
+     * Delay execution, based on the attempt number
+     *
+     * @param int $int_attempt
+     * @return void
+     */
+    protected function backoff(int $int_attempt)
+    {
+        $int_backoff = (int) pow(2, $int_attempt);
+        $int_jitter = rand(0, 10) * 1000;
+        $int_delay = ($int_backoff * 10000) + $int_jitter;
+        usleep($int_delay);
     }
 
     /**

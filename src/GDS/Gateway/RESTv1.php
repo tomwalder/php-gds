@@ -5,6 +5,7 @@ use Google\Auth\ApplicationDefaultCredentials;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\HandlerStack;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Gateway, implementing the Datastore API v1 over REST
@@ -22,6 +23,12 @@ class RESTv1 extends \GDS\Gateway
     const MODE_TRANSACTIONAL = 'TRANSACTIONAL';
     const MODE_NON_TRANSACTIONAL = 'NON_TRANSACTIONAL';
     const MODE_UNSPECIFIED = 'UNSPECIFIED';
+
+    // https://cloud.google.com/datastore/docs/concepts/errors
+    // https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
+    const RETRY_ERROR_CODES = [409, 429, 500, 503, 504];
+
+    const RETRY_ONCE_CODES = [500];
 
     /**
      * Client config keys.
@@ -165,8 +172,41 @@ class RESTv1 extends \GDS\Gateway
         if(null !== $obj_request_body) {
             $arr_options['json'] = $obj_request_body;
         }
-        $obj_response = $this->httpClient()->post($this->actionUrl($str_action), $arr_options);
-        $this->obj_last_response = json_decode((string)$obj_response->getBody());
+        $obj_response = $this->retryablePostRequest($this->actionUrl($str_action), $arr_options);
+        $this->obj_last_response = \json_decode((string)$obj_response->getBody());
+    }
+
+    /**
+     * Attempt an HTTP POST, with retry if enabled
+     *
+     * @param string $str_url
+     * @param array $arr_options
+     * @return ResponseInterface
+     */
+    private function retryablePostRequest(string $str_url, array $arr_options = []): ResponseInterface
+    {
+        $int_attempt = 0;
+        do {
+            try {
+                $int_attempt++;
+                if ($int_attempt > 1) {
+                    $this->backoff($int_attempt);
+                }
+                return $this->httpClient()->post($str_url, $arr_options);
+            } catch (\GuzzleHttp\Exception\RequestException $obj_thrown) {
+                if (false === self::$bol_retry || !in_array((int) $obj_thrown->getCode(), self::RETRY_ERROR_CODES)) {
+                    // Rethrow non-retryable errors or if retry is disabled
+                    throw $obj_thrown;
+                }
+                if (in_array((int) $obj_thrown->getCode(), self::RETRY_ONCE_CODES)) {
+                    // Just one retry for some errors
+                    $int_attempt = self::RETRY_MAX_ATTEMPTS - 1;
+                }
+            }
+        } while ($int_attempt < self::RETRY_MAX_ATTEMPTS);
+
+        // We could not make this work after max retries
+        throw $obj_thrown;
     }
 
     /**
