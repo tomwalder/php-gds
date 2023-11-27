@@ -113,40 +113,23 @@ class GRPCv1 extends \GDS\Gateway
     /**
      * Execute a method against the Datastore client.
      *
+     * Prepend projectId as first parameter automatically.
+     *
      * @param string $str_method
      * @param mixed[] $args
      * @return mixed
      * @throws \Exception
      */
-    private function execute($str_method, $args)
-    {
-        // prepend projectId as first parameter automatically.
+    private function execute(string $str_method, array $args) {
         array_unshift($args, $this->str_dataset_id);
-
-        $int_attempt = 0;
-        do {
-            try {
-                $int_attempt++;
-                if ($int_attempt > 1) {
-                    $this->backoff($int_attempt);
-                }
+        return $this->executeWithExponentialBackoff(
+            function () use ($str_method, $args) {
                 $this->obj_last_response = call_user_func_array([self::$obj_datastore_client, $str_method], $args);
                 return $this->obj_last_response;
-            } catch (ApiException $obj_thrown) {
-                $this->obj_last_response = null;
-                if (false === self::$bol_retry || !in_array($obj_thrown->getCode(), self::RETRY_ERROR_CODES)) {
-                    // Rethrow non-retryable errors or if retry is disabled
-                    throw $this->resolveException($obj_thrown);
-                }
-                if (in_array((int) $obj_thrown->getCode(), self::RETRY_ONCE_CODES)) {
-                    // Just one retry for some errors
-                    $int_attempt = self::RETRY_MAX_ATTEMPTS - 1;
-                }
-            }
-        } while ($int_attempt < self::RETRY_MAX_ATTEMPTS);
-
-        // We could not make this work after max retries
-        throw $this->resolveException($obj_thrown);
+            },
+            ApiException::class,
+            [$this, 'resolveExecuteException']
+        );
     }
 
     /**
@@ -157,8 +140,9 @@ class GRPCv1 extends \GDS\Gateway
      * @param ApiException $obj_exception
      * @return \Exception
      */
-    private function resolveException(ApiException $obj_exception): \Exception
+    protected function resolveExecuteException(ApiException $obj_exception): \Exception
     {
+        $this->obj_last_response = null;
         if (Code::ABORTED === $obj_exception->getCode() ||
             false !== strpos($obj_exception->getMessage(), 'too much contention') ||
             false !== strpos($obj_exception->getMessage(), 'Concurrency')) {

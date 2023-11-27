@@ -365,6 +365,52 @@ abstract class Gateway
     }
 
     /**
+     * Execute the callback with exponential backoff
+     *
+     * @param callable $fnc_main
+     * @param string|null $str_exception
+     * @param callable|null $fnc_resolve_exception
+     * @return mixed
+     * @throws \Throwable
+     */
+    protected function executeWithExponentialBackoff(
+        callable $fnc_main,
+        string $str_exception = null,
+        callable $fnc_resolve_exception = null
+    ) {
+        $int_attempt = 0;
+        $bol_retry_once = false;
+        do {
+            try {
+                $int_attempt++;
+                if ($int_attempt > 1) {
+                    $this->backoff($int_attempt);
+                }
+                return $fnc_main();
+            } catch (\Throwable $obj_thrown) {
+                // Rethrow if we're not interested in this Exception type
+                if (null !== $str_exception && !$obj_thrown instanceof $str_exception) {
+                    throw $obj_thrown;
+                }
+                // Rethrow if retry is disabled, non-retryable errors, or if we have hit a retry limit
+                if (false === self::$bol_retry ||
+                    true === $bol_retry_once ||
+                    !in_array((int) $obj_thrown->getCode(), static::RETRY_ERROR_CODES)
+                ) {
+                    throw null === $fnc_resolve_exception ? $obj_thrown : $fnc_resolve_exception($obj_thrown);
+                }
+                // Just one retry for some errors
+                if (in_array((int) $obj_thrown->getCode(), static::RETRY_ONCE_CODES)) {
+                    $bol_retry_once = true;
+                }
+            }
+        } while ($int_attempt < self::RETRY_MAX_ATTEMPTS);
+
+        // We could not make this work after max retries
+        throw null === $fnc_resolve_exception ? $obj_thrown : $fnc_resolve_exception($obj_thrown);
+    }
+
+    /**
      * Configure a Value parameter, based on the supplied object-type value
      *
      * @param object $obj_val
