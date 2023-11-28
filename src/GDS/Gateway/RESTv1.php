@@ -505,7 +505,7 @@ class RESTv1 extends \GDS\Gateway
      * @return string
      */
     protected function getBaseUrl() {
-        $str_base_url = $this->obj_http_client->getConfig(self::CONFIG_CLIENT_BASE_URL);
+        $str_base_url = $this->httpClient()->getConfig(self::CONFIG_CLIENT_BASE_URL);
         if (!empty($str_base_url)) {
             return $str_base_url;
         }
