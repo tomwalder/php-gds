@@ -535,6 +535,10 @@ A full suite of unit tests is in the works. Assuming you've installed `php-gds` 
 ```bash
 vendor/bin/phpunit
 ```
+Or, if you need to run containerised tests, you can use the `runphp` image (or any you choose)
+```bash
+docker run --rm -it -v`pwd`:/app -w /app fluentthinking/runphp:7.4.33-v0.9.0 php /app/vendor/bin/phpunit
+```
 
 [Click here for more details](tests/).
 
