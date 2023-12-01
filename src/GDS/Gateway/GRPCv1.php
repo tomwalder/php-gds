@@ -35,6 +35,7 @@ use Google\Cloud\Datastore\V1\ReadOptions;
 use Google\Cloud\Datastore\V1\GqlQuery;
 use Google\Cloud\Datastore\V1\GqlQueryParameter;
 use Google\Cloud\Datastore\V1\Value;
+use Google\Rpc\Code;
 
 /**
  * gRPC Datastore Gateway (v1)
@@ -46,6 +47,20 @@ use Google\Cloud\Datastore\V1\Value;
  */
 class GRPCv1 extends \GDS\Gateway
 {
+    // https://cloud.google.com/datastore/docs/concepts/errors
+    // https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
+    const RETRY_ERROR_CODES = [
+        Code::UNKNOWN,
+        Code::ABORTED,
+        Code::DEADLINE_EXCEEDED,
+        Code::RESOURCE_EXHAUSTED,
+        Code::UNAVAILABLE,
+        Code::INTERNAL,
+    ];
+
+    const RETRY_ONCE_CODES = [
+        Code::INTERNAL,
+    ];
 
     /**
      * Cloud Datastore (gRPC & REST) Client
@@ -98,29 +113,44 @@ class GRPCv1 extends \GDS\Gateway
     /**
      * Execute a method against the Datastore client.
      *
+     * Prepend projectId as first parameter automatically.
+     *
      * @param string $str_method
      * @param mixed[] $args
      * @return mixed
      * @throws \Exception
      */
-    private function execute($str_method, $args)
-    {
-        try {
-            // Call gRPC client,
-            //   prepend projectId as first parameter automatically.
-            array_unshift($args, $this->str_dataset_id);
-            $this->obj_last_response = call_user_func_array([self::$obj_datastore_client, $str_method], $args);
-        } catch (ApiException $obj_exception) {
-            $this->obj_last_response = null;
-            if (FALSE !== strpos($obj_exception->getMessage(), 'too much contention') || FALSE !== strpos($obj_exception->getMessage(), 'Concurrency')) {
-                // LIVE: "too much contention on these datastore entities. please try again." LOCAL : "Concurrency exception."
-                throw new Contention('Datastore contention', 409, $obj_exception);
-            } else {
-                throw $obj_exception;
-            }
-        }
+    private function execute(string $str_method, array $args) {
+        array_unshift($args, $this->str_dataset_id);
+        return $this->executeWithExponentialBackoff(
+            function () use ($str_method, $args) {
+                $this->obj_last_response = call_user_func_array([self::$obj_datastore_client, $str_method], $args);
+                return $this->obj_last_response;
+            },
+            ApiException::class,
+            [$this, 'resolveExecuteException']
+        );
+    }
 
-        return $this->obj_last_response;
+    /**
+     * Wrap the somewhat murky ApiException into something more useful
+     *
+     * https://cloud.google.com/datastore/docs/concepts/errors
+     *
+     * @param ApiException $obj_exception
+     * @return \Exception
+     */
+    protected function resolveExecuteException(ApiException $obj_exception): \Exception
+    {
+        $this->obj_last_response = null;
+        if (Code::ABORTED === $obj_exception->getCode() ||
+            false !== strpos($obj_exception->getMessage(), 'too much contention') ||
+            false !== strpos($obj_exception->getMessage(), 'Concurrency')) {
+            // LIVE: "too much contention on these datastore entities. please try again."
+            // LOCAL : "Concurrency exception."
+            return new Contention('Datastore contention', 409, $obj_exception);
+        }
+        return $obj_exception;
     }
 
     /**

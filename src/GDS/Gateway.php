@@ -29,6 +29,8 @@ namespace GDS;
  */
 abstract class Gateway
 {
+    // 8 = about 5 seconds total, with last gap ~2.5 seconds
+    const RETRY_MAX_ATTEMPTS = 8;
 
     /**
      * The dataset ID
@@ -71,6 +73,19 @@ abstract class Gateway
      * @var \GDS\Mapper[]
      */
     protected $arr_kind_mappers = [];
+
+    protected static $bol_retry = false;
+
+    /**
+     * Configure gateway retries (for 503, 500 responses)
+     *
+     * @param bool $bol_retry
+     * @return void
+     */
+    public static function exponentialBackoff(bool $bol_retry = true)
+    {
+        self::$bol_retry = $bol_retry;
+    }
 
     /**
      * Set the Schema to be used next (once?)
@@ -333,6 +348,66 @@ abstract class Gateway
                 throw new \InvalidArgumentException('Unsupported parameter type: ' . $str_type);
         }
         return $obj_val;
+    }
+
+    /**
+     * Delay execution, based on the attempt number
+     *
+     * @param int $int_attempt
+     * @return void
+     */
+    protected function backoff(int $int_attempt)
+    {
+        $int_backoff = (int) pow(2, $int_attempt);
+        $int_jitter = rand(0, 10) * 1000;
+        $int_delay = ($int_backoff * 10000) + $int_jitter;
+        usleep($int_delay);
+    }
+
+    /**
+     * Execute the callback with exponential backoff
+     *
+     * @param callable $fnc_main
+     * @param string|null $str_exception
+     * @param callable|null $fnc_resolve_exception
+     * @return mixed
+     * @throws \Throwable
+     */
+    protected function executeWithExponentialBackoff(
+        callable $fnc_main,
+        string $str_exception = null,
+        callable $fnc_resolve_exception = null
+    ) {
+        $int_attempt = 0;
+        $bol_retry_once = false;
+        do {
+            try {
+                $int_attempt++;
+                if ($int_attempt > 1) {
+                    $this->backoff($int_attempt);
+                }
+                return $fnc_main();
+            } catch (\Throwable $obj_thrown) {
+                // Rethrow if we're not interested in this Exception type
+                if (null !== $str_exception && !$obj_thrown instanceof $str_exception) {
+                    throw $obj_thrown;
+                }
+                // Rethrow if retry is disabled, non-retryable errors, or if we have hit a retry limit
+                if (false === self::$bol_retry ||
+                    true === $bol_retry_once ||
+                    !in_array((int) $obj_thrown->getCode(), static::RETRY_ERROR_CODES)
+                ) {
+                    throw null === $fnc_resolve_exception ? $obj_thrown : $fnc_resolve_exception($obj_thrown);
+                }
+                // Just one retry for some errors
+                if (in_array((int) $obj_thrown->getCode(), static::RETRY_ONCE_CODES)) {
+                    $bol_retry_once = true;
+                }
+            }
+        } while ($int_attempt < self::RETRY_MAX_ATTEMPTS);
+
+        // We could not make this work after max retries
+        throw null === $fnc_resolve_exception ? $obj_thrown : $fnc_resolve_exception($obj_thrown);
     }
 
     /**

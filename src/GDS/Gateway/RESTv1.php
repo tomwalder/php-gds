@@ -5,6 +5,7 @@ use Google\Auth\ApplicationDefaultCredentials;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\HandlerStack;
+use Psr\Http\Message\ResponseInterface;
 
 /**
  * Gateway, implementing the Datastore API v1 over REST
@@ -22,6 +23,12 @@ class RESTv1 extends \GDS\Gateway
     const MODE_TRANSACTIONAL = 'TRANSACTIONAL';
     const MODE_NON_TRANSACTIONAL = 'NON_TRANSACTIONAL';
     const MODE_UNSPECIFIED = 'UNSPECIFIED';
+
+    // https://cloud.google.com/datastore/docs/concepts/errors
+    // https://github.com/googleapis/googleapis/blob/master/google/rpc/code.proto
+    const RETRY_ERROR_CODES = [409, 429, 500, 503, 504];
+
+    const RETRY_ONCE_CODES = [500];
 
     /**
      * Client config keys.
@@ -165,8 +172,14 @@ class RESTv1 extends \GDS\Gateway
         if(null !== $obj_request_body) {
             $arr_options['json'] = $obj_request_body;
         }
-        $obj_response = $this->httpClient()->post($this->actionUrl($str_action), $arr_options);
-        $this->obj_last_response = json_decode((string)$obj_response->getBody());
+        $str_url = $this->actionUrl($str_action);
+        $obj_response = $this->executeWithExponentialBackoff(
+            function () use ($str_url, $arr_options) {
+                return $this->httpClient()->post($str_url, $arr_options);
+            },
+            \GuzzleHttp\Exception\RequestException::class
+        );
+        $this->obj_last_response = \json_decode((string)$obj_response->getBody());
     }
 
     /**
@@ -492,7 +505,7 @@ class RESTv1 extends \GDS\Gateway
      * @return string
      */
     protected function getBaseUrl() {
-        $str_base_url = $this->obj_http_client->getConfig(self::CONFIG_CLIENT_BASE_URL);
+        $str_base_url = $this->httpClient()->getConfig(self::CONFIG_CLIENT_BASE_URL);
         if (!empty($str_base_url)) {
             return $str_base_url;
         }

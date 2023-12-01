@@ -9,7 +9,7 @@ This library is intended to make it easier for you to get started with and to us
 
 ## Quick Start ##
 ```bash
-composer require "tomwalder/php-gds:^5.1"
+composer require "tomwalder/php-gds:^6.1"
 ```
 ```php
 // Build a new entity
@@ -27,6 +27,18 @@ foreach($obj_store->fetchAll() as $obj_book) {
     echo "Title: {$obj_book->title}, ISBN: {$obj_book->isbn} <br />", PHP_EOL;
 }
 ```
+
+## New in Version 6.1 ##
+
+Support for automated exponential backoff for some types of errors. See documentation here: 
+https://cloud.google.com/datastore/docs/concepts/errors
+
+To enable:
+```php
+\GDS\Gateway::exponentialBackoff(true);
+```
+
+Version `6.0.0` introduced better (but different) support for `NULL` values.
 
 ## New in Version 5.0 ##
 
@@ -522,6 +534,10 @@ A full suite of unit tests is in the works. Assuming you've installed `php-gds` 
 
 ```bash
 vendor/bin/phpunit
+```
+Or, if you need to run containerised tests, you can use the `runphp` image (or any you choose)
+```bash
+docker run --rm -it -v`pwd`:/app -w /app fluentthinking/runphp:7.4.33-v0.9.0 php /app/vendor/bin/phpunit
 ```
 
 [Click here for more details](tests/).
